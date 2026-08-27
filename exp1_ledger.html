@@ -1,0 +1,1063 @@
+<title>Four-Harness Protocol</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+
+<style>
+:root{
+  --paper:#F5F6F4;
+  --surface:#FFFFFF;
+  --surface-2:#ECEEE9;
+  --ink:#171C16;
+  --ink-2:#3E463C;
+  --muted:#6E776B;
+  --rule:#D9DDD4;
+  --accent:#41633C;
+  --accent-soft:#E2EADF;
+  --signal:#A04A28;
+  --signal-soft:#F3E3DA;
+  --warn-bg:#F6EBD9;
+  --warn-bd:#B98A3C;
+  --ok:#2F6B52;
+  --shadow:0 1px 2px rgba(23,28,22,.05),0 8px 24px -16px rgba(23,28,22,.30);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#12160F; --surface:#1A1F17; --surface-2:#22281E;
+    --ink:#E6E9E2; --ink-2:#B7BFB1; --muted:#8B9485; --rule:#2C3327;
+    --accent:#9CBF95; --accent-soft:#24301F;
+    --signal:#E0956F; --signal-soft:#382318;
+    --warn-bg:#33290F; --warn-bd:#C69A4F; --ok:#7FC1A2;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px -16px rgba(0,0,0,.8);
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#12160F; --surface:#1A1F17; --surface-2:#22281E;
+  --ink:#E6E9E2; --ink-2:#B7BFB1; --muted:#8B9485; --rule:#2C3327;
+  --accent:#9CBF95; --accent-soft:#24301F;
+  --signal:#E0956F; --signal-soft:#382318;
+  --warn-bg:#33290F; --warn-bd:#C69A4F; --ok:#7FC1A2;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px -16px rgba(0,0,0,.8);
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0;background:var(--paper);color:var(--ink);
+  font-family:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  font-size:16.5px;line-height:1.65;-webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1080px;margin:0 auto;padding:0 28px 96px}
+.col{max-width:72ch}
+
+h1,h2{font-family:Spectral,Georgia,"Times New Roman",serif;font-weight:600;text-wrap:balance;margin:0}
+h1{font-size:clamp(2.1rem,4.6vw,3.1rem);line-height:1.08;letter-spacing:-.015em}
+h2{font-size:clamp(1.35rem,2.4vw,1.75rem);line-height:1.2;letter-spacing:-.01em}
+h3{font-size:1rem;line-height:1.35;font-family:"IBM Plex Sans",sans-serif;font-weight:600;margin:0}
+p{margin:0}
+a{color:var(--accent);text-decoration-thickness:1px;text-underline-offset:2px}
+a:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:3px}
+
+.eyebrow{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.mono{font-family:"IBM Plex Mono",ui-monospace,monospace}
+code{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:.86em;background:var(--surface-2);padding:.1em .35em;border-radius:3px}
+
+header.mast{border-bottom:1px solid var(--rule);margin-bottom:48px}
+.mast-inner{max-width:1080px;margin:0 auto;padding:52px 28px 38px}
+.mast .col{display:flex;flex-direction:column;gap:18px}
+.lede{font-family:Spectral,Georgia,serif;font-size:1.18rem;line-height:1.55;color:var(--ink-2)}
+
+section{display:flex;flex-direction:column;gap:20px;margin-top:58px;scroll-margin-top:24px}
+section > .col{display:flex;flex-direction:column;gap:15px}
+.sec-head{display:flex;flex-direction:column;gap:7px;border-top:2px solid var(--ink);padding-top:14px}
+
+figure{margin:0;display:flex;flex-direction:column;gap:12px}
+.figbox{background:var(--surface);border:1px solid var(--rule);border-radius:5px;padding:24px 20px;overflow-x:auto}
+.figbox svg{display:block;width:100%;max-width:100%;height:auto;min-width:560px;color:var(--ink)}
+figcaption{font-size:.87rem;color:var(--muted);line-height:1.55;max-width:72ch}
+
+.tablewrap{overflow-x:auto;border:1px solid var(--rule);border-radius:5px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:.88rem}
+table.wide{min-width:780px}
+table.mid{min-width:600px}
+th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--rule);vertical-align:top}
+thead th{font-family:"IBM Plex Mono",monospace;font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:500;background:var(--surface-2);white-space:nowrap}
+tbody tr:last-child td{border-bottom:none}
+td.k{font-family:"IBM Plex Mono",monospace;font-size:.8rem;color:var(--accent);white-space:nowrap;font-weight:500}
+td.m{font-family:"IBM Plex Mono",monospace;font-size:.79rem;color:var(--ink-2)}
+td.num{font-variant-numeric:tabular-nums;font-family:"IBM Plex Mono",monospace;font-size:.82rem}
+td.bad{color:var(--signal)}
+td.good{color:var(--ok)}
+
+pre{margin:0;background:var(--surface);border:1px solid var(--rule);border-radius:5px;padding:16px 18px;overflow-x:auto;font-family:"IBM Plex Mono",monospace;font-size:.78rem;line-height:1.7;color:var(--ink-2)}
+pre .c{color:var(--muted)}
+pre .hl{color:var(--signal)}
+pre .kw{color:var(--accent)}
+
+details{background:var(--surface);border:1px solid var(--rule);border-radius:5px;overflow:hidden}
+details > summary{cursor:pointer;padding:12px 16px;font-family:"IBM Plex Mono",monospace;font-size:.8rem;color:var(--accent);user-select:none;list-style:none;display:flex;gap:10px;align-items:baseline}
+details > summary::before{content:"+";font-weight:600;color:var(--muted)}
+details[open] > summary::before{content:"−"}
+details > summary:hover{background:var(--surface-2)}
+details > .dbody{border-top:1px solid var(--rule);padding:0}
+details > .dbody pre{border:none;border-radius:0}
+details > .dbody .note{margin:12px 16px}
+.dstack{display:flex;flex-direction:column;gap:10px}
+
+.banner{border:1px solid var(--warn-bd);background:var(--warn-bg);border-radius:5px;padding:14px 18px;font-size:.9rem;line-height:1.6;color:var(--ink-2)}
+.banner b{color:var(--ink)}
+.callout{background:var(--surface);border:1px solid var(--rule);border-left:3px solid var(--accent);border-radius:0 5px 5px 0;padding:16px 20px;font-size:.92rem;line-height:1.65;color:var(--ink-2)}
+.callout b{color:var(--ink)}
+.callout.red{border-left-color:var(--signal)}
+
+.timeline{display:flex;flex-direction:column}
+.tl{display:grid;grid-template-columns:88px 1fr;gap:16px;padding:11px 0;border-top:1px solid var(--rule);font-size:.9rem}
+.tl:last-child{border-bottom:1px solid var(--rule)}
+.tl .t{font-family:"IBM Plex Mono",monospace;font-size:.78rem;color:var(--muted);padding-top:2px;white-space:nowrap}
+.tl .e{line-height:1.55}
+.tl .e b{font-weight:600}
+.tl.flag .t{color:var(--signal)}
+
+.findings{display:flex;flex-direction:column;border:1px solid var(--rule);border-radius:5px;background:var(--surface);overflow:hidden}
+.fnd{display:grid;grid-template-columns:96px 1fr;gap:14px;padding:14px 16px;border-bottom:1px solid var(--rule)}
+.fnd:last-child{border-bottom:none}
+.fnd .sev{font-family:"IBM Plex Mono",monospace;font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;font-weight:500;padding-top:2px}
+.sev.fatal{color:var(--signal)}
+.sev.serious{color:var(--warn-bd)}
+.sev.moderate{color:var(--accent)}
+.sev.minor{color:var(--muted)}
+.fnd .fb{font-size:.9rem;line-height:1.6;display:flex;flex-direction:column;gap:4px}
+.fnd .fb .resp{color:var(--ink-2);font-size:.86rem}
+.fnd .fb .resp b{color:var(--ok)}
+.fnd .fb .resp b.open{color:var(--signal)}
+
+ul.plain{margin:0;padding-left:1.15em;display:flex;flex-direction:column;gap:8px}
+ul.plain li{padding-left:.15em}
+ol.plain{margin:0;padding-left:1.3em;display:flex;flex-direction:column;gap:8px}
+
+footer{margin-top:80px;padding-top:22px;border-top:1px solid var(--rule);font-size:.83rem;color:var(--muted);max-width:72ch}
+
+@media (max-width:640px){
+  .tl,.fnd{grid-template-columns:1fr;gap:6px}
+  .wrap,.mast-inner{padding-left:20px;padding-right:20px}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<header class="mast">
+  <div class="mast-inner">
+    <div class="col">
+      <span class="eyebrow">Build ledger &middot; experiment 1 &middot; 2026-08-27</span>
+      <h1>Four-Harness Protocol</h1>
+      <p class="lede">Everything that was built, every choice that was made, and every place it could
+      be wrong &mdash; written down while the experiment runs, so a flaw in the setup is found on this
+      page and not in the results. An independent adversarial review of the full codebase was
+      commissioned alongside this document; its findings and their dispositions are in
+      <a href="#review">&sect;9</a>.</p>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+<section id="status">
+  <div class="col sec-head">
+    <span class="eyebrow">&sect;0 &middot; State of play</span>
+    <h2>What is running right now, and what already happened</h2>
+  </div>
+  <div class="timeline">
+    <div class="tl"><span class="t">~17:00</span><span class="e">Corpus download: 120 days of the real FutureSim article corpus (parquet), 412&nbsp;MB. Questions dataset (OpenForesight) alongside.</span></div>
+    <div class="tl"><span class="t">~17:20</span><span class="e">Local BM25 index built: <b>339,801 articles</b>, 2025-12-01 &rarr; 2026-03-31, 1.54&nbsp;GB SQLite. Date gate verified by hand-query.</span></div>
+    <div class="tl"><span class="t">~17:40</span><span class="e">Program-space validator tested against deliberately bad programs (literals, helper functions, imports, attribute access) &mdash; all rejected with line-level errors. Extraction chain (steps 1&ndash;3) tested end-to-end on a synthetic trajectory.</span></div>
+    <div class="tl"><span class="t">18:22</span><span class="e">Single-harness smoke test: one ReAct day ran in 37&nbsp;s, 3 searches, forecast 0.18 for USA gold in mid-January &mdash; a sane prior.</span></div>
+    <div class="tl flag"><span class="t">18:38&ndash;18:54</span><span class="e"><b>First full E1 run &mdash; discarded.</b> 16 runs completed but 32% of turns produced no forecast, every one an infrastructure error, traced to one SQLite connection shared across 8 worker threads (corrupted rows, <span class="mono">InterfaceError</span>). Quarantined to <span class="mono">results/exp1_buggy/</span>; nothing from it feeds any result. Its <em>text traces</em> were inspected only to confirm the four harnesses produce structurally distinct reasoning.</span></div>
+    <div class="tl"><span class="t">18:55</span><span class="e">Fix: thread-local connections (verified with 48 concurrent searches, zero failures) + one retry per turn, since a sequential trajectory cannot backfill a hole. Clean E1 relaunched.</span></div>
+    <div class="tl"><span class="t">19:11</span><span class="e"><b>Clean E1 complete: 16/16 runs, 80/80 turns with forecasts, zero missing.</b> The auto-chained E2 watcher was killed <em>before</em> the file landed &mdash; the review (next entry) had flagged both a crash bug and a race on exactly that path.</span></div>
+    <div class="tl flag"><span class="t">19:09</span><span class="e"><b>Independent adversarial review lands: 2 fatal, 7 serious, 6 moderate findings</b> plus a verified-sound list. The worst: the planned headline metric would have punished correct forecasting (F1), and the no-literal rule was semantically bypassable (F2). Full list with dispositions in <a href="#review">&sect;9</a>.</span></div>
+    <div class="tl"><span class="t">19:25</span><span class="e"><b>All fixable findings patched and verified</b>: every reviewer exploit now rejected by the validator; the strict parser reproduces all 80 collected forecasts byte-identically (the parser bugs were latent, never realised &mdash; E1 data stands); crash-safety and audit-trail fixes in place. Corrected analysis metrics written.</span></div>
+    <div class="tl"><span class="t">19:55</span><span class="e"><b>E2 complete on the patched pipeline: 8/8 groups, zero crashes.</b> The fixes visibly earned their keep in the log &mdash; near-target drops firing (F7), an instance-key exclusion never needed, incremental writes landing after every group (F3), OOS holdouts computed for all 8 groups (F2). First results in <a href="#results">&sect;10</a>.</span></div>
+  </div>
+</section>
+
+<section id="shape">
+  <div class="col sec-head">
+    <span class="eyebrow">&sect;1 &middot; The experiment</span>
+    <h2>Two stages: replay, then recovery</h2>
+  </div>
+  <div class="col">
+    <p><b>E1 &mdash; sequential replay.</b> Four harnesses &mdash; four <em>reasoning structures</em>,
+    not four repos &mdash; forecast the same two questions on five dates in chronological order. Each
+    day a harness sees its own previous forecasts and, where its shape has one, its own memory or
+    belief block from yesterday. All four read the same date-gated corpus through the same search
+    tool.</p>
+    <p><b>E2 &mdash; program recovery.</b> For every forecast produced, an extractor model reads that
+    day's trajectory and writes down the quantities the reasoning used, as
+    <code>name&nbsp;=&nbsp;value</code>. Those per-day tables are reconciled into one canonical schema,
+    and then <em>one</em> literal-free program is synthesised per harness&times;question that must
+    reproduce <em>every</em> forecast that harness made from its variables alone.</p>
+  </div>
+
+  <figure>
+    <div class="figbox">
+      <svg viewBox="0 0 900 330" role="img" aria-label="E1: four harnesses each produce a sequence of forecasts over five dates against a date-gated corpus. E2: per turn, variables are extracted from the trajectory; per harness, one literal-free program is fitted across all turns. Fit error and the variable trajectory are the outputs.">
+        <defs>
+          <marker id="la" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="currentColor"/></marker>
+          <marker id="la-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="var(--accent)"/></marker>
+        </defs>
+        <g font-family="IBM Plex Mono, monospace" font-size="11.5">
+          <text x="14" y="22" fill="var(--muted)" font-size="10.5" letter-spacing="1.2">E1 — REPLAY</text>
+          <text x="586" y="22" fill="var(--muted)" font-size="10.5" letter-spacing="1.2">E2 — RECOVERY</text>
+          <line x1="556" y1="8" x2="556" y2="322" stroke="var(--rule)" stroke-width="1" stroke-dasharray="3 4"/>
+
+          <rect x="14" y="40" width="128" height="252" rx="4" fill="var(--surface-2)" stroke="currentColor"/>
+          <text x="78" y="62" text-anchor="middle" fill="currentColor" font-size="10.5">date-gated</text>
+          <text x="78" y="77" text-anchor="middle" fill="currentColor" font-size="10.5">corpus</text>
+          <text x="78" y="97" text-anchor="middle" fill="var(--muted)" font-size="9.5">339,801 articles</text>
+          <text x="78" y="111" text-anchor="middle" fill="var(--muted)" font-size="9.5">BM25 · SQL gate</text>
+          <text x="78" y="130" text-anchor="middle" fill="var(--muted)" font-size="9.5">identical for all four</text>
+
+          <g>
+            <rect x="196" y="40" width="140" height="48" rx="4" fill="var(--surface)" stroke="currentColor" stroke-width="1.3"/>
+            <text x="210" y="60" fill="currentColor">react</text>
+            <text x="210" y="76" fill="var(--muted)" font-size="9.5">linear loop</text>
+            <rect x="196" y="108" width="140" height="48" rx="4" fill="var(--surface)" stroke="currentColor" stroke-width="1.3"/>
+            <text x="210" y="128" fill="currentColor">futuresim</text>
+            <text x="210" y="144" fill="var(--muted)" font-size="9.5">guidelines + memory</text>
+            <rect x="196" y="176" width="140" height="48" rx="4" fill="var(--surface)" stroke="currentColor" stroke-width="1.3"/>
+            <text x="210" y="196" fill="currentColor">analytica</text>
+            <text x="210" y="212" fill="var(--muted)" font-size="9.5">decompose·ground·synth</text>
+            <rect x="196" y="244" width="140" height="48" rx="4" fill="var(--surface)" stroke="currentColor" stroke-width="1.3"/>
+            <text x="210" y="264" fill="currentColor">bayesian</text>
+            <text x="210" y="280" fill="var(--muted)" font-size="9.5">prior·likelihood·posterior</text>
+          </g>
+          <path d="M142 64 L192 64" fill="none" stroke="currentColor" stroke-width="1.2" marker-end="url(#la)"/>
+          <path d="M142 132 L192 132" fill="none" stroke="currentColor" stroke-width="1.2" marker-end="url(#la)"/>
+          <path d="M142 200 L192 200" fill="none" stroke="currentColor" stroke-width="1.2" marker-end="url(#la)"/>
+          <path d="M142 268 L192 268" fill="none" stroke="currentColor" stroke-width="1.2" marker-end="url(#la)"/>
+
+          <rect x="382" y="122" width="150" height="88" rx="4" fill="var(--surface)" stroke="currentColor" stroke-width="1.3"/>
+          <text x="396" y="144" fill="currentColor" font-size="10.5">5 dates, in order</text>
+          <text x="396" y="161" fill="var(--muted)" font-size="9.5">carries own forecasts</text>
+          <text x="396" y="175" fill="var(--muted)" font-size="9.5">+ memory / belief</text>
+          <text x="396" y="196" fill="currentColor" font-size="10.5">→ p₁ … p₅ + trace</text>
+          <path d="M336 64 C 362 64, 362 140, 378 148" fill="none" stroke="currentColor" stroke-width="1.2" marker-end="url(#la)"/>
+          <path d="M336 132 L378 156" fill="none" stroke="currentColor" stroke-width="1.2" marker-end="url(#la)"/>
+          <path d="M336 200 L378 176" fill="none" stroke="currentColor" stroke-width="1.2" marker-end="url(#la)"/>
+          <path d="M336 268 C 362 268, 362 192, 378 184" fill="none" stroke="currentColor" stroke-width="1.2" marker-end="url(#la)"/>
+
+          <path d="M532 166 L596 166" fill="none" stroke="var(--accent)" stroke-width="1.5" marker-end="url(#la-a)"/>
+
+          <rect x="600" y="46" width="286" height="58" rx="4" fill="var(--surface)" stroke="var(--accent)" stroke-width="1.3"/>
+          <text x="614" y="67" fill="var(--accent)">step 1 · per turn</text>
+          <text x="614" y="84" fill="var(--muted)" font-size="9.5">read trace → name = value for every</text>
+          <text x="614" y="96" fill="var(--muted)" font-size="9.5">quantity used. output itself is banned.</text>
+
+          <rect x="600" y="118" width="286" height="58" rx="4" fill="var(--surface)" stroke="var(--accent)" stroke-width="1.3"/>
+          <text x="614" y="139" fill="var(--accent)">step 2 · per harness×question</text>
+          <text x="614" y="156" fill="var(--muted)" font-size="9.5">reconcile tables → one canonical schema,</text>
+          <text x="614" y="168" fill="var(--muted)" font-size="9.5">complete bindings for every instance</text>
+
+          <rect x="600" y="190" width="286" height="58" rx="4" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.5"/>
+          <text x="614" y="211" fill="var(--accent)">step 3 · ONE literal-free program</text>
+          <text x="614" y="228" fill="var(--muted)" font-size="9.5">P(bindings_i) ≈ forecast_i for ALL i,</text>
+          <text x="614" y="240" fill="var(--muted)" font-size="9.5">AST-validated, repair loop vs residuals</text>
+
+          <path d="M743 104 L743 114" fill="none" stroke="var(--accent)" stroke-width="1.3" marker-end="url(#la-a)"/>
+          <path d="M743 176 L743 186" fill="none" stroke="var(--accent)" stroke-width="1.3" marker-end="url(#la-a)"/>
+
+          <text x="600" y="278" fill="currentColor" font-size="10.5">out: fit MAE · program shape · variable</text>
+          <text x="600" y="294" fill="currentColor" font-size="10.5">trajectory (the belief, in a discovered basis)</text>
+          <path d="M743 248 L743 262" fill="none" stroke="var(--accent)" stroke-width="1.3" marker-end="url(#la-a)"/>
+        </g>
+      </svg>
+    </div>
+    <figcaption>The literal ban is what makes step 3 meaningful: there is nowhere for a number to hide
+    in the program body, so one program fitting every instance forces the split — program = the
+    reasoning structure (held fixed), bindings = the belief state (free to move with evidence).</figcaption>
+  </figure>
+
+  <div class="col">
+    <div class="callout"><b>Why this is not chain-of-thought, for any of the four.</b> CoT is a
+    transcript &mdash; free text read once and thrown away. Here the trajectory is raw material for an
+    <em>executable object</em>: a program with named inputs, fitted jointly across every instance, that
+    can be re-run, perturbed, and diffed. The recovered code is the DSL instance; the trajectory is
+    just where it was mined from. And the recovery is per-harness: the <span class="mono">analytica</span>
+    harness's staged decompose&rarr;ground&rarr;synthesise structure should compress into a program
+    easily; whether <span class="mono">react</span>'s free-form loop does is precisely one of the
+    measurements.</div>
+  </div>
+</section>
+
+<section id="inventory">
+  <div class="col sec-head">
+    <span class="eyebrow">&sect;2 &middot; Inventory</span>
+    <h2>Every moving part</h2>
+  </div>
+  <div class="tablewrap">
+    <table class="wide">
+      <thead><tr><th>file</th><th>role</th><th>the load-bearing details</th></tr></thead>
+      <tbody>
+        <tr><td class="k">belieflens/evidence.py</td><td>corpus index + the one search tool</td><td>SQLite FTS5 (BM25). Date gate in SQL: <code>WHERE fts MATCH ? AND a.date &lt;= to_date</code> &mdash; the current simulation date is a hard wall, not a prompt request. Thread-local connections. FTS query sanitiser quotes every token so agent-typed punctuation cannot crash the tool.</td></tr>
+        <tr><td class="k">belieflens/harnesses.py</td><td>the four reasoning shapes + sequential protocol</td><td>Four system prompts over one substrate (&sect;5). Tool loop: max 5 rounds, then a forced final answer with <code>tool_choice="none"</code>. Per-turn retry (once). <code>FORECAST: &lt;p&gt;</code> parsed by regex.</td></tr>
+        <tr><td class="k">belieflens/progdsl.py</td><td>the program space</td><td>AST whitelist validator + sandboxed executor (&sect;7). No literals, one function, no imports/attributes/subscripts. <code>while</code> + recursion allowed; 200k-step trace limit so non-termination is a failed fit, not a hang.</td></tr>
+        <tr><td class="k">belieflens/extract.py</td><td>steps 1&ndash;3 of recovery</td><td>Step-1 prompt bans recording the output; any variable equal to the turn's forecast is dropped <em>in code</em>. Step-3 repair loop: validator violations and worst-residual feedback, max 4 attempts. Degeneracy detector (&sect;7).</td></tr>
+        <tr><td class="k">scripts/fetch_corpus.py</td><td>data provenance</td><td>HF <code>shash42/forecast-news</code> (parquet only, 2025-12..2026-03) + <code>nikhilchandak/OpenForesight</code> questions. The 48&nbsp;GB prebuilt embedding index is deliberately <em>not</em> used (&sect;3).</td></tr>
+        <tr><td class="k">scripts/build_index.py</td><td>index build</td><td>Thin wrapper over <code>evidence.build()</code>: content truncated at 6,000 chars per article for the FTS row.</td></tr>
+        <tr><td class="k">scripts/run_exp1.py</td><td>orchestration</td><td>Questions + dates defined here. E1: thread pool (8) over (harness&times;question&times;sample). E2: step 1 parallel per turn, steps 2&ndash;3 per harness&times;question group. All raw turns serialised to <code>e1_runs.jsonl</code>; programs + residuals + trajectories to <code>e2_programs.json</code>.</td></tr>
+        <tr><td class="k">scripts/analyze_exp1.py</td><td>measurements</td><td>Separation, total movement, search behaviour; fit table, variable ranges across dates, recovered programs printed in full.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="data">
+  <div class="col sec-head">
+    <span class="eyebrow">&sect;3 &middot; Data</span>
+    <h2>The corpus, the gate, and the one deviation from the paper</h2>
+  </div>
+  <div class="col">
+    <p><b>Provenance.</b> The articles are the real FutureSim corpus &mdash; Hugging Face dataset
+    <code>shash42/forecast-news</code>, the CCNews-derived, deduplicated, dated tree the paper uses.
+    We pulled the parquet shards for 2025-12 through 2026-03: 120 day-directories, 412&nbsp;MB, indexed
+    into 339,801 rows spanning 2025-12-01 &rarr; 2026-03-31. Questions come from
+    <code>nikhilchandak/OpenForesight</code>, split <code>aljazeera2026Q1</code> &mdash; the exact 330-question
+    set the FutureSim paper evaluates on.</p>
+    <p><b>The gate.</b> At simulation date D, an agent can see only articles with
+    <code>date&nbsp;&le;&nbsp;D</code>, enforced in the SQL of the search tool itself &mdash; there is no
+    code path that returns a later article, regardless of what the model asks for. The indexed
+    <code>date</code> field is the corpus's crawl date (the day the article entered CCNews), which is the
+    conservative choice: an article becomes visible on the day it appeared, never earlier. Verified by
+    hand: querying &ldquo;March ECB meeting outcome&rdquo; as-of Jan 20 returns only pre-Jan-20 items.</p>
+    <p><b>The deviation, stated plainly.</b> FutureSim's own search tool is hybrid
+    semantic+keyword over a prebuilt LanceDB index &mdash; which is <b>48&nbsp;GB</b> (measured on the HF
+    repo before deciding). We built a local SQLite FTS5 BM25 index over the same articles instead.
+    Retrieval is therefore <em>weaker than the paper's</em>. It is also byte-identical across all four
+    harnesses, so it is a constant of the experiment, not a confound in it: the comparison is between
+    reasoning structures under fixed retrieval, and no cross-harness conclusion is affected. Absolute
+    forecast quality, however, is a lower bound relative to the paper's setup &mdash; that caveat
+    travels with any accuracy number.</p>
+  </div>
+</section>
+
+<section id="questions">
+  <div class="col sec-head">
+    <span class="eyebrow">&sect;4 &middot; Questions</span>
+    <h2>A matched pair that acts as its own control</h2>
+  </div>
+  <div class="tablewrap">
+    <table class="mid">
+      <thead><tr><th>id</th><th>question (binarised)</th><th>truth</th><th>provenance</th></tr></thead>
+      <tbody>
+        <tr><td class="k">hockey_usa</td><td>Will the United States win the men's ice hockey gold medal at the Milano Cortina 2026 Winter Olympics?</td><td class="good">YES</td><td class="m">OpenForesight qid 221278 (answer: &ldquo;United States&rdquo;), resolution 2026-02-22</td></tr>
+        <tr><td class="k">hockey_can</td><td>Will Canada win the men's ice hockey gold medal at the Milano Cortina 2026 Winter Olympics?</td><td class="bad">NO</td><td class="m">same event, complementary outcome</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="col">
+    <p>The original OpenForesight question is short-answer (&ldquo;which country will win?&rdquo;); we
+    binarised it into two yes/no propositions because the belief-dynamics measurements are defined on
+    probabilities of propositions.</p>
+    <div class="callout red"><b>Correction &mdash; the original control logic was wrong, and the review
+    caught it (F1, fatal).</b> This page first claimed that under one evidence stream &ldquo;one belief
+    should climb and the other should fall,&rdquo; scoring <em>separation</em> = net&Delta;(USA) &minus;
+    net&Delta;(CAN) as the evidence-tracking signal. The reviewer checked the corpus: <b>both</b> teams
+    won their semifinals on 2026-02-20 &mdash; the last simulation date &mdash; and the final resolved
+    on 02-22, <em>after</em> the window. Inside the window the evidence never discriminates the two
+    finalists, so a <em>correct</em> forecaster raises <em>both</em> beliefs toward ~0.5 as every other
+    team is eliminated; large separation would mean <em>mis</em>reading the news. The metric would have
+    punished exactly the behaviour it should reward. <b>Replaced with:</b> <span class="mono">semi-rise</span>
+    (did both beliefs rise across the semifinal date), <span class="mono">sum@last</span>
+    (P(USA)+P(CAN) should approach 1 by 02-20 and never exceed it), and complement-coherence error.
+    The pair remains a genuine control &mdash; but for <em>coherence under shared evidence</em>, not for
+    direction.</div>
+    <p><b>Dates:</b> 2026-01-14, 01-28, 02-08, 02-15, 02-20 &mdash; two pre-tournament (rosters,
+    warm-ups), three inside it (group stage, playoffs, eve of the final), so evidence concentrates
+    sharply across the last three and a belief that tracks it has to accelerate.</p>
+    <p><b>Why not more questions:</b> the 3-hour budget buys either breadth or sequential depth.
+    Dynamics is the object, and the trajectory is the measurement, so depth won: 2 questions &times; 4
+    harnesses &times; 2 samples &times; 5 sequential days = 80 forecast-turns, each with a full
+    extractable trace. Statistical claims at n=2 questions are explicitly out of scope; this run
+    establishes the instrument and the effect directions, not population statistics.</p>
+  </div>
+</section>
+
+<section id="models">
+  <div class="col sec-head">
+    <span class="eyebrow">&sect;5 &middot; Models</span>
+    <h2>Who runs, who extracts, and the contamination line between them</h2>
+  </div>
+  <div class="tablewrap">
+    <table class="wide">
+      <thead><tr><th>role</th><th>model</th><th>why this one</th><th>settings</th></tr></thead>
+      <tbody>
+        <tr><td class="k">all four harnesses</td><td class="m">gpt-5-mini</td><td>Released 2025-08-07 &mdash; knowledge cutoff comfortably before the Jan&ndash;Mar 2026 resolution window. Anything from gpt-5.4 onward post-dates the events: it would be <em>recalling</em>, not forecasting, and a model that knows the answer will not move its belief &mdash; which would destroy the dynamics half outright. Same model for all four harnesses, so reasoning shape is the only axis that varies.</td><td class="m">reasoning_effort=medium, timeout 240s, 3 retries, max 5 tool rounds, &le;6 articles/search</td></tr>
+        <tr><td class="k">extractor (steps 1&ndash;3)</td><td class="m">gpt-5.2</td><td>Contamination is irrelevant here: it reads a trace and writes variables/programs; it makes no forecasts. A stronger model is strictly better at faithful reconstruction.</td><td class="m">step 2 uses JSON response format; step 3 max 4 repair attempts</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="col">
+    <div class="callout"><b>The residual contamination path, named.</b> gpt-5-mini's pretraining
+    plausibly knows NHL players would attend Milano Cortina (announced pre-cutoff) &mdash; that is
+    legitimate prior knowledge, the same a human forecaster had. What it cannot know is tournament
+    results. A second, subtler path: the extractor <em>does</em> know how the tournament ended, and
+    could in principle tilt step-1 values toward the outcome. Mitigation: step 1 is instructed to
+    transcribe quantities <em>stated in the trace</em>, not to estimate them; residual risk is real and
+    is listed in the risk ledger, with spot-checking of step-1 tables against traces as the check.</div>
+    <p><b>Sampling note.</b> The two samples per cell are independent API draws. No temperature control
+    is applied (reasoning models constrain it); sample-to-sample spread is ordinary decoding variation
+    and is reported as such, never as controlled noise.</p>
+  </div>
+</section>
+
+<section id="harnesses">
+  <div class="col sec-head">
+    <span class="eyebrow">&sect;6 &middot; Harnesses</span>
+    <h2>How the four were built, and exactly what each says</h2>
+  </div>
+  <div class="col">
+    <p><b>The build decision.</b> The four harnesses are four system prompts over one shared substrate
+    &mdash; same model, same tool, same loop mechanics, same sequential protocol &mdash; not four
+    installed repositories. This was deliberate, twice over. Practically: Analytica's repo needs
+    FMP/FRED/Exa/Wolfram/Kalshi keys and FutureSim's full harness needs the 48&nbsp;GB index.
+    Scientifically, and more importantly: four repos differ in model calls, retries, context policies,
+    caching, and a hundred engineering choices &mdash; a comparison between them is a comparison of
+    repos. Holding the substrate fixed makes reasoning structure the only manipulated variable. The
+    cost, stated honestly: these are <em>faithful re-implementations of each paper's reasoning
+    shape</em>, not the papers' own code, and claims transfer to the originals only insofar as the
+    shape is what matters &mdash; which is exactly the hypothesis under test.</p>
+    <p><b>What is identical across all four</b> (verbatim, the shared preamble of every system
+    prompt):</p>
+  </div>
+  <pre>You are forecasting a real future event.
+
+The current simulation date is {date}. You know nothing about events after
+this date. Use search_news to gather evidence; it can only return articles
+published on or before {date}.
+
+Write your reasoning out explicitly as you go -- state the quantities you are
+weighing and the numbers you assign them. Someone will later have to
+reconstruct exactly how you arrived at your number.
+
+End your final message with a line of exactly this form:
+FORECAST: &lt;probability between 0 and 1&gt;</pre>
+  <div class="col">
+    <p>The &ldquo;write your reasoning out explicitly&rdquo; instruction is shared by all four, so the
+    observer effect it introduces (verbalising numbers may itself change the forecast) is a constant,
+    not a differential. It is also what makes E2 possible without touching hidden chain-of-thought.
+    Then each harness appends its own structure:</p>
+  </div>
+
+  <div class="tablewrap">
+    <table class="wide">
+      <thead><tr><th>harness</th><th>structure imposed</th><th>carries across days</th><th>lineage</th></tr></thead>
+      <tbody>
+        <tr><td class="k">react</td><td>&ldquo;Work in a simple loop: think, search, read, think again. Stop when further searching would not change your answer.&rdquo; Nothing else. <em>Note (review, F12): not a &ldquo;memoryless&rdquo; floor &mdash; all four harnesses see their own previous forecasts, so react is the history-anchored floor; futuresim/bayesian differ by the additional carry block, not by having memory at all.</em></td><td class="m">previous forecasts only</td><td class="m">Yao et al. ReAct &mdash; the structural floor</td></tr>
+        <tr><td class="k">futuresim</td><td>Six ordered procedural guidelines: restate resolution criterion &rarr; base rate from a reference class <em>before</em> news &rarr; several targeted searches incl. disconfirming &rarr; weigh vs base rate with numbers &rarr; overconfidence + anchoring self-check &rarr; calibrated p. Then a <b>forced memory block</b> (&le;200 words, fixed fields: BASE RATE / KEY EVIDENCE / WHAT WOULD CHANGE MY MIND / LAST FORECAST AND WHY).</td><td class="m">previous forecasts + the memory block &mdash; the block is all it keeps</td><td class="m">the FutureSim paper's own improved baseline harness (&sect;B.1: procedural guidelines, structured state, forced memory phase), re-expressed as a prompt</td></tr>
+        <tr><td class="k">analytica</td><td>Three labelled stages. STAGE 1 ANALYSE: 3&ndash;5 independent, individually checkable sub-propositions P1..Pn, <em>no searching yet</em>. STAGE 2 GROUND: search per sub-proposition, assign <span class="mono">Pi = &lt;p&gt;</span> with a one-line justification. STAGE 3 SYNTHESISE: assign weights, state the combination <em>with its numbers written out</em>, compute.</td><td class="m">previous forecasts only</td><td class="m">Analytica's Analyzer&rarr;Grounder&rarr;Synthesizer pipeline, collapsed into one staged prompt; the LLM plays all three roles in sequence instead of an outer loop orchestrating them</td></tr>
+        <tr><td class="k">bayesian</td><td>Explicit sequential update, in order: PRIOR (current p + one-sentence basis) &rarr; EVIDENCE (what is new since last update) &rarr; LIKELIHOOD (an explicit ratio per item: &ldquo;about 3&times; more likely under YES&rdquo;) &rarr; POSTERIOR (apply to prior odds). Then a <b>forced belief block</b> (P / EVIDENCE SUMMARY / STRONGEST COUNTER-EVIDENCE).</td><td class="m">previous forecasts + the belief block</td><td class="m">sequential Bayesian updating of a linguistic belief state (the ICML paper's shape, from its abstract; to be aligned to the PDF when supplied)</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="dstack">
+    <details><summary>full system prompt &mdash; react (verbatim)</summary><div class="dbody"><pre>[shared preamble above] +
+
+Work in a simple loop: think about what you need, search for it, read what
+comes back, think again. Stop when further searching would not change your
+answer.</pre></div></details>
+    <details><summary>full system prompt &mdash; futuresim (verbatim)</summary><div class="dbody"><pre>[shared preamble above] +
+
+FORECASTING GUIDELINES (follow them in order):
+1. Restate the resolution criterion precisely. What exactly must happen?
+2. Set a base rate from reference-class outcomes before looking at news.
+3. Search for evidence. Run several distinct, targeted queries, not one broad
+   one. Look for disconfirming evidence specifically.
+4. Weigh evidence against the base rate. State how much each item moves you
+   and why.
+5. Check yourself for overconfidence and for anchoring on your previous
+   forecast. A forecast that never moves is as suspect as one that thrashes.
+6. Give a calibrated probability.
+
+MEMORY. Your memory from previous days is below. Before your final answer you
+MUST output an updated memory block, in this exact form:
+
+&lt;memory&gt;
+BASE RATE: ...
+KEY EVIDENCE: ...
+WHAT WOULD CHANGE MY MIND: ...
+LAST FORECAST AND WHY: ...
+&lt;/memory&gt;
+
+Keep it under 200 words. It is all you will carry to the next day.</pre></div></details>
+    <details><summary>full system prompt &mdash; analytica (verbatim)</summary><div class="dbody"><pre>[shared preamble above] +
+
+Work in three explicit stages, labelled.
+
+STAGE 1 - ANALYSE. Break the question into 3 to 5 sub-propositions that are
+independent of each other and each individually checkable. Number them P1, P2,
+...  Do not search yet.
+
+STAGE 2 - GROUND. For each sub-proposition in turn, search for evidence and
+assign it a probability. Write   P1 = &lt;p&gt;   with a one-line justification.
+
+STAGE 3 - SYNTHESISE. Assign each sub-proposition a weight showing how much it
+contributes to the overall question, state the combination you are performing
+with its numbers written out, and compute the result. Then give FORECAST.</pre></div></details>
+    <details><summary>full system prompt &mdash; bayesian (verbatim)</summary><div class="dbody"><pre>[shared preamble above] +
+
+Maintain an explicit belief state and update it in the open.
+
+Your belief state from previous days is below. Each day, in this order:
+
+PRIOR: state your current probability and the one-sentence summary of the
+evidence it rests on.
+EVIDENCE: search, then state what is new since your last update.
+LIKELIHOOD: for each new item, state how much more likely it is if the event
+happens than if it does not -- an explicit ratio, e.g. "about 3x more likely
+under YES".
+POSTERIOR: apply the update to your prior odds and state the result.
+
+Then output an updated belief state in this exact form:
+
+&lt;belief&gt;
+P: &lt;probability&gt;
+EVIDENCE SUMMARY: ...
+STRONGEST COUNTER-EVIDENCE: ...
+&lt;/belief&gt;
+
+Then give FORECAST.</pre></div></details>
+    <details><summary>the per-day user message (template, verbatim structure)</summary><div class="dbody"><pre>QUESTION: {question text}
+BACKGROUND: {question background}          # roster/tournament context, no outcome info
+RESOLVES: {resolution date}
+YOUR PREVIOUS FORECASTS:                   # only after day 1
+  2026-01-14: 0.180
+  2026-01-28: 0.220
+YOUR MEMORY FROM YESTERDAY: / YOUR BELIEF STATE FROM YESTERDAY:
+  {carry block}                            # futuresim / bayesian only
+Today is {date}. Produce your forecast for today.</pre>
+    <p class="note" style="font-size:.85rem;color:var(--muted)">The previous-forecast history is shown to ALL four harnesses deliberately: it is the anchoring
+    pressure the FutureSim paper documents, applied uniformly, so the harness comparison measures who
+    escapes it.</p></div></details>
+  </div>
+
+  <div class="col">
+    <p><b>Loop mechanics, shared:</b> up to 5 tool rounds per day; each search returns &le;6 articles
+    (date + source + title + first ~900 chars). If the model is still searching at round 5 it is told
+    to stop and answer, with tools disabled (<code>tool_choice="none"</code>). Every response's
+    <code>FORECAST:</code> line is parsed by regex; a turn with no parsable forecast, or any exception,
+    is retried once from scratch. Verified in the first (discarded) run's traces: each harness produced
+    its intended structure &mdash; futuresim derived &ldquo;2 golds in ~23 tournaments &rarr; base rate
+    0.08&rdquo;, bayesian emitted real PRIOR/LIKELIHOOD/POSTERIOR blocks, analytica numbered P1..P4,
+    react free-formed &mdash; at ~30 explicit numerals per turn, which is what step 1 needs.</p>
+  </div>
+</section>
+
+<section id="extraction">
+  <div class="col sec-head">
+    <span class="eyebrow">&sect;7 &middot; Recovery</span>
+    <h2>From trajectory to program: the three steps and the wall around them</h2>
+  </div>
+  <div class="col">
+    <p><b>Step 1 &mdash; the variable table, per turn.</b> The extractor reads one day's searches and
+    reasoning and writes <code>snake_case_name = number</code>, one per line: base rates,
+    sub-probabilities, weights, adjustments, thresholds, counts. The rules that matter: names must
+    describe <em>quantities</em>, never dates or runs; implied numbers (&ldquo;roughly halves the
+    odds&rdquo;) are recorded as what they imply (0.5); and it is forbidden to record the final
+    forecast &mdash; it records the <em>inputs</em> to the reasoning, never its output. Belt and
+    braces: any declared variable numerically equal to that turn's forecast is dropped mechanically in
+    code, whatever it is named.</p>
+    <p><b>Step 2 &mdash; reconciliation, per harness&times;question.</b> Independent extraction gives
+    each day its own names for the same quantities. Step 2 merges them into one canonical schema
+    (5&ndash;14 names) and binds <em>every</em> instance to <em>every</em> name &mdash; where a
+    quantity was absent from a day's reasoning, the value that reasoning implicitly treated it as.
+    This schema is the discovered coordinate system: the belief trajectory lives in it.</p>
+    <p><b>Step 3 &mdash; one program.</b> The extractor writes a single <code>def forecast():</code>
+    that must reproduce every instance's output from its bindings. It sees the schema, all instances'
+    bindings-and-targets, and an excerpt of the original reasoning with the instruction to mirror its
+    shape (&ldquo;if it set a base rate and applied adjustments, your program sets a base rate and
+    applies adjustments &mdash; do not write a curve fit that happens to land on the numbers&rdquo;).
+    A repair loop feeds back validator violations and the worst-fitting instances, up to 4 attempts.</p>
+  </div>
+
+  <div class="col"><h3>The program space, in full</h3></div>
+  <pre><span class="c"># structure</span>
+exactly one   def forecast():   with zero arguments; names resolve from an
+injected namespace. No other def, no lambda, no class, no import.
+forecast() may call itself → recursion available. while available.
+
+<span class="c"># THE rule</span>
+<span class="hl">NO LITERALS ANYWHERE IN THE BODY. Not 2, not 1, not 0.5, not "".</span>
+Every value must arrive as a declared variable or a named constant.
+
+<span class="c"># allowed statements</span>
+assignment · augmented assignment · if/elif/else · while · break · continue · return
+
+<span class="c"># banned outright (AST node whitelist, not regex)</span>
+for · try · with · comprehensions · generators · attribute access (a.b) ·
+subscripting (a[b]) · tuples/lists/dicts/sets · f-strings · lambda · import ·
+global/nonlocal · yield · starred · slices
+
+<span class="c"># callable globals (the only calls allowed, by bare name)</span>
+min max abs round exp log sqrt clamp logistic noisy_or odds prob
+
+<span class="c"># named constants (so the body never needs a numeral)</span>
+ZERO ONE TWO HALF TENTH HUNDREDTH EPS E PI
+
+<span class="c"># execution</span>
+exec with __builtins__ = {} plus only the globals above and the bindings;
+per-line trace counter, 200,000-step budget → an infinite loop is a failed
+fit, not a hung experiment. Return value must be a number.</pre>
+
+  <div class="col">
+    <p>The validator was exercised before anything ran. A well-formed program (base + noisy-OR pull +
+    while-decay + clamp) passes and executes; the deliberate counterexamples are all caught with
+    line-level messages:</p>
+  </div>
+  <pre>line 4: no-functions -- helper function 'helper' -- the program is a single function
+line 3: magic-number -- literal 2 -- declare it as a variable in step 1
+line 3: magic-number -- literal 0.7 -- declare it as a variable in step 1
+line 3: banned-construct -- Import is not in the program space
+line 4: banned-construct -- Attribute is not in the program space
+line 2: undeclared -- 'unknown_name' is used but was never declared in step 1</pre>
+
+  <div class="col">
+    <div class="callout red"><b>The degeneracy problem &mdash; the one way this whole design can lie.</b>
+    The literal ban stops numbers hiding in the program body. It does not stop step 1 declaring
+    <code>final_answer&nbsp;=&nbsp;0.62</code> and step 3 writing <code>return final_answer</code>: a
+    perfect fit that measures nothing. Four mechanical defences: (1) step 1's output ban; (2) the
+    in-code drop of any variable equal to the target; (3) a bare <code>return &lt;name&gt;</code> body,
+    or any program with fewer than 3 operations, is rejected outright and re-requested; (4) a
+    degeneracy report computes the strongest single-variable correlation with the target across
+    instances and flags near-passthrough programs (|corr|&nbsp;&gt;&nbsp;0.98 over &ge;6 instances with
+    &lt;5 ops) as suspect. <b>A perfect fit with high degeneracy is recorded as a failed extraction,
+    never as a result.</b> Residual gap, admitted: a near-copy (forecast 0.21, variable 0.2) passes
+    the equality drop; the correlation flag is the net under it, and spot-checking step-1 tables
+    against their traces is the manual audit for what slips both.
+    <br><br><b>Post-review hardening (F2, fatal &mdash; see &sect;9):</b> the review proved the
+    no-literal rule was <em>syntactically</em> enforced but <em>semantically</em> bypassable
+    (<span class="mono">TENTH*(TWO+TWO+TWO)</span> = 0.6; <span class="mono">True+True</span> = 2;
+    an if-chain keyed on any varying variable is a per-instance lookup table). Now: boolean constants
+    are banned, a <b>constant-construction detector</b> rejects any expression built solely from named
+    constants, a branch-count check flags lookup-table programs (branches &ge; n&minus;1), the
+    near-target drop is a tolerance band with a previous-day-forecast exemption &mdash; and, because no
+    static defence can prove structure, the gate that actually decides is <b>out-of-sample fit</b>:
+    the program is synthesised again on sample&nbsp;0's instances alone and evaluated untouched on
+    sample&nbsp;1's. In-sample fits are reported as descriptive only.</div>
+    <p><b>The fit gate</b> (all three required): MAE &le; 0.02, <em>and</em> &ge;80% of instances
+    individually within tolerance, <em>and</em> zero failed executions. MAE alone was the original
+    gate; it passed a program that averaged well while most instances missed, so the per-instance
+    clause was added and the original gate is documented here as a corrected mistake.</p>
+    <p><b>What this has to do with Analytica.</b> Nothing is elicited from the Analytica <em>repo</em>
+    and no tree schema is imposed. The DSL instance is <em>recovered</em>: the harness reasons however
+    its shape dictates, and the program+schema are mined from the trace afterwards. For the
+    <span class="mono">analytica</span> harness the recovered program should look like its stated
+    synthesis (weights over sub-propositions &mdash; effectively its tree, flattened into code); for
+    <span class="mono">bayesian</span>, like an odds-update chain; whether <span class="mono">react</span>
+    compresses into a program at all is one of the findings, not an assumption.</p>
+  </div>
+
+  <div class="dstack">
+    <details><summary>step 1 system prompt (verbatim)</summary><div class="dbody"><pre>You are reverse-engineering a forecaster's reasoning.
+
+Below is one day of a forecasting agent's trajectory: the searches it ran and
+the reasoning it wrote. It ended with a probability.
+
+Your job is to write down EVERY quantity that reasoning used, as a flat list of
+name = value declarations. These are the inputs its reasoning operated on:
+base rates, sub-probabilities it assigned, weights it gave things, adjustments
+it applied, thresholds it compared against, counts it cited.
+
+RULES
+- One per line, exactly:   snake_case_name = &lt;number&gt;
+- Numbers only. No expressions, no units, no strings, no comments on the line.
+- Names must be descriptive of the QUANTITY, not of the date or the run.
+  Good:  base_rate_no_cut, weight_inflation_signal, adjustment_for_hawkish_tone
+  Bad:   x1, value_on_jan_15, v2
+- If the reasoning implied a number without writing it ("this roughly halves
+  the odds"), record it with the value it implies (0.5) and a name that says so.
+- NEVER record the final forecast, the answer, or the posterior it reported.
+  You are recording the INPUTS to the reasoning, never its OUTPUT.
+- Aim for 5 to 15 variables. Prefer the quantities that did real work.
+
+Output nothing but the declaration lines.</pre></div></details>
+    <details><summary>step 2 system prompt (verbatim)</summary><div class="dbody"><pre>You are given variable tables extracted from several days of
+one forecasting agent's reasoning. The names differ between days because they
+were extracted independently, but many refer to the same underlying quantity.
+
+Produce a single canonical schema: the union of quantities, deduplicated and
+consistently named, plus, for every instance, the value each canonical name
+takes there.
+
+Output JSON only, exactly this shape:
+
+{
+  "schema": ["canonical_name_1", "canonical_name_2", ...],
+  "bindings": { "&lt;instance key&gt;": {"canonical_name_1": &lt;number&gt;, ...}, ... },
+  "notes": "one line on what you merged"
+}
+
+RULES
+- Every instance must bind EVERY name in the schema. If a quantity was absent
+  from an instance's reasoning, infer the value that reasoning implicitly
+  treated it as (usually a neutral value), and still bind it.
+- Merge aggressively: base_rate_cut and prior_probability_of_cut are one name.
+- Keep the schema between 5 and 14 names.
+- Names must describe quantities, never dates or instances.</pre></div></details>
+    <details><summary>step 3 system prompt (verbatim, minus the program-space spec quoted above)</summary><div class="dbody"><pre>You are writing the program that this forecaster's reasoning
+actually was.
+
+You get a canonical variable schema, and for several instances the values those
+variables took together with the probability the forecaster produced. Write ONE
+program that reproduces every instance's output from its variables.
+
+[PROGRAM SPACE spec — as printed in §7 above]
+
+TWO THINGS MATTER EQUALLY.
+
+FIDELITY. The program must mirror how the forecaster actually reasoned -- the
+same intermediate quantities, combined in the same order, by the same kind of
+operation. If it set a base rate and then applied adjustments, your program
+sets a base rate and applies adjustments. Do not write a curve fit that happens
+to land on the numbers.
+
+NON-TRIVIALITY. A program that returns one variable unchanged, or that leans
+almost entirely on a single variable, will be rejected even if it fits
+perfectly. The variables are inputs; the program must do the combining work.
+
+Output only the program, in a ```python block. No commentary.</pre></div></details>
+    <details><summary>pre-flight test of the full chain (synthetic trajectory)</summary><div class="dbody"><pre><span class="c"># step 1 on a synthetic base-rate-and-adjustments trace produced:</span>
+base_rate_single_top_tier_nation_gold    = 0.2
+realistic_contender_nations_count        = 6.0
+adjusted_usa_win_probability_pre_signals = 0.28
+roster_strength_additive_boost           = 0.04
+four_nations_final_loss_additive_penalty = -0.08
+knockout_format_variance_shrink_factor   = 0.9
+<span class="c"># final answer 0.21 correctly NOT recorded</span>
+
+<span class="c"># step 3, one attempt, recovered (MAE 0.0197 across 3 instances):</span>
+def forecast():
+    base = base_rate_win
+    sig = pre_signal_win_prob
+    roster = roster_strength_adjustment
+    form = recent_form_adjustment
+    shrink = knockout_stage_shrink_factor
+    delta = sig - base
+    adj = roster + form
+    post = base + delta + adj
+    shrunk = base + shrink * (post - base)
+    out = clamp(shrunk, ZERO, ONE)
+    return out</pre></div></details>
+  </div>
+</section>
+
+<section id="risks">
+  <div class="col sec-head">
+    <span class="eyebrow">&sect;8 &middot; Risk ledger</span>
+    <h2>Everything that could invalidate this, and where each stands</h2>
+  </div>
+  <div class="tablewrap">
+    <table class="wide">
+      <thead><tr><th>risk</th><th>consequence if unhandled</th><th>status</th></tr></thead>
+      <tbody>
+        <tr><td>Shared SQLite connection across threads</td><td>corrupted search results, missing forecasts (hit us: 32% of first run's turns)</td><td class="good">FIXED &mdash; thread-local connections, verified under 48-way concurrency; first run quarantined, rerun clean-started</td></tr>
+        <tr><td>Future-dated leakage through search</td><td>the entire premise dies</td><td class="good">gate in SQL, crawl-date field, hand-verified</td></tr>
+        <tr><td>Harness model post-dates events</td><td>recall masquerading as forecasting; frozen beliefs</td><td class="good">gpt-5-mini (2025-08); flagged in every doc</td></tr>
+        <tr><td>Extractor knows the outcome</td><td>step-1 values tilted toward truth; fits flattered</td><td class="bad">OPEN &mdash; mitigated by transcribe-only instruction; spot-check step-1 tables vs traces before trusting fits</td></tr>
+        <tr><td>Degenerate fit (answer smuggled as a variable or as constant arithmetic)</td><td>perfect MAE, zero meaning</td><td class="good">HARDENED post-review &mdash; bool ban, constant-construction detector, lookup-table flag, tolerance-band target drop, and the out-of-sample holdout as the deciding gate (&sect;7, &sect;9 F2)</td></tr>
+        <tr><td>Forecast-parse fallback grabs a stray number</td><td>a fabricated forecast enters the data</td><td class="good">FIXED &mdash; fallback removed; % and comma handled; out-of-range = retry. Retro-verified: all 80 collected forecasts identical under the strict parser</td></tr>
+        <tr><td>Retry-on-failure selection effect</td><td>retried turns are a second draw; if failures correlate with hedgy answers, trajectories tilt</td><td class="bad">OPEN &mdash; retries are logged per turn; count will be reported alongside results</td></tr>
+        <tr><td>Weaker retrieval than the paper's hybrid index</td><td>absolute forecast quality understated</td><td class="good">accepted &amp; disclosed &mdash; identical across harnesses, so comparisons stand; absolute numbers carry the caveat</td></tr>
+        <tr><td>Observer effect of &ldquo;write your numbers&rdquo;</td><td>verbalising may change the forecast itself</td><td class="good">inherent to any trace-based method; identical across harnesses; disclosed</td></tr>
+        <tr><td>n = 2 questions, 2 samples</td><td>population claims unsupported</td><td class="good">scope limited by design: this run establishes the instrument and effect directions, not statistics</td></tr>
+        <tr><td>No LLM response caching in this pipeline</td><td>reruns cost money; exact reproduction impossible</td><td class="bad">PARTIAL &mdash; raw turns fully serialised and config JSON (model, flags, tolerances, timestamps) now written next to every output; generation itself is still not replayable</td></tr>
+        <tr><td>One bad synthesised program crashes all of E2</td><td>every paid group discarded at once</td><td class="good">FIXED &mdash; NameError caught as a failed fit; per-group isolation; report written incrementally (&sect;9 F3)</td></tr>
+        <tr><td>Chained E2 reads a partially written e1_runs.jsonl</td><td>silent truncation or crash</td><td class="good">FIXED &mdash; watcher killed in time; E1 now streams to .tmp with atomic rename (&sect;9 F4)</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="review">
+  <div class="col sec-head">
+    <span class="eyebrow">&sect;9 &middot; Independent review</span>
+    <h2>Adversarial review of the full setup</h2>
+  </div>
+  <div class="col">
+    <p>A reviewer with no stake in the design was pointed at the entire codebase with instructions to
+    be ruthless: leakage paths, validator loopholes (including <em>constructing</em> programs that
+    smuggle constants past the no-literal rule), statistical validity, extraction circularity, harness
+    comparability, orchestration bugs, reproducibility. It read every file, ran its own exploits
+    against the validator and parser, inspected the corpus database and the discarded run, and
+    verified the live process's actual flags. <b>Verdict: 2 fatal, 7 serious, 6 moderate findings,
+    a cluster of minors &mdash; and a verified-sound list.</b> Every finding is below with its
+    disposition; every fix was re-verified against the reviewer's own exploit cases before E2 was
+    allowed to run.</p>
+  </div>
+
+  <div class="findings">
+    <div class="fnd"><span class="sev fatal">F1 fatal</span><div class="fb">
+      <span><b>The planned headline metric punished correct forecasting.</b> &ldquo;Separation&rdquo;
+      assumed one belief should rise and the other fall &mdash; but the reviewer checked the corpus:
+      both teams won their semifinals on 02-20 (the last simulated date) and the final resolved 02-22,
+      outside the window. A correct forecaster raises <em>both</em> beliefs; high separation would mean
+      misreading the news.</span>
+      <span class="resp"><b>FIXED.</b> Metric replaced with semi-rise, sum@last coherence
+      (P(USA)+P(CAN)&nbsp;&rarr;&nbsp;~1, never above), and complement error; the original claim is
+      retracted in &sect;4, visibly. Caught before a single conclusion was written.</span>
+    </div></div>
+    <div class="fnd"><span class="sev fatal">F2 fatal*</span><div class="fb">
+      <span><b>The no-literal rule was semantically empty.</b> Reviewer-built exploits all passed the
+      old validator: <span class="mono">TENTH*(TWO+TWO+TWO)+HUNDREDTH*TWO</span> = 0.62;
+      <span class="mono">True+True</span> = 2; <span class="mono">(EPS&lt;ONE)+(EPS&lt;ONE)</span> = 2;
+      an if-chain over any varying variable is a per-instance lookup table &mdash; and the repair loop,
+      by showing failing instances with their targets, actively coaches the synthesiser toward it.
+      Dead code (<span class="mono">+ZERO*(a+b)</span>) lifted the op-count past the degeneracy flag.
+      (*fatal for the <em>interpretation</em> &ldquo;low MAE &rArr; the reasoning was
+      program-like&rdquo;.)</span>
+      <span class="resp"><b>FIXED / MITIGATED.</b> Bool constants banned; constant-construction
+      detector rejects any expression whose every leaf is a named constant (all four exploits now
+      REJECT &mdash; re-verified); branch-count flag for lookup tables (branches &ge; n&minus;1). And
+      the honest gate the reviewer demanded: <b>out-of-sample holdout</b> &mdash; synthesise on
+      sample&nbsp;0 alone, evaluate untouched on sample&nbsp;1, reported per group. In-sample fit is
+      demoted to descriptive. Dead-code padding remains possible in principle; OOS is the backstop.</span>
+    </div></div>
+    <div class="fnd"><span class="sev serious">F3 serious</span><div class="fb">
+      <span><b>One bad program would have killed all of E2.</b> A synthesised program binding a name on
+      only one branch raises <span class="mono">UnboundLocalError</span> &mdash; not in
+      <span class="mono">fit_error</span>'s except tuple &mdash; and the report was written only at the
+      very end, so one crash discarded every already-paid-for group. E2 was set to launch itself
+      unattended.</span>
+      <span class="resp"><b>FIXED</b> before E2 ran: NameError caught as a failed fit (verified),
+      per-group try/except, incremental report writes after every group.</span>
+    </div></div>
+    <div class="fnd"><span class="sev serious">F4 serious</span><div class="fb">
+      <span><b>Race: the auto-chained E2 watcher fired on file <em>creation</em>,</b> while E1 was
+      still writing its 16 JSON lines &mdash; a truncated read or silent partial load.</span>
+      <span class="resp"><b>FIXED.</b> Watcher killed minutes before E1 landed; E1 now streams each
+      run to a <span class="mono">.tmp</span> (a crash at 15/16 no longer loses everything &mdash;
+      also F13) and renames atomically; E2 was launched manually on patched code.</span>
+    </div></div>
+    <div class="fnd"><span class="sev serious">F5 serious</span><div class="fb">
+      <span><b>The forecast parser could fabricate certainty.</b> &ldquo;FORECAST: 85%&rdquo; clamped
+      to 1.0; the bare-number fallback could turn a list item &ldquo;1.&rdquo; into a forecast of 1.0;
+      &ldquo;0,45&rdquo; parsed as 0.0.</span>
+      <span class="resp"><b>FIXED + RETRO-VERIFIED.</b> Percent divides by 100, comma is a decimal
+      separator, out-of-range is a parse <em>failure</em> that triggers the existing retry, fallback
+      deleted. The strict parser re-run over all 80 collected turns reproduces every stored forecast
+      identically &mdash; the bugs were latent, never realised, so the E1 data stands.</span>
+    </div></div>
+    <div class="fnd"><span class="sev serious">F6 serious</span><div class="fb">
+      <span><b>Step 2 silently zero-filled mis-copied instance keys and destroyed the audit
+      trail.</b> One key the extractor failed to reproduce verbatim &rarr; all-zero bindings,
+      indistinguishable from &ldquo;the structure changed&rdquo;; pre-reconcile bindings were
+      overwritten in place, so step 1's actual output was unrecoverable &mdash; which also blocked
+      auditing the contamination path (F14).</span>
+      <span class="resp"><b>FIXED.</b> Missing keys retried once, still-missing instances excluded
+      loudly (never zero-filled); raw step-1 bindings preserved on every instance and saved in the
+      report; non-numeric values coerce with a logged count instead of crashing the stage.</span>
+    </div></div>
+    <div class="fnd"><span class="sev serious">F7 serious</span><div class="fb">
+      <span><b>The target-drop defence both leaked and backfired.</b> Exact-equality dropping let
+      near-copies through (<span class="mono">posterior_before_rounding=0.205</span> vs forecast 0.21)
+      &mdash; while for a harness that <em>didn't move</em>, yesterday's forecast equals today's and
+      was dropped: the anchored harnesses lost their most legitimate variable, biasing fit quality
+      against exactly the harnesses whose anchoring the experiment studies.</span>
+      <span class="resp"><b>FIXED.</b> Tolerance band (&plusmn;0.005) with an exemption for values
+      equal to the previous day's forecast; every drop logged by name.</span>
+    </div></div>
+    <div class="fnd"><span class="sev serious">F8 serious</span><div class="fb">
+      <span><b>The shared tool budget binds the harnesses unequally.</b> In the discarded run,
+      analytica averaged 8.0 searches/turn (its prompt mandates per-sub-proposition grounding) vs
+      react's 5.0 &mdash; so with 5 tool rounds, analytica hits the forced &ldquo;stop searching&rdquo;
+      cutoff more often, and analytica-vs-react differences are partly &ldquo;who got
+      truncated&rdquo;. The forced stop wasn't even logged.</span>
+      <span class="resp"><b>PARTIALLY ADDRESSED.</b> Forced-stop is now recorded per turn as a
+      covariate. It is absent from the already-collected E1 (disclosed limitation of this run);
+      per-call budgeting is deferred to the next run.</span>
+    </div></div>
+    <div class="fnd"><span class="sev serious">F9 serious</span><div class="fb">
+      <span><b>n = 1 question pair, 2 samples: no between-harness ranking survives.</b>
+      Sample-to-sample spread is the same magnitude as harness differences. Also, nets computed over
+      whichever dates happened to parse span different windows per run &mdash; not comparable.</span>
+      <span class="resp"><b>ACCEPTED + FIXED in analysis.</b> Nets now restricted to runs holding both
+      endpoint dates; scope language hardened everywhere: this run establishes the instrument and
+      effect directions. No harness ranking will be claimed from it.</span>
+    </div></div>
+    <div class="fnd"><span class="sev moderate">F10 moderate</span><div class="fb">
+      <span><b>Reproducibility record was empty, and a default was a trap.</b> No output recorded
+      model, flags or tolerances; the CLI default was <span class="mono">--model gpt-5</span> while the
+      documented runs use gpt-5-mini &mdash; a naive rerun would use a different, contamination-riskier
+      model; the step-3 excerpt came from whichever run finished first (nondeterministic).</span>
+      <span class="resp"><b>FIXED.</b> Config JSON (all flags + timestamp + corpus span) written next
+      to every output; default corrected to gpt-5-mini; excerpt choice deterministic (lowest sample).</span>
+    </div></div>
+    <div class="fnd"><span class="sev moderate">F11 moderate</span><div class="fb">
+      <span><b>Prose overstated the gate.</b> Docs said the program &ldquo;reproduces every
+      forecast&rdquo;; the actual gate is MAE &le; 0.02 <em>and</em> &ge;80% of instances within
+      tolerance <em>and</em> zero failed executions.</span>
+      <span class="resp"><b>FIXED in prose</b> &mdash; the gate is stated as the gate, here and in the
+      repo docs.</span>
+    </div></div>
+    <div class="fnd"><span class="sev moderate">F12 moderate</span><div class="fb">
+      <span><b>react was mislabelled &ldquo;no memory&rdquo;.</b> All four harnesses carry their own
+      forecast history, deliberately; react is the <em>history-anchored</em> structural floor, and
+      react-vs-futuresim contrasts &ldquo;history&rdquo; with &ldquo;history + memo&rdquo;.</span>
+      <span class="resp"><b>FIXED in description</b> (&sect;6). The uniform history is by design &mdash;
+      it is the anchoring pressure applied equally &mdash; and now says so.</span>
+    </div></div>
+    <div class="fnd"><span class="sev moderate">F13&ndash;F14</span><div class="fb">
+      <span><b>Robustness &amp; tool edge cases.</b> E1 held all results in RAM until the end (a crash
+      at 15/16 loses ~90 min of paid calls) and a partial jsonl was silent; a model-passed
+      <span class="mono">k=-1</span> became SQL <span class="mono">LIMIT -1</span> = unlimited dump;
+      the tool description promised &ldquo;max 10&rdquo; while code caps at 6; index failures returned
+      &ldquo;no articles&rdquo; silently.</span>
+      <span class="resp"><b>FIXED.</b> Streaming writes + loud partial warning; k clamped &ge;1 at both
+      layers; description aligned; search failures logged to stderr.</span>
+    </div></div>
+    <div class="fnd"><span class="sev moderate">F15 moderate</span><div class="fb">
+      <span><b>Extractor contamination is real but bounded.</b> gpt-5.2 knows the tournament's outcome.
+      The reviewer traced the bound: step 2 never sees the targets (verified), and step 3's objective
+      is the harness's forecasts, not the truth &mdash; so the leak can tint step-1 values and variable
+      naming, not the fit targets. It can matter for the &ldquo;which variables moved&rdquo;
+      narrative.</span>
+      <span class="resp"><b>ACCEPTED + DISCLOSED.</b> The transcribe-only instruction is the first
+      mitigation; the now-preserved raw step-1 bindings (F6 fix) are the audit trail for spot-checking
+      extracted values against the trace text.</span>
+    </div></div>
+    <div class="fnd"><span class="sev minor">minors</span><div class="fb">
+      <span>Docstrings in synthesised programs were flagged as magic-strings (repair-loop noise);
+      thread-local DB connections never closed; the analyzer counted step-2 zero-fills as &ldquo;held
+      fixed&rdquo;; the step-limiter is per-thread (sound today, fragile if refactored); the API key is
+      visible in the local process command line.</span>
+      <span class="resp"><b>Dispositions:</b> docstring whitelisted &middot; connection leak accepted at
+      this scale &middot; zero-fill moot (exclusion replaced it) &middot; comment added &middot;
+      <b class="open">key rotation is on the user</b> &mdash; flagged twice now.</span>
+    </div></div>
+  </div>
+
+  <div class="col">
+    <h3>What the review verified as sound</h3>
+    <ul class="plain">
+      <li><b>The date gate holds.</b> All 339,801 rows carry uniform <span class="mono">YYYY-MM-DD</span>
+      dates, the gate is in SQL not in a prompt, <span class="mono">from_date</span> cannot widen it,
+      and spot-checks of mid-February articles found no post-dated content. <b>The truth labels were
+      verified against the corpus itself</b> (USA beat Canada in overtime, 02-22 &mdash; outside the
+      window).</li>
+      <li><b>The live run is what the docs say it is</b> &mdash; gpt-5-mini, effort medium, 5 tool
+      rounds, verified from the process table, not from the docs.</li>
+      <li><b>The thread-safety fix is real</b>, the corruption class cannot recur, and the discarded
+      run cannot contaminate the clean one (separate directories, verified).</li>
+      <li><b>The execution sandbox held.</b> With attributes, subscripts and imports banned and
+      <span class="mono">__builtins__</span> empty, the reviewer found no escape; the step-limiter
+      terminates <span class="mono">while True</span>.</li>
+      <li><b>Step 2 never sees the forecasts</b> &mdash; the circularity vector is step-1 near-copies
+      only, which is what F7 closes.</li>
+      <li><b>Carry blocks work</b>: memory/belief extraction succeeded on every non-errored turn, and
+      carry persists across a failed day rather than being wiped.</li>
+    </ul>
+  </div>
+</section>
+
+<section id="results">
+  <div class="col sec-head">
+    <span class="eyebrow">&sect;10 &middot; First results</span>
+    <h2>What came out &mdash; pilot numbers, corrected metrics</h2>
+  </div>
+  <div class="col">
+    <p>Scope reminder before any number: one question pair, two samples (F9) &mdash; these are effect
+    directions from a working instrument, not population claims.</p>
+  </div>
+
+  <div class="tablewrap">
+    <table class="mid">
+      <thead><tr><th>harness</th><th>|&Delta;| total</th><th>net USA</th><th>net CAN</th><th>semi-rise</th><th>sum@last</th></tr></thead>
+      <tbody>
+        <tr><td class="k">analytica</td><td class="num">0.364</td><td class="num">+0.281</td><td class="num">+0.042</td><td class="num good">1.00</td><td class="num good">0.99</td></tr>
+        <tr><td class="k">bayesian</td><td class="num">0.334</td><td class="num">+0.184</td><td class="num">+0.141</td><td class="num">0.50</td><td class="num good">1.01</td></tr>
+        <tr><td class="k">react</td><td class="num">0.206</td><td class="num">+0.225</td><td class="num">+0.150</td><td class="num">0.50</td><td class="num">0.84</td></tr>
+        <tr><td class="k">futuresim</td><td class="num">0.117</td><td class="num bad">&minus;0.070</td><td class="num">+0.075</td><td class="num bad">0.00</td><td class="num">0.82</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="col">
+    <p><b>E1, corrected metrics.</b> semi-rise = fraction of samples where <em>both</em> beliefs rose
+    across the semifinal date (the correct direction for this event path, per F1); sum@last =
+    P(USA)+P(CAN) on the eve of the final, which should approach 1. <span class="mono">analytica</span>
+    is the cleanest tracker: both beliefs rose in both samples and the pair sums to 0.99.
+    <span class="mono">futuresim</span> &mdash; the harness with explicit anchoring-check guidelines and
+    a memory block &mdash; moved least, never raised both after the semifinals, and on 02-20, with the
+    USA <em>already in the gold-medal game</em>, still held P(USA gold) at 0.17&ndash;0.22. Its
+    base-rate anchor beat live evidence: the FutureSim paper's anchoring finding, reproduced in
+    miniature by the harness named after it.</p>
+  </div>
+
+  <div class="tablewrap">
+    <table class="wide">
+      <thead><tr><th>harness / question</th><th>in-sample MAE</th><th>in-tol</th><th>OOS test MAE</th><th>OOS in-tol</th><th>reading</th></tr></thead>
+      <tbody>
+        <tr><td class="k">futuresim / hockey_can</td><td class="num good">0.0175</td><td class="num">70%</td><td class="num good">0.0140</td><td class="num good">80%</td><td><b>most program-like and best transfer</b>: small adjustments on a stable base rate, 6 ops &mdash; the held-out sample is predicted at 80% within tolerance</td></tr>
+        <tr><td class="k">bayesian / hockey_usa</td><td class="num">0.0274</td><td class="num">40%</td><td class="num good">0.0160</td><td class="num">60%</td><td><b>strong transfer</b>: log-odds additive updating + shrink-to-prior, recovered and predictive on held-out days</td></tr>
+        <tr><td class="k">futuresim / hockey_usa</td><td class="num">0.0445</td><td class="num">50%</td><td class="num">0.1348</td><td class="num">20%</td><td>fits in-sample, transfers weakly</td></tr>
+        <tr><td class="k">react / hockey_can</td><td class="num">0.0700</td><td class="num">20%</td><td class="num">0.0732</td><td class="num">40%</td><td>middling both ways</td></tr>
+        <tr><td class="k">bayesian / hockey_can</td><td class="num">nan</td><td class="num">0%</td><td class="num">0.0628</td><td class="num">0%</td><td>full-fit program crashed on some instances (caught, isolated); holdout program ran</td></tr>
+        <tr><td class="k">analytica / hockey_usa</td><td class="num bad">0.1077</td><td class="num">10%</td><td class="num">0.2743</td><td class="num">20%</td><td rowspan="2">the decomposition itself changes day to day &mdash; the structure moves, not just the values</td></tr>
+        <tr><td class="k">analytica / hockey_can</td><td class="num bad">0.3009</td><td class="num">10%</td><td class="num">0.3962</td><td class="num">20%</td></tr>
+        <tr><td class="k">react / hockey_usa</td><td class="num bad">&mdash;</td><td class="num">&mdash;</td><td class="num">0.1777</td><td class="num">0%</td><td>no valid full-fit program in 4 attempts: the free-form loop resisted compression</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="col">
+    <p><b>E2.</b> No group passed the strict gate (MAE &le; 0.02 <em>and</em> &ge;80% in-tolerance
+    <em>and</em> zero failures) &mdash; these are descriptive fits, as the review demanded. The
+    headline observation is an <b>inversion</b>: the harness whose reasoning is most program-like
+    (futuresim &mdash; stable structure, tiny fit error) is the one whose belief was most rigid, and
+    the harness that tracked evidence best (analytica) is the one whose structure would not hold still
+    across days. In this pilot, structural stability and evidence-tracking pulled in opposite
+    directions &mdash; which, if it survives more questions, is exactly the kind of law the
+    belief-dynamics program is after.</p>
+    <div class="callout"><b>Circularity audit on the best result.</b> The bayesian/hockey_usa schema
+    contained <span class="mono">posterior_odds_usa_gold</span>, and
+    <span class="mono">prob(odds)</span> of it reconstructs the target to 3 decimals &mdash; a
+    transformed copy of the answer that slipped the probability-scale drop (the F7 channel in odds
+    clothing). Checked: <b>the recovered program never references that variable</b> &mdash; it rebuilds
+    the posterior from the prior and six likelihood ratios in log space, then shrinks toward the
+    prior. The OOS transfer (test MAE 0.016) stands on the structural program. Next-run fix queued:
+    extend the near-target drop to odds and logit transforms of the forecast.</div>
+  </div>
+</section>
+
+<section id="repro">
+  <div class="col sec-head">
+    <span class="eyebrow">&sect;11 &middot; Reproduce</span>
+    <h2>The whole thing, from an empty directory</h2>
+  </div>
+  <pre><span class="c"># data: real FutureSim corpus slice + questions (~400 MB, once)</span>
+python scripts/fetch_corpus.py --start 2025-12 --end 2026-03
+python scripts/build_index.py                    <span class="c"># ~2 min → data/news.db</span>
+
+<span class="c"># E1: 2 questions x 4 harnesses x 2 samples x 5 sequential dates</span>
+export OPENAI_API_KEY=...
+python scripts/run_exp1.py --stage e1 --model gpt-5-mini --effort medium \
+       --samples 2 --tool-rounds 5 --workers 8 --out results/exp1
+
+<span class="c"># E2: variable extraction + program synthesis per harness x question</span>
+python scripts/run_exp1.py --stage e2 --extractor gpt-5.2 --out results/exp1
+
+<span class="c"># measurements: separation, movement, fit table, programs, trajectories</span>
+python scripts/analyze_exp1.py results/exp1</pre>
+  <div class="col">
+    <p>Outputs: <code>results/exp1/e1_runs.jsonl</code> &mdash; every turn with its searches (queries +
+    returned titles), full reasoning text, carry blocks, forecast, and any error;
+    <code>results/exp1/e2_programs.json</code> &mdash; per harness&times;question the schema, the
+    program, per-instance residuals, degeneracy report, repair history, and the variable trajectory
+    across dates. Analysis re-runs from these files alone, with no API calls.</p>
+  </div>
+</section>
+
+<footer>
+  Companion to the BeliefLens research-program page. Corpus: shash42/forecast-news (HF) ·
+  questions: nikhilchandak/OpenForesight, split aljazeera2026Q1 · papers: FutureSim
+  arXiv:2605.15188, Analytica arXiv:2604.23072, Agent-BRACE arXiv:2605.11436. This ledger is updated
+  in place as the run and the review proceed.
+</footer>
+
+</div>

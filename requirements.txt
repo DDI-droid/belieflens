@@ -1,0 +1,5 @@
+openai>=2.0            # harnesses + extractor (Experiment 1)
+huggingface_hub>=0.20  # corpus download (bootstrap / scripts/fetch_corpus.py)
+pyarrow>=15            # parquet reading (index build)
+anthropic>=1.0         # optional: the anthropic backend in belieflens/llm.py
+datasets>=2.0          # optional: scripts/fetch_futuresim_questions.py only

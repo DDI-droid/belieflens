@@ -1,0 +1,4758 @@
+{
+ "analytica/hockey_can": {
+  "n_instances": 10,
+  "schema": [
+   "base_forecast_probability",
+   "canada_roster_quality_probability",
+   "nhl_participation_probability",
+   "competition_strength_favorability_probability",
+   "health_availability_probability",
+   "tournament_variance_favorability_probability",
+   "reach_final_probability",
+   "win_final_given_final_probability"
+  ],
+  "schema_notes": "Merged overlapping notions of baseline/prior forecast; roster strength and on-paper strength into roster_quality; injury/availability shocks and venue/availability into health_availability; rival strength into competition_favorability (using 1-p when input was 'rivals strong'); volatility/variance terms into tournament_variance_favorability; and decomposed path terms into reach_final and win_final_given_final (neutral 0.5 when absent).",
+  "excluded": [],
+  "program": "def forecast():\n    base = base_forecast_probability\n\n    rq = canada_roster_quality_probability\n    nhl = nhl_participation_probability\n    comp_fav = competition_strength_favorability_probability\n    health = health_availability_probability\n    var_fav = tournament_variance_favorability_probability\n    reach = reach_final_probability\n    win = win_final_given_final_probability\n\n    base_lo = log(odds(base))\n\n    p1_team = rq * nhl\n    p2_rival_not_overwhelming = comp_fav\n    p3_avail = nhl * health\n    p4_low_upset = var_fav\n\n    lo_team = log(odds(p1_team))\n    lo_rival = log(odds(p2_rival_not_overwhelming))\n    lo_avail = log(odds(p3_avail))\n    lo_var = log(odds(p4_low_upset))\n\n    w_team = abs(lo_team) + ONE\n    w_rival = abs(lo_rival) + ONE\n    w_avail = abs(lo_avail) + ONE\n    w_var = abs(lo_var) + ONE\n\n    s_team = lo_team / w_team\n    s_rival = lo_rival / w_rival\n    s_avail = lo_avail / w_avail\n    s_var = lo_var / w_var\n\n    stage = base_lo\n    stage = stage + s_team\n    stage = stage + s_avail\n    stage = stage + s_rival\n    stage = stage + s_var\n\n    base_out = logistic(stage)\n\n    path = reach * win\n    path_gap = path - HALF\n\n    path_weight = abs(path_gap) + ONE\n    path_adj = path_gap / path_weight\n\n    final = base_out + path_adj\n    final = clamp(final, ZERO, ONE)\n    return final",
+  "fit": {
+   "n": 10,
+   "n_ran": 10,
+   "n_failed": 0,
+   "mae": 0.3009204115655272,
+   "max": 0.5232260594942394,
+   "within_tol": 0.1,
+   "errors": []
+  },
+  "residuals": [
+   0.5232260594942394,
+   0.0030260516333114884,
+   0.3466699137569474,
+   0.2599715254174286,
+   0.47923436111516854,
+   0.34371385802819915,
+   0.2998561624176132,
+   0.05832359777310275,
+   0.31883775058494435,
+   0.37634483543431735
+  ],
+  "degeneracy": {
+   "max_abs_corr": 0.5020685498189916,
+   "max_corr_var": "base_forecast_probability",
+   "passthrough": false,
+   "n_ops": 36,
+   "n_branches": 0,
+   "near_passthrough": false,
+   "lookup_smell": false,
+   "suspect": false
+  },
+  "ok": false,
+  "attempts": 4,
+  "history": [
+   {
+    "attempt": 1,
+    "stage": "fit",
+    "mae": 0.3859955761926966,
+    "within_tol": 0.0,
+    "degeneracy": {
+     "max_abs_corr": 0.5020685498189916,
+     "max_corr_var": "base_forecast_probability",
+     "passthrough": false,
+     "n_ops": 14,
+     "n_branches": 0,
+     "near_passthrough": false,
+     "lookup_smell": false,
+     "suspect": false
+    }
+   },
+   {
+    "attempt": 2,
+    "stage": "fit",
+    "mae": 0.16464120686308084,
+    "within_tol": 0.0,
+    "degeneracy": {
+     "max_abs_corr": 0.5020685498189916,
+     "max_corr_var": "base_forecast_probability",
+     "passthrough": false,
+     "n_ops": 23,
+     "n_branches": 0,
+     "near_passthrough": false,
+     "lookup_smell": false,
+     "suspect": false
+    }
+   },
+   {
+    "attempt": 3,
+    "stage": "fit",
+    "mae": 0.26858548745954025,
+    "within_tol": 0.2,
+    "degeneracy": {
+     "max_abs_corr": 0.5020685498189916,
+     "max_corr_var": "base_forecast_probability",
+     "passthrough": false,
+     "n_ops": 38,
+     "n_branches": 0,
+     "near_passthrough": false,
+     "lookup_smell": false,
+     "suspect": false
+    }
+   },
+   {
+    "attempt": 4,
+    "stage": "fit",
+    "mae": 0.3009204115655272,
+    "within_tol": 0.1,
+    "degeneracy": {
+     "max_abs_corr": 0.5020685498189916,
+     "max_corr_var": "base_forecast_probability",
+     "passthrough": false,
+     "n_ops": 36,
+     "n_branches": 0,
+     "near_passthrough": false,
+     "lookup_smell": false,
+     "suspect": false
+    }
+   }
+  ],
+  "oos": {
+   "train_sample": 0,
+   "train_n": 5,
+   "test_n": 5,
+   "train_mae": 0.2641184298103313,
+   "test_mae": 0.3962210009255478,
+   "test_within_tol": 0.2,
+   "test_failed": 0,
+   "program": "def forecast():\n    base = base_forecast_probability\n\n    roster = canada_roster_quality_probability\n    nhl = nhl_participation_probability\n    rivals_fav = competition_strength_favorability_probability\n    health = health_availability_probability\n    var_fav = tournament_variance_favorability_probability\n\n    reach = reach_final_probability\n    win_final = win_final_given_final_probability\n\n    # Convert each checkable proposition into a log-odds adjustment around 0.5.\n    l_base = log(odds(base))\n\n    l_team = log(odds(roster)) + log(odds(nhl))\n    l_avail = log(odds(health))\n    l_rivals = log(odds(rivals_fav))\n    l_var = log(odds(var_fav))\n\n    # \"Path\" framing: sometimes reason directly as reach-final * win-final,\n    # then convert that into an odds term.\n    path = reach * win_final\n    l_path = log(odds(path))\n\n    # Combine: base anchored, then add/subtract proposition terms.\n    # Rival strength and variance reduce chances, so subtract their log-odds.\n    l_total = l_base\n    l_total += l_team\n    l_total += l_avail\n    l_total -= l_rivals\n    l_total -= l_var\n\n    # Blend with path-based view by averaging in log-odds space.\n    l_total = (l_total + l_path) * HALF\n\n    out = logistic(l_total)\n    out = clamp(out, ZERO, ONE)\n    return out",
+   "degeneracy": {
+    "max_abs_corr": 0.8626532331520169,
+    "max_corr_var": "win_final_given_final_probability",
+    "passthrough": false,
+    "n_ops": 20,
+    "n_branches": 0,
+    "near_passthrough": false,
+    "lookup_smell": false,
+    "suspect": false
+   }
+  },
+  "instances": [
+   {
+    "key": "analytica|hockey_can|s0|2026-01-14",
+    "date": "2026-01-14",
+    "sample": 0,
+    "target": 0.68,
+    "bindings": {
+     "base_forecast_probability": 0.5,
+     "canada_roster_quality_probability": 0.65,
+     "nhl_participation_probability": 0.5,
+     "competition_strength_favorability_probability": 0.4,
+     "health_availability_probability": 0.9,
+     "tournament_variance_favorability_probability": 0.6,
+     "reach_final_probability": 0.5,
+     "win_final_given_final_probability": 0.5
+    },
+    "raw_bindings": {
+     "team_strength_probability": 0.65,
+     "rival_strength_probability": 0.6,
+     "availability_venue_favorable_probability": 0.9,
+     "tournament_variance_reduces_favorite_probability": 0.6,
+     "weight_team_strength": 0.4,
+     "weight_rival_strength": 0.25,
+     "weight_availability_venue": 0.2,
+     "weight_tournament_variance": 0.15,
+     "weighted_component_team_strength": 0.26,
+     "weighted_component_rival_strength": 0.15,
+     "weighted_component_availability_venue": 0.18,
+     "weighted_component_tournament_variance": 0.09,
+     "weights_sum_check": 1.0
+    }
+   },
+   {
+    "key": "analytica|hockey_can|s0|2026-01-28",
+    "date": "2026-01-28",
+    "sample": 0,
+    "target": 0.63,
+    "bindings": {
+     "base_forecast_probability": 0.68,
+     "canada_roster_quality_probability": 0.99,
+     "nhl_participation_probability": 0.98,
+     "competition_strength_favorability_probability": 0.15,
+     "health_availability_probability": 0.9,
+     "tournament_variance_favorability_probability": 0.5,
+     "reach_final_probability": 0.5,
+     "win_final_given_final_probability": 0.5
+    },
+    "raw_bindings": {
+     "nhl_players_participate_probability": 0.98,
+     "canada_roster_includes_top_stars_probability": 0.99,
+     "other_top_nations_field_strong_nhl_teams_probability": 0.85,
+     "no_major_injury_or_availability_shock_probability": 0.9,
+     "weight_nhl_participation": 0.1,
+     "weight_canada_roster_quality": 0.45,
+     "weight_competition_strength": 0.3,
+     "weight_no_key_player_loss": 0.15,
+     "baseline_previous_forecast_probability": 0.68,
+     "p1_weighted_factor": 0.99798,
+     "p2_weighted_factor": 0.99549,
+     "p3_weighted_factor": 0.95244,
+     "p4_weighted_factor": 0.9843,
+     "combined_favorability_multiplier": 0.93119
+    }
+   },
+   {
+    "key": "analytica|hockey_can|s0|2026-02-08",
+    "date": "2026-02-08",
+    "sample": 0,
+    "target": 0.336,
+    "bindings": {
+     "base_forecast_probability": 0.5,
+     "canada_roster_quality_probability": 0.95,
+     "nhl_participation_probability": 0.99,
+     "competition_strength_favorability_probability": 0.5,
+     "health_availability_probability": 0.92,
+     "tournament_variance_favorability_probability": 0.5,
+     "reach_final_probability": 0.65,
+     "win_final_given_final_probability": 0.55
+    },
+    "raw_bindings": {
+     "nhl_players_participate_probability_p1": 0.99,
+     "canada_roster_intact_probability_p2": 0.95,
+     "canada_reaches_final_conditional_probability_p3": 0.65,
+     "canada_wins_final_conditional_probability_p4": 0.55,
+     "uncertainty_weight_p1": 0.03,
+     "uncertainty_weight_p2": 0.07,
+     "uncertainty_weight_p3": 0.45,
+     "uncertainty_weight_p4": 0.45,
+     "injury_replacements_count": 2.0,
+     "announced_roster_size_players": 25.0,
+     "rounding_decimals": 3.0
+    }
+   },
+   {
+    "key": "analytica|hockey_can|s0|2026-02-15",
+    "date": "2026-02-15",
+    "sample": 0,
+    "target": 0.49,
+    "bindings": {
+     "base_forecast_probability": 0.5,
+     "canada_roster_quality_probability": 0.85,
+     "nhl_participation_probability": 0.5,
+     "competition_strength_favorability_probability": 0.6,
+     "health_availability_probability": 0.75,
+     "tournament_variance_favorability_probability": 0.5,
+     "reach_final_probability": 0.5,
+     "win_final_given_final_probability": 0.5
+    },
+    "raw_bindings": {
+     "p_roster_top_tier": 0.85,
+     "p_strong_group_stage_form": 0.9,
+     "p_no_rival_decisive_advantage": 0.6,
+     "p_avoid_additional_critical_injuries": 0.75,
+     "knockout_games_required_to_win_gold": 3.0,
+     "qf_weight_form": 0.5,
+     "qf_weight_roster": 0.3,
+     "qf_weight_injuries": 0.2,
+     "sf_weight_roster": 0.4,
+     "sf_weight_rivals": 0.3,
+     "sf_weight_injuries": 0.2,
+     "sf_weight_form": 0.1,
+     "final_weight_roster": 0.35,
+     "final_weight_rivals": 0.35,
+     "final_weight_form": 0.15,
+     "final_weight_injuries": 0.15
+    }
+   },
+   {
+    "key": "analytica|hockey_can|s0|2026-02-20",
+    "date": "2026-02-20",
+    "sample": 0,
+    "target": 0.642,
+    "bindings": {
+     "base_forecast_probability": 0.5,
+     "canada_roster_quality_probability": 0.58,
+     "nhl_participation_probability": 0.5,
+     "competition_strength_favorability_probability": 0.5,
+     "health_availability_probability": 0.95,
+     "tournament_variance_favorability_probability": 0.5,
+     "reach_final_probability": 0.5,
+     "win_final_given_final_probability": 0.5
+    },
+    "raw_bindings": {
+     "prob_no_new_key_canada_injuries_or_suspensions": 0.95,
+     "prob_canada_stronger_on_paper_than_usa": 0.58,
+     "prob_canada_wins_matchday_head_to_head": 0.65,
+     "weight_injuries_suspensions_factor": 0.1,
+     "weight_on_paper_team_strength_factor": 0.55,
+     "weight_matchday_execution_form_factor": 0.35,
+     "canada_semifinal_goals": 3.0,
+     "canada_semifinal_goals_allowed": 2.0,
+     "canada_semifinal_shots_on_goal": 39.0,
+     "usa_semifinal_goals": 6.0,
+     "usa_semifinal_goals_allowed": 2.0,
+     "hours_until_final_estimate": 48.0
+    }
+   },
+   {
+    "key": "analytica|hockey_can|s1|2026-01-14",
+    "date": "2026-01-14",
+    "sample": 1,
+    "target": 0.3,
+    "bindings": {
+     "base_forecast_probability": 0.5,
+     "canada_roster_quality_probability": 0.92,
+     "nhl_participation_probability": 0.95,
+     "competition_strength_favorability_probability": 0.5,
+     "health_availability_probability": 0.92,
+     "tournament_variance_favorability_probability": 0.5,
+     "reach_final_probability": 0.6,
+     "win_final_given_final_probability": 0.55
+    },
+    "raw_bindings": {
+     "canada_roster_availability_probability_p1": 0.92,
+     "nhl_players_participate_probability_p2": 0.95,
+     "canada_reaches_final_probability_p3": 0.6,
+     "canada_wins_final_given_reach_probability_p4": 0.55,
+     "heuristic_weight_roster_security_w1": 0.1,
+     "heuristic_weight_nhl_participation_w2": 0.1,
+     "heuristic_weight_reach_final_w3": 0.4,
+     "heuristic_weight_win_final_w4": 0.4,
+     "computed_intermediate_p1_times_p3": 0.552
+    }
+   },
+   {
+    "key": "analytica|hockey_can|s1|2026-01-28",
+    "date": "2026-01-28",
+    "sample": 1,
+    "target": 0.36,
+    "bindings": {
+     "base_forecast_probability": 0.3,
+     "canada_roster_quality_probability": 0.99,
+     "nhl_participation_probability": 0.95,
+     "competition_strength_favorability_probability": 0.3,
+     "health_availability_probability": 0.5,
+     "tournament_variance_favorability_probability": 0.35,
+     "reach_final_probability": 0.5,
+     "win_final_given_final_probability": 0.5
+    },
+    "raw_bindings": {
+     "p_roster_top_tier": 0.99,
+     "p_nhl_participation": 0.95,
+     "p_rivals_comparable_strength": 0.7,
+     "p_tournament_volatility_material": 0.65,
+     "prior_forecast_probability": 0.3,
+     "weight_roster_quality": 0.35,
+     "weight_nhl_participation": 0.2,
+     "weight_rival_strength": 0.3,
+     "weight_volatility": 0.15,
+     "max_upshift_roster_strength": 0.08,
+     "max_upshift_nhl_participation": 0.04,
+     "max_downshift_strong_rivals": -0.06,
+     "max_downshift_volatility": -0.03
+    }
+   },
+   {
+    "key": "analytica|hockey_can|s1|2026-02-08",
+    "date": "2026-02-08",
+    "sample": 1,
+    "target": 0.36,
+    "bindings": {
+     "base_forecast_probability": 0.5,
+     "canada_roster_quality_probability": 0.88,
+     "nhl_participation_probability": 0.5,
+     "competition_strength_favorability_probability": 0.6,
+     "health_availability_probability": 0.93,
+     "tournament_variance_favorability_probability": 0.74,
+     "reach_final_probability": 0.5,
+     "win_final_given_final_probability": 0.5
+    },
+    "raw_bindings": {
+     "prob_top_tier_roster": 0.88,
+     "prob_no_catastrophic_new_losses": 0.93,
+     "prob_catastrophic_new_losses": 0.07,
+     "prob_canada_top_contender_given_roster_health": 0.6,
+     "tournament_variance_survival_factor": 0.74,
+     "weight_roster_quality": 0.35,
+     "weight_no_catastrophic_injuries": 0.2,
+     "weight_relative_competitiveness": 0.35,
+     "weight_tournament_variance": 0.1,
+     "injury_replacements_count": 2.0,
+     "roster_size_players": 25.0
+    }
+   },
+   {
+    "key": "analytica|hockey_can|s1|2026-02-15",
+    "date": "2026-02-15",
+    "sample": 1,
+    "target": 0.364,
+    "bindings": {
+     "base_forecast_probability": 0.36,
+     "canada_roster_quality_probability": 0.5,
+     "nhl_participation_probability": 0.5,
+     "competition_strength_favorability_probability": 0.5,
+     "health_availability_probability": 0.5,
+     "tournament_variance_favorability_probability": 0.5,
+     "reach_final_probability": 0.56,
+     "win_final_given_final_probability": 0.65
+    },
+    "raw_bindings": {
+     "p_reach_semifinals": 0.8,
+     "p_win_semifinal_given_semifinals": 0.7,
+     "p_win_final_given_final": 0.65,
+     "weight_step_reach_semifinals": 1.0,
+     "weight_step_win_semifinal": 1.0,
+     "weight_step_win_final": 1.0,
+     "opening_game_goals_for_canada": 5.0,
+     "opening_game_goals_against_canada": 0.0,
+     "prior_forecast_2026_01_14": 0.3,
+     "prior_forecast_2026_01_28": 0.36,
+     "prior_forecast_2026_02_08": 0.36
+    }
+   },
+   {
+    "key": "analytica|hockey_can|s1|2026-02-20",
+    "date": "2026-02-20",
+    "sample": 1,
+    "target": 0.423,
+    "bindings": {
+     "base_forecast_probability": 0.36,
+     "canada_roster_quality_probability": 0.15,
+     "nhl_participation_probability": 0.5,
+     "competition_strength_favorability_probability": 0.5,
+     "health_availability_probability": 0.15,
+     "tournament_variance_favorability_probability": 0.5,
+     "reach_final_probability": 1.0,
+     "win_final_given_final_probability": 0.4225
+    },
+    "raw_bindings": {
+     "prob_canada_in_final_p1": 1.0,
+     "prob_crosby_plays_final_p2": 0.15,
+     "prob_canada_wins_if_crosby_out_p3": 0.4,
+     "prob_canada_wins_if_crosby_plays_p4": 0.55,
+     "days_between_semifinal_and_final": 2.0,
+     "crosby_age_years": 38.0,
+     "canada_semifinal_goals_for": 3.0,
+     "canada_semifinal_goals_against": 2.0,
+     "usa_semifinal_goals_for": 6.0,
+     "usa_semifinal_goals_against": 2.0,
+     "previous_forecast_mid_feb": 0.36,
+     "weight_p1_uncertainty": 0.0
+    }
+   }
+  ],
+  "trajectory": {
+   "s0": {
+    "2026-01-14": {
+     "base_forecast_probability": 0.5,
+     "canada_roster_quality_probability": 0.65,
+     "nhl_participation_probability": 0.5,
+     "competition_strength_favorability_probability": 0.4,
+     "health_availability_probability": 0.9,
+     "tournament_variance_favorability_probability": 0.6,
+     "reach_final_probability": 0.5,
+     "win_final_given_final_probability": 0.5,
+     "_target": 0.68
+    },
+    "2026-01-28": {
+     "base_forecast_probability": 0.68,
+     "canada_roster_quality_probability": 0.99,
+     "nhl_participation_probability": 0.98,
+     "competition_strength_favorability_probability": 0.15,
+     "health_availability_probability": 0.9,
+     "tournament_variance_favorability_probability": 0.5,
+     "reach_final_probability": 0.5,
+     "win_final_given_final_probability": 0.5,
+     "_target": 0.63
+    },
+    "2026-02-08": {
+     "base_forecast_probability": 0.5,
+     "canada_roster_quality_probability": 0.95,
+     "nhl_participation_probability": 0.99,
+     "competition_strength_favorability_probability": 0.5,
+     "health_availability_probability": 0.92,
+     "tournament_variance_favorability_probability": 0.5,
+     "reach_final_probability": 0.65,
+     "win_final_given_final_probability": 0.55,
+     "_target": 0.336
+    },
+    "2026-02-15": {
+     "base_forecast_probability": 0.5,
+     "canada_roster_quality_probability": 0.85,
+     "nhl_participation_probability": 0.5,
+     "competition_strength_favorability_probability": 0.6,
+     "health_availability_probability": 0.75,
+     "tournament_variance_favorability_probability": 0.5,
+     "reach_final_probability": 0.5,
+     "win_final_given_final_probability": 0.5,
+     "_target": 0.49
+    },
+    "2026-02-20": {
+     "base_forecast_probability": 0.5,
+     "canada_roster_quality_probability": 0.58,
+     "nhl_participation_probability": 0.5,
+     "competition_strength_favorability_probability": 0.5,
+     "health_availability_probability": 0.95,
+     "tournament_variance_favorability_probability": 0.5,
+     "reach_final_probability": 0.5,
+     "win_final_given_final_probability": 0.5,
+     "_target": 0.642
+    }
+   },
+   "s1": {
+    "2026-01-14": {
+     "base_forecast_probability": 0.5,
+     "canada_roster_quality_probability": 0.92,
+     "nhl_participation_probability": 0.95,
+     "competition_strength_favorability_probability": 0.5,
+     "health_availability_probability": 0.92,
+     "tournament_variance_favorability_probability": 0.5,
+     "reach_final_probability": 0.6,
+     "win_final_given_final_probability": 0.55,
+     "_target": 0.3
+    },
+    "2026-01-28": {
+     "base_forecast_probability": 0.3,
+     "canada_roster_quality_probability": 0.99,
+     "nhl_participation_probability": 0.95,
+     "competition_strength_favorability_probability": 0.3,
+     "health_availability_probability": 0.5,
+     "tournament_variance_favorability_probability": 0.35,
+     "reach_final_probability": 0.5,
+     "win_final_given_final_probability": 0.5,
+     "_target": 0.36
+    },
+    "2026-02-08": {
+     "base_forecast_probability": 0.5,
+     "canada_roster_quality_probability": 0.88,
+     "nhl_participation_probability": 0.5,
+     "competition_strength_favorability_probability": 0.6,
+     "health_availability_probability": 0.93,
+     "tournament_variance_favorability_probability": 0.74,
+     "reach_final_probability": 0.5,
+     "win_final_given_final_probability": 0.5,
+     "_target": 0.36
+    },
+    "2026-02-15": {
+     "base_forecast_probability": 0.36,
+     "canada_roster_quality_probability": 0.5,
+     "nhl_participation_probability": 0.5,
+     "competition_strength_favorability_probability": 0.5,
+     "health_availability_probability": 0.5,
+     "tournament_variance_favorability_probability": 0.5,
+     "reach_final_probability": 0.56,
+     "win_final_given_final_probability": 0.65,
+     "_target": 0.364
+    },
+    "2026-02-20": {
+     "base_forecast_probability": 0.36,
+     "canada_roster_quality_probability": 0.15,
+     "nhl_participation_probability": 0.5,
+     "competition_strength_favorability_probability": 0.5,
+     "health_availability_probability": 0.15,
+     "tournament_variance_favorability_probability": 0.5,
+     "reach_final_probability": 1.0,
+     "win_final_given_final_probability": 0.4225,
+     "_target": 0.423
+    }
+   }
+  }
+ },
+ "analytica/hockey_usa": {
+  "n_instances": 10,
+  "schema": [
+   "p_nhl_participation",
+   "p_usa_elite_roster_or_top_contender",
+   "p_no_major_disruption_or_good_health",
+   "p_usa_reach_final",
+   "p_usa_win_final_given_reach",
+   "p_stronger_opponent_or_canada_favorite",
+   "tournament_variance_probability"
+  ],
+  "schema_notes": "Merged differently named probabilities into: NHL participation, USA roster/contender strength, health/disruption, reach-final, win-final|reach, opponent strength/Canada favorite, and tournament variance; filled missing factors with neutral 1.0 for non-mentioned certainties and 0.5 for unspecified binary/variance-style uncertainties.",
+  "excluded": [],
+  "program": "def forecast():\n    p1 = p_nhl_participation\n    p2 = p_usa_elite_roster_or_top_contender\n    p3 = p_no_major_disruption_or_good_health\n\n    normality = p1 * p2 * p3\n\n    reach = p_usa_reach_final\n    win_final = p_usa_win_final_given_reach\n    base_gold = reach * win_final\n\n    favorite = p_stronger_opponent_or_canada_favorite\n    variance = tournament_variance_probability\n\n    coinflipness = ONE - abs(favorite - HALF) * TWO\n    variance_mix = HALF + (variance - HALF) * coinflipness\n\n    adjusted = base_gold * (HALF + variance_mix * HALF)\n\n    final = normality * adjusted + (ONE - normality) * adjusted * (ONE - variance_mix)\n\n    return clamp(final, ZERO, ONE)",
+  "fit": {
+   "n": 10,
+   "n_ran": 10,
+   "n_failed": 0,
+   "mae": 0.10770481973749998,
+   "max": 0.40889375,
+   "within_tol": 0.1,
+   "errors": []
+  },
+  "residuals": [
+   0.026180999999999982,
+   0.030161093750000006,
+   0.017885087999999966,
+   0.073389453125,
+   0.10875000000000001,
+   0.04339000000000001,
+   0.40889375,
+   0.029806562500000022,
+   0.06859124999999999,
+   0.27
+  ],
+  "degeneracy": {
+   "max_abs_corr": 0.8847023520324478,
+   "max_corr_var": "p_stronger_opponent_or_canada_favorite",
+   "passthrough": false,
+   "n_ops": 20,
+   "n_branches": 0,
+   "near_passthrough": false,
+   "lookup_smell": false,
+   "suspect": false
+  },
+  "ok": false,
+  "attempts": 4,
+  "history": [
+   {
+    "attempt": 1,
+    "stage": "fit",
+    "mae": 0.11014304515625,
+    "within_tol": 0.0,
+    "degeneracy": {
+     "max_abs_corr": 0.8847023520324478,
+     "max_corr_var": "p_stronger_opponent_or_canada_favorite",
+     "passthrough": false,
+     "n_ops": 11,
+     "n_branches": 0,
+     "near_passthrough": false,
+     "lookup_smell": false,
+     "suspect": false
+    }
+   },
+   {
+    "attempt": 2,
+    "stage": "fit",
+    "mae": 0.16858772918715234,
+    "within_tol": 0.0,
+    "degeneracy": {
+     "max_abs_corr": 0.8847023520324478,
+     "max_corr_var": "p_stronger_opponent_or_canada_favorite",
+     "passthrough": false,
+     "n_ops": 16,
+     "n_branches": 0,
+     "near_passthrough": false,
+     "lookup_smell": false,
+     "suspect": false
+    }
+   },
+   {
+    "attempt": 3,
+    "stage": "fit",
+    "mae": 0.08461262043750001,
+    "within_tol": 0.0,
+    "degeneracy": {
+     "max_abs_corr": 0.8847023520324478,
+     "max_corr_var": "p_stronger_opponent_or_canada_favorite",
+     "passthrough": false,
+     "n_ops": 13,
+     "n_branches": 0,
+     "near_passthrough": false,
+     "lookup_smell": false,
+     "suspect": false
+    }
+   },
+   {
+    "attempt": 4,
+    "stage": "fit",
+    "mae": 0.10770481973749998,
+    "within_tol": 0.1,
+    "degeneracy": {
+     "max_abs_corr": 0.8847023520324478,
+     "max_corr_var": "p_stronger_opponent_or_canada_favorite",
+     "passthrough": false,
+     "n_ops": 20,
+     "n_branches": 0,
+     "near_passthrough": false,
+     "lookup_smell": false,
+     "suspect": false
+    }
+   }
+  ],
+  "oos": {
+   "train_sample": 0,
+   "train_n": 5,
+   "test_n": 5,
+   "train_mae": 0.02919248870000001,
+   "test_mae": 0.27434539437499994,
+   "test_within_tol": 0.2,
+   "test_failed": 0,
+   "program": "def forecast():\n    nhl = p_nhl_participation\n    elite = p_usa_elite_roster_or_top_contender\n    healthy = p_no_major_disruption_or_good_health\n    reach = p_usa_reach_final\n    win_given = p_usa_win_final_given_reach\n    canada_fav = p_stronger_opponent_or_canada_favorite\n    var = tournament_variance_probability\n\n    # Preconditions for \"normal NHL-era tournament with USA as a true contender\"\n    p_normal = nhl * elite * healthy\n\n    # Core tournament path estimate (what the excerpt describes as the conditional win model)\n    p_path = reach * win_given\n\n    # When conditions are less than ideal, the forecaster \"marks down\" the path estimate.\n    # The markdown is driven mainly by roster quality (elite), then health/system shocks,\n    # and is softened by tournament variance (more variance => less predictable favorites).\n    softness = (ONE - var) * canada_fav\n    condition_mix = (elite + healthy) / TWO\n    markdown = ONE - softness * (ONE - condition_mix)\n\n    # Synthesis: under normal conditions use the path estimate; otherwise apply markdown.\n    p_gold = p_path * (p_normal + (ONE - p_normal) * markdown)\n\n    return p_gold",
+   "degeneracy": {
+    "max_abs_corr": 0.8786174997234032,
+    "max_corr_var": "p_stronger_opponent_or_canada_favorite",
+    "passthrough": false,
+    "n_ops": 14,
+    "n_branches": 0,
+    "near_passthrough": false,
+    "lookup_smell": false,
+    "suspect": false
+   }
+  },
+  "instances": [
+   {
+    "key": "analytica|hockey_usa|s0|2026-01-14",
+    "date": "2026-01-14",
+    "sample": 0,
+    "target": 0.162,
+    "bindings": {
+     "p_nhl_participation": 0.97,
+     "p_usa_elite_roster_or_top_contender": 0.88,
+     "p_no_major_disruption_or_good_health": 0.95,
+     "p_usa_reach_final": 1.0,
+     "p_usa_win_final_given_reach": 0.2,
+     "p_stronger_opponent_or_canada_favorite": 0.5,
+     "tournament_variance_probability": 0.5
+    },
+    "raw_bindings": {
+     "nhl_players_participate_probability": 0.97,
+     "usa_fields_top_tier_nhl_roster_probability": 0.88,
+     "no_major_disruption_probability": 0.95,
+     "usa_win_gold_conditional_on_normal_tournament_probability": 0.2,
+     "weight_nhl_participation": 0.25,
+     "weight_usa_roster_quality": 0.4,
+     "weight_no_major_disruption": 0.35,
+     "elite_teams_low_estimate": 4.0,
+     "elite_teams_high_estimate": 6.0,
+     "plausible_win_probability_low": 0.15,
+     "plausible_win_probability_high": 0.25
+    }
+   },
+   {
+    "key": "analytica|hockey_usa|s0|2026-01-28",
+    "date": "2026-01-28",
+    "sample": 0,
+    "target": 0.17,
+    "bindings": {
+     "p_nhl_participation": 0.99,
+     "p_usa_elite_roster_or_top_contender": 0.85,
+     "p_no_major_disruption_or_good_health": 1.0,
+     "p_usa_reach_final": 0.45,
+     "p_usa_win_final_given_reach": 0.45,
+     "p_stronger_opponent_or_canada_favorite": 0.5,
+     "tournament_variance_probability": 0.5
+    },
+    "raw_bindings": {
+     "nhl_players_participate_probability": 0.99,
+     "usa_top_contender_probability": 0.85,
+     "usa_reach_final_given_top_contender_probability": 0.45,
+     "usa_win_final_given_reach_final_probability": 0.45,
+     "weight_nhl_participation_uncertainty": 0.05,
+     "weight_top_contender_status": 0.25,
+     "weight_reach_final_step": 0.45,
+     "weight_win_final_step": 0.25,
+     "top_favorite_group_team_count": 4.0,
+     "reach_final_plausible_range_lower": 0.4,
+     "reach_final_plausible_range_upper": 0.5
+    }
+   },
+   {
+    "key": "analytica|hockey_usa|s0|2026-02-08",
+    "date": "2026-02-08",
+    "sample": 0,
+    "target": 0.144,
+    "bindings": {
+     "p_nhl_participation": 1.0,
+     "p_usa_elite_roster_or_top_contender": 0.82,
+     "p_no_major_disruption_or_good_health": 0.65,
+     "p_usa_reach_final": 1.0,
+     "p_usa_win_final_given_reach": 0.22000000000000003,
+     "p_stronger_opponent_or_canada_favorite": 0.7,
+     "tournament_variance_probability": 0.8
+    },
+    "raw_bindings": {
+     "p1_top4_quality_probability": 0.82,
+     "p2_opponent_stronger_probability": 0.7,
+     "p3_material_injury_impact_probability": 0.35,
+     "p4_high_variance_tournament_probability": 0.8,
+     "weight_p1_roster_quality": 0.4,
+     "weight_p2_opponent_strength": 0.3,
+     "weight_p3_injuries": 0.1,
+     "weight_p4_variance": 0.2,
+     "conditional_win_prob_if_high_variance": 0.2,
+     "conditional_win_prob_if_low_variance": 0.3,
+     "competitor_fractional_reduction_if_p2_certain": 0.25,
+     "injury_relative_hit_if_material": 0.1,
+     "material_drop_threshold_percentage_points": 5.0
+    }
+   },
+   {
+    "key": "analytica|hockey_usa|s0|2026-02-15",
+    "date": "2026-02-15",
+    "sample": 0,
+    "target": 0.176,
+    "bindings": {
+     "p_nhl_participation": 1.0,
+     "p_usa_elite_roster_or_top_contender": 0.65,
+     "p_no_major_disruption_or_good_health": 0.85,
+     "p_usa_reach_final": 0.705,
+     "p_usa_win_final_given_reach": 0.25,
+     "p_stronger_opponent_or_canada_favorite": 0.5,
+     "tournament_variance_probability": 0.5
+    },
+    "raw_bindings": {
+     "prob_top3_talent": 0.65,
+     "prob_high_level_early_performance": 0.7,
+     "prob_no_major_new_injury_before_medal_rounds": 0.85,
+     "prob_win_final_given_reach_final": 0.25,
+     "weight_talent_in_reach_final": 0.5,
+     "weight_form_in_reach_final": 0.3,
+     "weight_health_in_reach_final": 0.2,
+     "latvia_game_goals_for": 5.0,
+     "latvia_game_goals_against": 1.0,
+     "reach_final_weighted_component_talent": 0.325,
+     "reach_final_weighted_component_form": 0.21,
+     "reach_final_weighted_component_health": 0.17
+    }
+   },
+   {
+    "key": "analytica|hockey_usa|s0|2026-02-20",
+    "date": "2026-02-20",
+    "sample": 0,
+    "target": 0.435,
+    "bindings": {
+     "p_nhl_participation": 1.0,
+     "p_usa_elite_roster_or_top_contender": 1.0,
+     "p_no_major_disruption_or_good_health": 1.0,
+     "p_usa_reach_final": 1.0,
+     "p_usa_win_final_given_reach": 0.435,
+     "p_stronger_opponent_or_canada_favorite": 1.0,
+     "tournament_variance_probability": 0.5
+    },
+    "raw_bindings": {
+     "baseline_talent_win_probability_usa_vs_canada": 0.3,
+     "momentum_form_implied_win_probability_usa": 0.6,
+     "canada_injury_uncertainty_implied_win_probability_usa": 0.55,
+     "single_game_variance_implied_win_probability_usa": 0.45,
+     "weight_baseline_talent": 0.4,
+     "weight_momentum_form": 0.2,
+     "weight_opponent_injury": 0.15,
+     "weight_single_game_variance": 0.25,
+     "weighted_component_baseline_talent": 0.12,
+     "weighted_component_momentum_form": 0.12,
+     "weighted_component_opponent_injury": 0.0825,
+     "weighted_component_single_game_variance": 0.1125
+    }
+   },
+   {
+    "key": "analytica|hockey_usa|s1|2026-01-14",
+    "date": "2026-01-14",
+    "sample": 1,
+    "target": 0.19,
+    "bindings": {
+     "p_nhl_participation": 1.0,
+     "p_usa_elite_roster_or_top_contender": 0.9,
+     "p_no_major_disruption_or_good_health": 0.9,
+     "p_usa_reach_final": 0.45,
+     "p_usa_win_final_given_reach": 0.48,
+     "p_stronger_opponent_or_canada_favorite": 0.5,
+     "tournament_variance_probability": 0.5
+    },
+    "raw_bindings": {
+     "prob_usa_reach_gold_medal_game_p1": 0.45,
+     "prob_usa_win_gold_game_conditional_p2": 0.48,
+     "prob_top_roster_largely_available_p3": 0.9,
+     "weight_reaching_final": 0.5,
+     "weight_winning_final_given_reach": 0.4,
+     "weight_roster_availability": 0.1,
+     "team_usa_roster_player_count": 25.0,
+     "top_players_considered_key_count": 3.0,
+     "date_knowledge_context_year": 2026.0,
+     "date_knowledge_context_month": 1.0,
+     "date_knowledge_context_day": 14.0
+    }
+   },
+   {
+    "key": "analytica|hockey_usa|s1|2026-01-28",
+    "date": "2026-01-28",
+    "sample": 1,
+    "target": 0.187,
+    "bindings": {
+     "p_nhl_participation": 0.99,
+     "p_usa_elite_roster_or_top_contender": 0.7,
+     "p_no_major_disruption_or_good_health": 0.85,
+     "p_usa_reach_final": 1.0,
+     "p_usa_win_final_given_reach": 1.0,
+     "p_stronger_opponent_or_canada_favorite": 0.75,
+     "tournament_variance_probability": 0.5
+    },
+    "raw_bindings": {
+     "p_nhl_players_participate": 0.99,
+     "p_usa_roster_top_tier_contender": 0.7,
+     "p_canada_stronger_pre_tournament_favorite": 0.75,
+     "p_material_injury_or_late_negative_event": 0.15,
+     "baseline_win_probability_given_nhl_participation": 0.18,
+     "baseline_win_probability_given_no_nhl_participation": 0.02,
+     "multiplier_roster_quality_if_true": 1.6,
+     "multiplier_roster_quality_if_false": 0.6,
+     "multiplier_canada_stronger_if_true": 0.8,
+     "multiplier_canada_stronger_if_false": 1.1,
+     "multiplier_injury_event_if_true": 0.5,
+     "multiplier_injury_event_if_false": 1.0
+    }
+   },
+   {
+    "key": "analytica|hockey_usa|s1|2026-02-08",
+    "date": "2026-02-08",
+    "sample": 1,
+    "target": 0.169,
+    "bindings": {
+     "p_nhl_participation": 1.0,
+     "p_usa_elite_roster_or_top_contender": 0.98,
+     "p_no_major_disruption_or_good_health": 0.85,
+     "p_usa_reach_final": 0.45,
+     "p_usa_win_final_given_reach": 0.45,
+     "p_stronger_opponent_or_canada_favorite": 0.5,
+     "tournament_variance_probability": 0.5
+    },
+    "raw_bindings": {
+     "p1_us_roster_top_tier_nhl_stars": 0.98,
+     "p2_us_roster_sufficiently_healthy": 0.85,
+     "p3_us_reaches_gold_medal_game": 0.45,
+     "p4_us_wins_final_given_reaches_final": 0.45,
+     "weight_p1_roster_quality": 0.1,
+     "weight_p2_health": 0.1,
+     "weight_p3_reach_final": 0.4,
+     "weight_p4_win_final": 0.4,
+     "prior_forecast_probability_2026_01_14": 0.19,
+     "prior_forecast_probability_2026_01_28": 0.187,
+     "stepwise_product_p1_times_p2": 0.833,
+     "stepwise_product_p1_p2_times_p3": 0.37485,
+     "injury_replacements_count_jones_to_lacombe": 1.0
+    }
+   },
+   {
+    "key": "analytica|hockey_usa|s1|2026-02-15",
+    "date": "2026-02-15",
+    "sample": 1,
+    "target": 0.156,
+    "bindings": {
+     "p_nhl_participation": 1.0,
+     "p_usa_elite_roster_or_top_contender": 0.7,
+     "p_no_major_disruption_or_good_health": 0.9,
+     "p_usa_reach_final": 0.65,
+     "p_usa_win_final_given_reach": 0.22,
+     "p_stronger_opponent_or_canada_favorite": 0.5,
+     "tournament_variance_probability": 0.5
+    },
+    "raw_bindings": {
+     "subprob_usa_roster_top_contender": 0.7,
+     "subprob_no_further_major_injuries": 0.9,
+     "subprob_usa_advances_based_on_form_group": 0.6,
+     "subprob_win_gold_given_advance": 0.22,
+     "weight_roster_quality_in_advance": 0.5,
+     "weight_injuries_in_advance": 0.2,
+     "weight_form_in_advance": 0.3,
+     "confirmed_pre_tournament_major_injuries": 1.0,
+     "previous_forecast_2026_01_14": 0.19,
+     "previous_forecast_2026_01_28": 0.187,
+     "previous_forecast_2026_02_08": 0.169
+    }
+   },
+   {
+    "key": "analytica|hockey_usa|s1|2026-02-20",
+    "date": "2026-02-20",
+    "sample": 1,
+    "target": 0.48,
+    "bindings": {
+     "p_nhl_participation": 1.0,
+     "p_usa_elite_roster_or_top_contender": 1.0,
+     "p_no_major_disruption_or_good_health": 1.0,
+     "p_usa_reach_final": 1.0,
+     "p_usa_win_final_given_reach": 1.0,
+     "p_stronger_opponent_or_canada_favorite": 1.0,
+     "tournament_variance_probability": 0.5
+    },
+    "raw_bindings": {
+     "prob_usa_reached_final": 1.0,
+     "prob_canada_is_final_opponent": 1.0,
+     "pre_tournament_baseline_prob_low": 0.15,
+     "pre_tournament_baseline_prob_high": 0.19,
+     "semifinal_usa_goals": 6.0,
+     "semifinal_usa_goals_allowed": 2.0,
+     "semifinal_canada_goals": 3.0,
+     "semifinal_canada_goals_allowed": 2.0,
+     "weight_uncertainty_usa_reaches_final": 0.05,
+     "weight_uncertainty_opponent_is_canada": 0.05,
+     "weight_uncertainty_usa_wins_final": 0.9
+    }
+   }
+  ],
+  "trajectory": {
+   "s0": {
+    "2026-01-14": {
+     "p_nhl_participation": 0.97,
+     "p_usa_elite_roster_or_top_contender": 0.88,
+     "p_no_major_disruption_or_good_health": 0.95,
+     "p_usa_reach_final": 1.0,
+     "p_usa_win_final_given_reach": 0.2,
+     "p_stronger_opponent_or_canada_favorite": 0.5,
+     "tournament_variance_probability": 0.5,
+     "_target": 0.162
+    },
+    "2026-01-28": {
+     "p_nhl_participation": 0.99,
+     "p_usa_elite_roster_or_top_contender": 0.85,
+     "p_no_major_disruption_or_good_health": 1.0,
+     "p_usa_reach_final": 0.45,
+     "p_usa_win_final_given_reach": 0.45,
+     "p_stronger_opponent_or_canada_favorite": 0.5,
+     "tournament_variance_probability": 0.5,
+     "_target": 0.17
+    },
+    "2026-02-08": {
+     "p_nhl_participation": 1.0,
+     "p_usa_elite_roster_or_top_contender": 0.82,
+     "p_no_major_disruption_or_good_health": 0.65,
+     "p_usa_reach_final": 1.0,
+     "p_usa_win_final_given_reach": 0.22000000000000003,
+     "p_stronger_opponent_or_canada_favorite": 0.7,
+     "tournament_variance_probability": 0.8,
+     "_target": 0.144
+    },
+    "2026-02-15": {
+     "p_nhl_participation": 1.0,
+     "p_usa_elite_roster_or_top_contender": 0.65,
+     "p_no_major_disruption_or_good_health": 0.85,
+     "p_usa_reach_final": 0.705,
+     "p_usa_win_final_given_reach": 0.25,
+     "p_stronger_opponent_or_canada_favorite": 0.5,
+     "tournament_variance_probability": 0.5,
+     "_target": 0.176
+    },
+    "2026-02-20": {
+     "p_nhl_participation": 1.0,
+     "p_usa_elite_roster_or_top_contender": 1.0,
+     "p_no_major_disruption_or_good_health": 1.0,
+     "p_usa_reach_final": 1.0,
+     "p_usa_win_final_given_reach": 0.435,
+     "p_stronger_opponent_or_canada_favorite": 1.0,
+     "tournament_variance_probability": 0.5,
+     "_target": 0.435
+    }
+   },
+   "s1": {
+    "2026-01-14": {
+     "p_nhl_participation": 1.0,
+     "p_usa_elite_roster_or_top_contender": 0.9,
+     "p_no_major_disruption_or_good_health": 0.9,
+     "p_usa_reach_final": 0.45,
+     "p_usa_win_final_given_reach": 0.48,
+     "p_stronger_opponent_or_canada_favorite": 0.5,
+     "tournament_variance_probability": 0.5,
+     "_target": 0.19
+    },
+    "2026-01-28": {
+     "p_nhl_participation": 0.99,
+     "p_usa_elite_roster_or_top_contender": 0.7,
+     "p_no_major_disruption_or_good_health": 0.85,
+     "p_usa_reach_final": 1.0,
+     "p_usa_win_final_given_reach": 1.0,
+     "p_stronger_opponent_or_canada_favorite": 0.75,
+     "tournament_variance_probability": 0.5,
+     "_target": 0.187
+    },
+    "2026-02-08": {
+     "p_nhl_participation": 1.0,
+     "p_usa_elite_roster_or_top_contender": 0.98,
+     "p_no_major_disruption_or_good_health": 0.85,
+     "p_usa_reach_final": 0.45,
+     "p_usa_win_final_given_reach": 0.45,
+     "p_stronger_opponent_or_canada_favorite": 0.5,
+     "tournament_variance_probability": 0.5,
+     "_target": 0.169
+    },
+    "2026-02-15": {
+     "p_nhl_participation": 1.0,
+     "p_usa_elite_roster_or_top_contender": 0.7,
+     "p_no_major_disruption_or_good_health": 0.9,
+     "p_usa_reach_final": 0.65,
+     "p_usa_win_final_given_reach": 0.22,
+     "p_stronger_opponent_or_canada_favorite": 0.5,
+     "tournament_variance_probability": 0.5,
+     "_target": 0.156
+    },
+    "2026-02-20": {
+     "p_nhl_participation": 1.0,
+     "p_usa_elite_roster_or_top_contender": 1.0,
+     "p_no_major_disruption_or_good_health": 1.0,
+     "p_usa_reach_final": 1.0,
+     "p_usa_win_final_given_reach": 1.0,
+     "p_stronger_opponent_or_canada_favorite": 1.0,
+     "tournament_variance_probability": 0.5,
+     "_target": 0.48
+    }
+   }
+  }
+ },
+ "bayesian/hockey_can": {
+  "n_instances": 10,
+  "schema": [
+   "prior_probability_canada_gold",
+   "prior_odds_canada_gold",
+   "likelihood_ratio_roster_strength",
+   "likelihood_ratio_injuries_availability",
+   "likelihood_ratio_opposition_strength",
+   "likelihood_ratio_venue_logistics",
+   "likelihood_ratio_tournament_variance",
+   "likelihood_ratio_recent_performance_signal",
+   "likelihood_ratio_bracket_progress_signal",
+   "likelihood_ratio_other_news_signal",
+   "likelihood_ratio_product"
+  ],
+  "schema_notes": "Merged all priors into prior_probability_canada_gold/prior_odds_canada_gold; collapsed many specific likelihood ratios into 7 evidence buckets (roster, injuries, opposition, venue, variance, recent performance, bracket progress, other news) and set missing factors to neutral 1.0; likelihood_ratio_product is the product of included factors (using provided combined products where given).",
+  "excluded": [],
+  "program": "def forecast():\n    prior_o = prior_odds_canada_gold\n\n    lr_roster = likelihood_ratio_roster_strength\n    lr_inj = likelihood_ratio_injuries_availability\n    lr_opp = likelihood_ratio_opposition_strength\n    lr_venue = likelihood_ratio_venue_logistics\n    lr_var = likelihood_ratio_tournament_variance\n    lr_recent = likelihood_ratio_recent_performance_signal\n    lr_bracket = likelihood_ratio_bracket_progress_signal\n    lr_news = likelihood_ratio_other_news_signal\n\n    o1 = prior_o * lr_roster\n    o2 = o1 * lr_inj\n    o3 = o2 * lr_opp\n    o4 = o3 * lr_venue\n    o5 = o4 * lr_var\n    o6 = o5 * lr_recent\n    o7 = o6 * lr_bracket\n    o8 = o7 * lr_news\n\n    p_post = prob(o8)\n\n    p_round = round(p_post, HUNDREDTH)\n    return p_round",
+  "fit": {
+   "n": 10,
+   "n_ran": 0,
+   "n_failed": 10,
+   "mae": NaN,
+   "max": NaN,
+   "within_tol": 0.0,
+   "errors": [
+    [
+     0,
+     "TypeError: 'float' object cannot be interpreted as an integer"
+    ],
+    [
+     1,
+     "TypeError: 'float' object cannot be interpreted as an integer"
+    ],
+    [
+     2,
+     "TypeError: 'float' object cannot be interpreted as an integer"
+    ],
+    [
+     3,
+     "TypeError: 'float' object cannot be interpreted as an integer"
+    ],
+    [
+     4,
+     "TypeError: 'float' object cannot be interpreted as an integer"
+    ],
+    [
+     5,
+     "TypeError: 'float' object cannot be interpreted as an integer"
+    ],
+    [
+     6,
+     "TypeError: 'float' object cannot be interpreted as an integer"
+    ],
+    [
+     7,
+     "TypeError: 'float' object cannot be interpreted as an integer"
+    ],
+    [
+     8,
+     "TypeError: 'float' object cannot be interpreted as an integer"
+    ],
+    [
+     9,
+     "TypeError: 'float' object cannot be interpreted as an integer"
+    ]
+   ]
+  },
+  "residuals": [
+   NaN,
+   NaN,
+   NaN,
+   NaN,
+   NaN,
+   NaN,
+   NaN,
+   NaN,
+   NaN,
+   NaN
+  ],
+  "degeneracy": {
+   "max_abs_corr": 0.733959259157908,
+   "max_corr_var": "likelihood_ratio_bracket_progress_signal",
+   "passthrough": false,
+   "n_ops": 10,
+   "n_branches": 0,
+   "near_passthrough": false,
+   "lookup_smell": false,
+   "suspect": false
+  },
+  "ok": false,
+  "attempts": 4,
+  "history": [
+   {
+    "attempt": 1,
+    "stage": "fit",
+    "mae": NaN,
+    "within_tol": 0.0,
+    "degeneracy": {
+     "max_abs_corr": 0.733959259157908,
+     "max_corr_var": "likelihood_ratio_bracket_progress_signal",
+     "passthrough": false,
+     "n_ops": 14,
+     "n_branches": 2,
+     "near_passthrough": false,
+     "lookup_smell": false,
+     "suspect": false
+    }
+   },
+   {
+    "attempt": 2,
+    "stage": "fit",
+    "mae": NaN,
+    "within_tol": 0.0,
+    "degeneracy": {
+     "max_abs_corr": 0.733959259157908,
+     "max_corr_var": "likelihood_ratio_bracket_progress_signal",
+     "passthrough": false,
+     "n_ops": 14,
+     "n_branches": 1,
+     "near_passthrough": false,
+     "lookup_smell": false,
+     "suspect": false
+    }
+   },
+   {
+    "attempt": 3,
+    "stage": "fit",
+    "mae": NaN,
+    "within_tol": 0.0,
+    "degeneracy": {
+     "max_abs_corr": 0.733959259157908,
+     "max_corr_var": "likelihood_ratio_bracket_progress_signal",
+     "passthrough": false,
+     "n_ops": 10,
+     "n_branches": 0,
+     "near_passthrough": false,
+     "lookup_smell": false,
+     "suspect": false
+    }
+   },
+   {
+    "attempt": 4,
+    "stage": "fit",
+    "mae": NaN,
+    "within_tol": 0.0,
+    "degeneracy": {
+     "max_abs_corr": 0.733959259157908,
+     "max_corr_var": "likelihood_ratio_bracket_progress_signal",
+     "passthrough": false,
+     "n_ops": 10,
+     "n_branches": 0,
+     "near_passthrough": false,
+     "lookup_smell": false,
+     "suspect": false
+    }
+   }
+  ],
+  "oos": {
+   "train_sample": 0,
+   "train_n": 5,
+   "test_n": 5,
+   "train_mae": 0.045693938599081864,
+   "test_mae": 0.06281688000369998,
+   "test_within_tol": 0.0,
+   "test_failed": 0,
+   "program": "def forecast():\n    prior_p = prior_probability_canada_gold\n    prior_o = prior_odds_canada_gold\n\n    lr_roster = likelihood_ratio_roster_strength\n    lr_inj = likelihood_ratio_injuries_availability\n    lr_opp = likelihood_ratio_opposition_strength\n    lr_venue = likelihood_ratio_venue_logistics\n    lr_var = likelihood_ratio_tournament_variance\n    lr_recent = likelihood_ratio_recent_performance_signal\n    lr_bracket = likelihood_ratio_bracket_progress_signal\n    lr_other = likelihood_ratio_other_news_signal\n\n    lr_from_factors = lr_roster * lr_inj\n    lr_from_factors *= lr_opp\n    lr_from_factors *= lr_venue\n    lr_from_factors *= lr_var\n    lr_from_factors *= lr_recent\n    lr_from_factors *= lr_bracket\n    lr_from_factors *= lr_other\n\n    lr_reported = likelihood_ratio_product\n    lr_blend = sqrt(lr_from_factors * lr_reported)\n\n    updated_o = prior_o * lr_blend\n    updated_p = prob(updated_o)\n\n    p_center = prior_p\n    one_minus_p_center = ONE - p_center\n\n    shrink_raw = p_center * one_minus_p_center\n    shrink = sqrt(shrink_raw)\n\n    delta = updated_p - p_center\n    p_out = p_center + delta * shrink\n\n    p_low = EPS\n    p_high = ONE\n    p_high -= EPS\n    p_out = clamp(p_out, p_low, p_high)\n    return p_out",
+   "degeneracy": {
+    "max_abs_corr": 0.7354948182122762,
+    "max_corr_var": "likelihood_ratio_product",
+    "passthrough": false,
+    "n_ops": 12,
+    "n_branches": 0,
+    "near_passthrough": false,
+    "lookup_smell": false,
+    "suspect": false
+   }
+  },
+  "instances": [
+   {
+    "key": "bayesian|hockey_can|s0|2026-01-14",
+    "date": "2026-01-14",
+    "sample": 0,
+    "target": 0.52,
+    "bindings": {
+     "prior_probability_canada_gold": 0.35,
+     "prior_odds_canada_gold": 0.5384615,
+     "likelihood_ratio_roster_strength": 2.0,
+     "likelihood_ratio_injuries_availability": 1.0,
+     "likelihood_ratio_opposition_strength": 0.7,
+     "likelihood_ratio_venue_logistics": 1.2,
+     "likelihood_ratio_tournament_variance": 0.8,
+     "likelihood_ratio_recent_performance_signal": 1.5,
+     "likelihood_ratio_bracket_progress_signal": 1.0,
+     "likelihood_ratio_other_news_signal": 1.0,
+     "likelihood_ratio_product": 2.016
+    },
+    "raw_bindings": {
+     "prior_probability_canada_gold": 0.35,
+     "canada_roster_size_players": 25.0,
+     "continuity_players_from_4_nations": 19.0,
+     "likelihood_ratio_roster_nhl_stacked": 2.0,
+     "likelihood_ratio_team_continuity_recent_success": 1.5,
+     "likelihood_ratio_strong_opposition_rosters": 0.7,
+     "likelihood_ratio_venue_concerns_resolved": 1.2,
+     "likelihood_ratio_short_tournament_variance": 0.8,
+     "prior_odds_from_prior_probability": 0.5384615,
+     "product_of_likelihood_ratios": 2.016,
+     "posterior_odds_after_updating": 1.085,
+     "odds_to_probability_denominator_add_one": 1.0
+    }
+   },
+   {
+    "key": "bayesian|hockey_can|s0|2026-01-28",
+    "date": "2026-01-28",
+    "sample": 0,
+    "target": 0.466,
+    "bindings": {
+     "prior_probability_canada_gold": 0.52,
+     "prior_odds_canada_gold": 1.0833333,
+     "likelihood_ratio_roster_strength": 1.0,
+     "likelihood_ratio_injuries_availability": 0.7,
+     "likelihood_ratio_opposition_strength": 1.15,
+     "likelihood_ratio_venue_logistics": 1.0,
+     "likelihood_ratio_tournament_variance": 1.0,
+     "likelihood_ratio_recent_performance_signal": 1.0,
+     "likelihood_ratio_bracket_progress_signal": 1.0,
+     "likelihood_ratio_other_news_signal": 1.0,
+     "likelihood_ratio_product": 0.805
+    },
+    "raw_bindings": {
+     "prior_probability_canada_gold": 0.52,
+     "prior_odds_canada_gold": 1.0833333,
+     "likelihood_ratio_kuemper_injury_given_canada_gold": 0.7,
+     "likelihood_ratio_usa_seth_jones_out_given_canada_gold": 1.15,
+     "likelihood_ratio_venue_finishing_concerns_given_canada_gold": 1.0,
+     "total_likelihood_ratio_product": 0.805,
+     "posterior_odds_after_updates": 0.87208,
+     "implied_odds_reduction_factor_net": 0.805,
+     "usa_jones_replacement_relative_increase": 0.15,
+     "canada_prior_favored_margin_over_even": 0.02
+    }
+   },
+   {
+    "key": "bayesian|hockey_can|s0|2026-02-08",
+    "date": "2026-02-08",
+    "sample": 0,
+    "target": 0.449,
+    "bindings": {
+     "prior_probability_canada_gold": 0.466,
+     "prior_odds_canada_gold": 0.87266,
+     "likelihood_ratio_roster_strength": 1.0,
+     "likelihood_ratio_injuries_availability": 0.8075,
+     "likelihood_ratio_opposition_strength": 1.0,
+     "likelihood_ratio_venue_logistics": 1.0,
+     "likelihood_ratio_tournament_variance": 1.0,
+     "likelihood_ratio_recent_performance_signal": 1.0,
+     "likelihood_ratio_bracket_progress_signal": 1.0,
+     "likelihood_ratio_other_news_signal": 1.1550000000000002,
+     "likelihood_ratio_product": 0.9326625000000001
+    },
+    "raw_bindings": {
+     "prior_probability": 0.466,
+     "prior_complement_probability": 0.534,
+     "prior_odds": 0.87266,
+     "likelihood_ratio_jarvis_replaces_point": 0.85,
+     "likelihood_ratio_bennett_replaces_cirelli": 0.95,
+     "likelihood_ratio_crosby_captain_arrival_practice": 1.05,
+     "likelihood_ratio_media_bookmaker_favorite_reinforcement": 1.1,
+     "odds_after_evidence_1": 0.74176,
+     "odds_after_evidence_2": 0.70467,
+     "odds_after_evidence_3": 0.7399,
+     "odds_after_evidence_4": 0.81389
+    }
+   },
+   {
+    "key": "bayesian|hockey_can|s0|2026-02-15",
+    "date": "2026-02-15",
+    "sample": 0,
+    "target": 0.571,
+    "bindings": {
+     "prior_probability_canada_gold": 0.449,
+     "prior_odds_canada_gold": 0.81579,
+     "likelihood_ratio_roster_strength": 1.0,
+     "likelihood_ratio_injuries_availability": 1.03,
+     "likelihood_ratio_opposition_strength": 1.0,
+     "likelihood_ratio_venue_logistics": 1.0,
+     "likelihood_ratio_tournament_variance": 1.0,
+     "likelihood_ratio_recent_performance_signal": 1.25,
+     "likelihood_ratio_bracket_progress_signal": 1.1,
+     "likelihood_ratio_other_news_signal": 1.15,
+     "likelihood_ratio_product": 1.6286875
+    },
+    "raw_bindings": {
+     "prior_probability": 0.449,
+     "prior_odds": 0.81579,
+     "likelihood_ratio_dominant_5_0_opening_win": 1.25,
+     "likelihood_ratio_binnington_shutout_signal": 1.15,
+     "likelihood_ratio_top_group_a_quarterfinal_berth": 1.1,
+     "likelihood_ratio_no_new_core_injuries": 1.03,
+     "lr_product": 1.6286875,
+     "posterior_odds": 1.3289,
+     "opening_game_goals_for_canada": 5.0,
+     "opening_game_goals_against_canada": 0.0,
+     "binningson_shutout_saves": 26.0,
+     "mcdavid_assists_in_opener": 3.0
+    }
+   },
+   {
+    "key": "bayesian|hockey_can|s0|2026-02-20",
+    "date": "2026-02-20",
+    "sample": 0,
+    "target": 0.483,
+    "bindings": {
+     "prior_probability_canada_gold": 0.571,
+     "prior_odds_canada_gold": 1.33193,
+     "likelihood_ratio_roster_strength": 1.0,
+     "likelihood_ratio_injuries_availability": 0.5,
+     "likelihood_ratio_opposition_strength": 1.0,
+     "likelihood_ratio_venue_logistics": 1.0,
+     "likelihood_ratio_tournament_variance": 1.0,
+     "likelihood_ratio_recent_performance_signal": 1.0,
+     "likelihood_ratio_bracket_progress_signal": 1.98,
+     "likelihood_ratio_other_news_signal": 0.7,
+     "likelihood_ratio_product": 0.6929999999999998
+    },
+    "raw_bindings": {
+     "prior_probability_canada_gold": 0.571,
+     "prior_odds_canada_gold": 1.33193,
+     "p_semifinal_win_given_yes": 0.99,
+     "p_semifinal_win_given_no": 0.5,
+     "likelihood_ratio_semifinal_win": 1.98,
+     "p_crosby_out_given_yes": 0.3,
+     "p_crosby_out_given_no": 0.6,
+     "likelihood_ratio_crosby_out": 0.5,
+     "p_us_rout_given_yes": 0.3,
+     "p_us_rout_given_no": 0.6,
+     "likelihood_ratio_us_rout": 0.5,
+     "p_39_shots_narrow_win_given_yes": 0.7,
+     "p_39_shots_narrow_win_given_no": 0.5,
+     "likelihood_ratio_39_shots_narrow_win": 1.4
+    }
+   },
+   {
+    "key": "bayesian|hockey_can|s1|2026-01-14",
+    "date": "2026-01-14",
+    "sample": 1,
+    "target": 0.4,
+    "bindings": {
+     "prior_probability_canada_gold": 0.3,
+     "prior_odds_canada_gold": 0.428571,
+     "likelihood_ratio_roster_strength": 4.0,
+     "likelihood_ratio_injuries_availability": 1.0,
+     "likelihood_ratio_opposition_strength": 0.48,
+     "likelihood_ratio_venue_logistics": 0.9,
+     "likelihood_ratio_tournament_variance": 0.9,
+     "likelihood_ratio_recent_performance_signal": 1.0,
+     "likelihood_ratio_bracket_progress_signal": 1.0,
+     "likelihood_ratio_other_news_signal": 1.0,
+     "likelihood_ratio_product": 1.5552000000000001
+    },
+    "raw_bindings": {
+     "prior_probability_canada_gold": 0.3,
+     "prior_odds_canada_gold": 0.428571,
+     "likelihood_ratio_canada_star_roster": 2.5,
+     "likelihood_ratio_nhl_participation_confirmed": 1.6,
+     "likelihood_ratio_usa_strong_roster": 0.6,
+     "likelihood_ratio_milan_rink_concerns_mitigated": 0.9,
+     "likelihood_ratio_other_teams_nhl_stars_and_neutral_russians_possible": 0.8,
+     "likelihood_ratio_single_elimination_high_variance": 0.9,
+     "number_of_teams_in_tournament": 12.0
+    }
+   },
+   {
+    "key": "bayesian|hockey_can|s1|2026-01-28",
+    "date": "2026-01-28",
+    "sample": 1,
+    "target": 0.44,
+    "bindings": {
+     "prior_probability_canada_gold": 0.4,
+     "prior_odds_canada_gold": 0.6666667,
+     "likelihood_ratio_roster_strength": 1.0,
+     "likelihood_ratio_injuries_availability": 0.7,
+     "likelihood_ratio_opposition_strength": 1.0,
+     "likelihood_ratio_venue_logistics": 1.0,
+     "likelihood_ratio_tournament_variance": 1.0,
+     "likelihood_ratio_recent_performance_signal": 1.68,
+     "likelihood_ratio_bracket_progress_signal": 1.0,
+     "likelihood_ratio_other_news_signal": 1.0,
+     "likelihood_ratio_product": 1.1759999999999997
+    },
+    "raw_bindings": {
+     "prior_probability_canada_wins_gold": 0.4,
+     "likelihood_ratio_mcdavid_goal_and_assist_supports_win": 1.4,
+     "likelihood_ratio_crosby_goal_supports_win": 1.2,
+     "likelihood_ratio_kuemper_injury_evidence_against_win": 0.7,
+     "prior_odds_canada_wins_gold": 0.6666667,
+     "odds_after_mcdavid_evidence": 0.9333333,
+     "odds_after_crosby_evidence": 1.12,
+     "odds_after_kuemper_injury": 0.784,
+     "implied_inverse_likelihood_ratio_kuemper_injury_supports_not_win": 1.43
+    }
+   },
+   {
+    "key": "bayesian|hockey_can|s1|2026-02-08",
+    "date": "2026-02-08",
+    "sample": 1,
+    "target": 0.35,
+    "bindings": {
+     "prior_probability_canada_gold": 0.44,
+     "prior_odds_canada_gold": 0.785714,
+     "likelihood_ratio_roster_strength": 1.0,
+     "likelihood_ratio_injuries_availability": 0.595,
+     "likelihood_ratio_opposition_strength": 1.0,
+     "likelihood_ratio_venue_logistics": 1.0,
+     "likelihood_ratio_tournament_variance": 1.0,
+     "likelihood_ratio_recent_performance_signal": 1.0,
+     "likelihood_ratio_bracket_progress_signal": 1.0,
+     "likelihood_ratio_other_news_signal": 1.15,
+     "likelihood_ratio_product": 0.6842499999999999
+    },
+    "raw_bindings": {
+     "prior_probability_canada_gold": 0.44,
+     "prior_odds_canada_gold": 0.785714,
+     "likelihood_ratio_jarvis_replaces_point": 0.7,
+     "likelihood_ratio_bennett_replaces_cirelli": 0.85,
+     "likelihood_ratio_crosby_named_captain": 1.15,
+     "implied_percent_less_likely_jarvis_point_event_under_yes": 0.3,
+     "implied_percent_less_likely_bennett_cirelli_event_under_yes": 0.15,
+     "implied_percent_more_likely_crosby_captain_event_under_yes": 0.15,
+     "assumed_independence_weight_between_evidence_items": 1.0,
+     "previous_probability_reference_point": 0.4
+    }
+   },
+   {
+    "key": "bayesian|hockey_can|s1|2026-02-15",
+    "date": "2026-02-15",
+    "sample": 1,
+    "target": 0.67,
+    "bindings": {
+     "prior_probability_canada_gold": 0.35,
+     "prior_odds_canada_gold": 0.5384615385,
+     "likelihood_ratio_roster_strength": 1.0,
+     "likelihood_ratio_injuries_availability": 1.0,
+     "likelihood_ratio_opposition_strength": 1.0,
+     "likelihood_ratio_venue_logistics": 1.0,
+     "likelihood_ratio_tournament_variance": 1.0,
+     "likelihood_ratio_recent_performance_signal": 2.24,
+     "likelihood_ratio_bracket_progress_signal": 1.7,
+     "likelihood_ratio_other_news_signal": 1.0,
+     "likelihood_ratio_product": 3.808
+    },
+    "raw_bindings": {
+     "prior_probability_canada_wins_gold": 0.35,
+     "likelihood_ratio_shutout_5_0_vs_czech": 1.6,
+     "shots_faced_by_binnington_vs_czech": 26.0,
+     "likelihood_ratio_win_5_1_vs_switzerland": 1.4,
+     "likelihood_ratio_clinched_quarters_top_group_a": 1.7,
+     "combined_likelihood_ratio_assumed_independent": 3.808,
+     "prior_odds_from_prior_probability": 0.5384615385,
+     "posterior_odds_after_applying_likelihood_ratios": 2.049,
+     "czech_goals_scored_by_canada": 5.0,
+     "czech_goals_allowed_by_canada": 0.0,
+     "switzerland_goals_scored_by_canada": 5.0,
+     "switzerland_goals_allowed_by_canada": 1.0
+    }
+   },
+   {
+    "key": "bayesian|hockey_can|s1|2026-02-20",
+    "date": "2026-02-20",
+    "sample": 1,
+    "target": 0.72,
+    "bindings": {
+     "prior_probability_canada_gold": 0.67,
+     "prior_odds_canada_gold": 2.0303,
+     "likelihood_ratio_roster_strength": 1.0,
+     "likelihood_ratio_injuries_availability": 0.5,
+     "likelihood_ratio_opposition_strength": 1.0,
+     "likelihood_ratio_venue_logistics": 1.0,
+     "likelihood_ratio_tournament_variance": 1.0,
+     "likelihood_ratio_recent_performance_signal": 1.0,
+     "likelihood_ratio_bracket_progress_signal": 2.5,
+     "likelihood_ratio_other_news_signal": 1.0,
+     "likelihood_ratio_product": 1.25
+    },
+    "raw_bindings": {
+     "prior_probability": 0.67,
+     "prior_complement_probability": 0.33,
+     "prior_odds": 2.0303,
+     "p_semifinal_win_given_gold": 1.0,
+     "p_semifinal_win_given_no_gold": 0.4,
+     "lr_semifinal_win": 2.5,
+     "p_crosby_out_given_gold": 0.3,
+     "p_crosby_out_given_no_gold": 0.6,
+     "lr_crosby_out": 0.5,
+     "combined_likelihood_ratio": 1.25,
+     "us_win_probability_vs_slovakia_semifinal": 0.75
+    }
+   }
+  ],
+  "trajectory": {
+   "s0": {
+    "2026-01-14": {
+     "prior_probability_canada_gold": 0.35,
+     "prior_odds_canada_gold": 0.5384615,
+     "likelihood_ratio_roster_strength": 2.0,
+     "likelihood_ratio_injuries_availability": 1.0,
+     "likelihood_ratio_opposition_strength": 0.7,
+     "likelihood_ratio_venue_logistics": 1.2,
+     "likelihood_ratio_tournament_variance": 0.8,
+     "likelihood_ratio_recent_performance_signal": 1.5,
+     "likelihood_ratio_bracket_progress_signal": 1.0,
+     "likelihood_ratio_other_news_signal": 1.0,
+     "likelihood_ratio_product": 2.016,
+     "_target": 0.52
+    },
+    "2026-01-28": {
+     "prior_probability_canada_gold": 0.52,
+     "prior_odds_canada_gold": 1.0833333,
+     "likelihood_ratio_roster_strength": 1.0,
+     "likelihood_ratio_injuries_availability": 0.7,
+     "likelihood_ratio_opposition_strength": 1.15,
+     "likelihood_ratio_venue_logistics": 1.0,
+     "likelihood_ratio_tournament_variance": 1.0,
+     "likelihood_ratio_recent_performance_signal": 1.0,
+     "likelihood_ratio_bracket_progress_signal": 1.0,
+     "likelihood_ratio_other_news_signal": 1.0,
+     "likelihood_ratio_product": 0.805,
+     "_target": 0.466
+    },
+    "2026-02-08": {
+     "prior_probability_canada_gold": 0.466,
+     "prior_odds_canada_gold": 0.87266,
+     "likelihood_ratio_roster_strength": 1.0,
+     "likelihood_ratio_injuries_availability": 0.8075,
+     "likelihood_ratio_opposition_strength": 1.0,
+     "likelihood_ratio_venue_logistics": 1.0,
+     "likelihood_ratio_tournament_variance": 1.0,
+     "likelihood_ratio_recent_performance_signal": 1.0,
+     "likelihood_ratio_bracket_progress_signal": 1.0,
+     "likelihood_ratio_other_news_signal": 1.1550000000000002,
+     "likelihood_ratio_product": 0.9326625000000001,
+     "_target": 0.449
+    },
+    "2026-02-15": {
+     "prior_probability_canada_gold": 0.449,
+     "prior_odds_canada_gold": 0.81579,
+     "likelihood_ratio_roster_strength": 1.0,
+     "likelihood_ratio_injuries_availability": 1.03,
+     "likelihood_ratio_opposition_strength": 1.0,
+     "likelihood_ratio_venue_logistics": 1.0,
+     "likelihood_ratio_tournament_variance": 1.0,
+     "likelihood_ratio_recent_performance_signal": 1.25,
+     "likelihood_ratio_bracket_progress_signal": 1.1,
+     "likelihood_ratio_other_news_signal": 1.15,
+     "likelihood_ratio_product": 1.6286875,
+     "_target": 0.571
+    },
+    "2026-02-20": {
+     "prior_probability_canada_gold": 0.571,
+     "prior_odds_canada_gold": 1.33193,
+     "likelihood_ratio_roster_strength": 1.0,
+     "likelihood_ratio_injuries_availability": 0.5,
+     "likelihood_ratio_opposition_strength": 1.0,
+     "likelihood_ratio_venue_logistics": 1.0,
+     "likelihood_ratio_tournament_variance": 1.0,
+     "likelihood_ratio_recent_performance_signal": 1.0,
+     "likelihood_ratio_bracket_progress_signal": 1.98,
+     "likelihood_ratio_other_news_signal": 0.7,
+     "likelihood_ratio_product": 0.6929999999999998,
+     "_target": 0.483
+    }
+   },
+   "s1": {
+    "2026-01-14": {
+     "prior_probability_canada_gold": 0.3,
+     "prior_odds_canada_gold": 0.428571,
+     "likelihood_ratio_roster_strength": 4.0,
+     "likelihood_ratio_injuries_availability": 1.0,
+     "likelihood_ratio_opposition_strength": 0.48,
+     "likelihood_ratio_venue_logistics": 0.9,
+     "likelihood_ratio_tournament_variance": 0.9,
+     "likelihood_ratio_recent_performance_signal": 1.0,
+     "likelihood_ratio_bracket_progress_signal": 1.0,
+     "likelihood_ratio_other_news_signal": 1.0,
+     "likelihood_ratio_product": 1.5552000000000001,
+     "_target": 0.4
+    },
+    "2026-01-28": {
+     "prior_probability_canada_gold": 0.4,
+     "prior_odds_canada_gold": 0.6666667,
+     "likelihood_ratio_roster_strength": 1.0,
+     "likelihood_ratio_injuries_availability": 0.7,
+     "likelihood_ratio_opposition_strength": 1.0,
+     "likelihood_ratio_venue_logistics": 1.0,
+     "likelihood_ratio_tournament_variance": 1.0,
+     "likelihood_ratio_recent_performance_signal": 1.68,
+     "likelihood_ratio_bracket_progress_signal": 1.0,
+     "likelihood_ratio_other_news_signal": 1.0,
+     "likelihood_ratio_product": 1.1759999999999997,
+     "_target": 0.44
+    },
+    "2026-02-08": {
+     "prior_probability_canada_gold": 0.44,
+     "prior_odds_canada_gold": 0.785714,
+     "likelihood_ratio_roster_strength": 1.0,
+     "likelihood_ratio_injuries_availability": 0.595,
+     "likelihood_ratio_opposition_strength": 1.0,
+     "likelihood_ratio_venue_logistics": 1.0,
+     "likelihood_ratio_tournament_variance": 1.0,
+     "likelihood_ratio_recent_performance_signal": 1.0,
+     "likelihood_ratio_bracket_progress_signal": 1.0,
+     "likelihood_ratio_other_news_signal": 1.15,
+     "likelihood_ratio_product": 0.6842499999999999,
+     "_target": 0.35
+    },
+    "2026-02-15": {
+     "prior_probability_canada_gold": 0.35,
+     "prior_odds_canada_gold": 0.5384615385,
+     "likelihood_ratio_roster_strength": 1.0,
+     "likelihood_ratio_injuries_availability": 1.0,
+     "likelihood_ratio_opposition_strength": 1.0,
+     "likelihood_ratio_venue_logistics": 1.0,
+     "likelihood_ratio_tournament_variance": 1.0,
+     "likelihood_ratio_recent_performance_signal": 2.24,
+     "likelihood_ratio_bracket_progress_signal": 1.7,
+     "likelihood_ratio_other_news_signal": 1.0,
+     "likelihood_ratio_product": 3.808,
+     "_target": 0.67
+    },
+    "2026-02-20": {
+     "prior_probability_canada_gold": 0.67,
+     "prior_odds_canada_gold": 2.0303,
+     "likelihood_ratio_roster_strength": 1.0,
+     "likelihood_ratio_injuries_availability": 0.5,
+     "likelihood_ratio_opposition_strength": 1.0,
+     "likelihood_ratio_venue_logistics": 1.0,
+     "likelihood_ratio_tournament_variance": 1.0,
+     "likelihood_ratio_recent_performance_signal": 1.0,
+     "likelihood_ratio_bracket_progress_signal": 2.5,
+     "likelihood_ratio_other_news_signal": 1.0,
+     "likelihood_ratio_product": 1.25,
+     "_target": 0.72
+    }
+   }
+  }
+ },
+ "bayesian/hockey_usa": {
+  "n_instances": 10,
+  "schema": [
+   "prior_probability_usa_gold",
+   "prior_odds_usa_gold",
+   "lr_roster_strength_positive",
+   "lr_opponent_canada_strength",
+   "lr_injury_and_replacements",
+   "lr_recent_game_results",
+   "lr_nhl_participation_logistics",
+   "lr_venue_or_media_sentiment",
+   "lr_total_product",
+   "posterior_odds_usa_gold"
+  ],
+  "schema_notes": "Merged all priors (probability/odds) to usa_gold, collapsed many specific likelihood ratios into 6 thematic LR buckets (roster, Canada strength, injuries, results, NHL/logistics, venue/media), used 1.0 when absent, and computed posterior_odds as prior_odds*lr_total_product when not explicitly given.",
+  "excluded": [],
+  "program": "def forecast():\n    p0 = prior_probability_usa_gold\n    o0 = prior_odds_usa_gold\n\n    lr_roster = lr_roster_strength_positive\n    lr_canada = lr_opponent_canada_strength\n    lr_injury = lr_injury_and_replacements\n    lr_recent = lr_recent_game_results\n    lr_nhl = lr_nhl_participation_logistics\n    lr_venue = lr_venue_or_media_sentiment\n\n    ln_prior_odds = log(o0)\n\n    ln_lr_roster = log(lr_roster)\n    ln_lr_canada = log(lr_canada)\n    ln_lr_injury = log(lr_injury)\n    ln_lr_recent = log(lr_recent)\n    ln_lr_nhl = log(lr_nhl)\n    ln_lr_venue = log(lr_venue)\n\n    ln_lr_total = ln_lr_roster\n    ln_lr_total += ln_lr_canada\n    ln_lr_total += ln_lr_injury\n    ln_lr_total += ln_lr_recent\n    ln_lr_total += ln_lr_nhl\n    ln_lr_total += ln_lr_venue\n\n    ln_post_odds = ln_prior_odds + ln_lr_total\n\n    p_bayes = logistic(ln_post_odds)\n\n    logit_p0 = log(p0) - log(ONE - p0)\n    gap = ln_post_odds - logit_p0\n\n    tight = ONE + abs(gap)\n    tight = ONE / tight\n\n    w_base = HALF\n    w = w_base + tight\n    w *= HALF\n\n    delta = p_bayes - p0\n    delta *= w\n\n    p_out = p0 + delta\n    return p_out",
+  "fit": {
+   "n": 10,
+   "n_ran": 10,
+   "n_failed": 0,
+   "mae": 0.027411834252811722,
+   "max": 0.06533521478157889,
+   "within_tol": 0.4,
+   "errors": []
+  },
+  "residuals": [
+   0.0329068176105049,
+   0.02113274055325029,
+   0.012514398770386764,
+   0.02491637548586867,
+   0.06533521478157889,
+   0.0007481849646890082,
+   0.012529518812285645,
+   0.01903050693467717,
+   0.02476642559011452,
+   0.06023815902476137
+  ],
+  "degeneracy": {
+   "max_abs_corr": 0.9875051714505167,
+   "max_corr_var": "posterior_odds_usa_gold",
+   "passthrough": false,
+   "n_ops": 20,
+   "n_branches": 0,
+   "near_passthrough": false,
+   "lookup_smell": false,
+   "suspect": false
+  },
+  "ok": false,
+  "attempts": 4,
+  "history": [
+   {
+    "attempt": 1,
+    "stage": "fit",
+    "mae": 0.0331857009781076,
+    "within_tol": 0.3,
+    "degeneracy": {
+     "max_abs_corr": 0.9875051714505167,
+     "max_corr_var": "posterior_odds_usa_gold",
+     "passthrough": false,
+     "n_ops": 3,
+     "n_branches": 0,
+     "near_passthrough": true,
+     "lookup_smell": false,
+     "suspect": true
+    }
+   },
+   {
+    "attempt": 2,
+    "stage": "fit",
+    "mae": 0.0331857009781076,
+    "within_tol": 0.3,
+    "degeneracy": {
+     "max_abs_corr": 0.9875051714505167,
+     "max_corr_var": "posterior_odds_usa_gold",
+     "passthrough": false,
+     "n_ops": 3,
+     "n_branches": 0,
+     "near_passthrough": true,
+     "lookup_smell": false,
+     "suspect": true
+    }
+   },
+   {
+    "attempt": 3,
+    "stage": "fit",
+    "mae": 0.0331857009781076,
+    "within_tol": 0.3,
+    "degeneracy": {
+     "max_abs_corr": 0.9875051714505167,
+     "max_corr_var": "posterior_odds_usa_gold",
+     "passthrough": false,
+     "n_ops": 9,
+     "n_branches": 0,
+     "near_passthrough": false,
+     "lookup_smell": false,
+     "suspect": false
+    }
+   },
+   {
+    "attempt": 4,
+    "stage": "fit",
+    "mae": 0.027411834252811722,
+    "within_tol": 0.4,
+    "degeneracy": {
+     "max_abs_corr": 0.9875051714505167,
+     "max_corr_var": "posterior_odds_usa_gold",
+     "passthrough": false,
+     "n_ops": 20,
+     "n_branches": 0,
+     "near_passthrough": false,
+     "lookup_smell": false,
+     "suspect": false
+    }
+   }
+  ],
+  "oos": {
+   "train_sample": 0,
+   "train_n": 5,
+   "test_n": 5,
+   "train_mae": 0.0197497291228086,
+   "test_mae": 0.0160073738115142,
+   "test_within_tol": 0.6,
+   "test_failed": 0,
+   "program": "def forecast():\n    prior_p = prior_probability_usa_gold\n    prior_odds = prior_odds_usa_gold\n\n    lr_roster = lr_roster_strength_positive\n    lr_canada = lr_opponent_canada_strength\n    lr_injuries = lr_injury_and_replacements\n    lr_recent = lr_recent_game_results\n    lr_nhl = lr_nhl_participation_logistics\n    lr_venue = lr_venue_or_media_sentiment\n\n    lr_product = lr_roster * lr_canada\n    lr_product *= lr_injuries\n    lr_product *= lr_recent\n    lr_product *= lr_nhl\n    lr_product *= lr_venue\n\n    post_odds = prior_odds * lr_product\n    raw_post_p = prob(post_odds)\n\n    # Forecaster applied a conservative cap on how much one update can move the probability,\n    # implemented as a blend between the Bayesian posterior and a \"stay close to prior\" anchor.\n    move = raw_post_p - prior_p\n\n    up_weight = HALF\n    down_weight = HALF\n\n    if move > ZERO:\n        adjusted = prior_p + move * up_weight\n    else:\n        adjusted = prior_p + move * down_weight\n\n    # Light additional conservatism toward the raw posterior to avoid underreacting\n    final_p = (adjusted + raw_post_p) * HALF\n\n    return final_p",
+   "degeneracy": {
+    "max_abs_corr": 0.9950094587380401,
+    "max_corr_var": "posterior_odds_usa_gold",
+    "passthrough": false,
+    "n_ops": 11,
+    "n_branches": 1,
+    "near_passthrough": false,
+    "lookup_smell": false,
+    "suspect": false
+   }
+  },
+  "instances": [
+   {
+    "key": "bayesian|hockey_usa|s0|2026-01-14",
+    "date": "2026-01-14",
+    "sample": 0,
+    "target": 0.28,
+    "bindings": {
+     "prior_probability_usa_gold": 0.2,
+     "prior_odds_usa_gold": 0.25,
+     "lr_roster_strength_positive": 1.6,
+     "lr_opponent_canada_strength": 0.7,
+     "lr_injury_and_replacements": 1.0,
+     "lr_recent_game_results": 1.15,
+     "lr_nhl_participation_logistics": 1.2,
+     "lr_venue_or_media_sentiment": 1.0,
+     "lr_total_product": 1.5456,
+     "posterior_odds_usa_gold": 0.3864
+    },
+    "raw_bindings": {
+     "prior_probability_us_gold": 0.2,
+     "assumed_tournament_team_count": 12.0,
+     "naive_prior_us_share": 0.2,
+     "likelihood_ratio_nhl_players_participating_confirmed": 1.2,
+     "likelihood_ratio_us_roster_top_nhl_stars_finalized": 1.6,
+     "likelihood_ratio_canada_roster_elite_strength": 0.7,
+     "likelihood_ratio_four_nations_faceoff_close_parity_overtime_loss": 1.15,
+     "likelihood_ratio_arena_logistical_concerns_net_neutral": 1.0,
+     "prior_odds_us_gold": 0.25,
+     "combined_likelihood_ratio_product": 1.5456,
+     "posterior_odds_after_update": 0.3864
+    }
+   },
+   {
+    "key": "bayesian|hockey_usa|s0|2026-01-28",
+    "date": "2026-01-28",
+    "sample": 0,
+    "target": 0.222,
+    "bindings": {
+     "prior_probability_usa_gold": 0.28,
+     "prior_odds_usa_gold": 0.3888889,
+     "lr_roster_strength_positive": 1.15,
+     "lr_opponent_canada_strength": 1.0,
+     "lr_injury_and_replacements": 0.67,
+     "lr_recent_game_results": 1.0,
+     "lr_nhl_participation_logistics": 1.0,
+     "lr_venue_or_media_sentiment": 0.95,
+     "lr_total_product": 0.733,
+     "posterior_odds_usa_gold": 0.285055664
+    },
+    "raw_bindings": {
+     "prior_probability_usa_gold": 0.28,
+     "prior_odds_usa_gold": 0.3888889,
+     "prob_jones_injury_given_usa_gold": 0.06,
+     "prob_jones_injury_given_usa_not_gold": 0.088,
+     "likelihood_ratio_jones_injury": 0.67,
+     "prob_lacombe_quality_replacement_given_usa_gold": 0.138,
+     "prob_lacombe_quality_replacement_given_usa_not_gold": 0.12,
+     "likelihood_ratio_lacombe_quality_replacement": 1.15,
+     "prob_venue_concern_report_given_usa_gold": 0.078,
+     "prob_venue_concern_report_given_usa_not_gold": 0.082,
+     "likelihood_ratio_venue_concern_report": 0.95,
+     "product_of_likelihood_ratios": 0.733
+    }
+   },
+   {
+    "key": "bayesian|hockey_usa|s0|2026-02-08",
+    "date": "2026-02-08",
+    "sample": 0,
+    "target": 0.258,
+    "bindings": {
+     "prior_probability_usa_gold": 0.222,
+     "prior_odds_usa_gold": 0.285596,
+     "lr_roster_strength_positive": 1.1,
+     "lr_opponent_canada_strength": 1.08,
+     "lr_injury_and_replacements": 1.0,
+     "lr_recent_game_results": 1.0,
+     "lr_nhl_participation_logistics": 1.02,
+     "lr_venue_or_media_sentiment": 1.0,
+     "lr_total_product": 1.214,
+     "posterior_odds_usa_gold": 0.3468
+    },
+    "raw_bindings": {
+     "prior_probability": 0.222,
+     "prior_complement_probability": 0.778,
+     "prior_odds": 0.285596,
+     "likelihood_ratio_matthews_captain_and_first_practice": 1.1,
+     "likelihood_ratio_canada_injury_replacements": 1.08,
+     "likelihood_ratio_nhl_players_confirmed_present": 1.02,
+     "combined_likelihood_ratio_product": 1.214,
+     "updated_odds_after_evidence": 0.3468
+    }
+   },
+   {
+    "key": "bayesian|hockey_usa|s0|2026-02-15",
+    "date": "2026-02-15",
+    "sample": 0,
+    "target": 0.324,
+    "bindings": {
+     "prior_probability_usa_gold": 0.258,
+     "prior_odds_usa_gold": 0.347964,
+     "lr_roster_strength_positive": 1.0,
+     "lr_opponent_canada_strength": 0.6,
+     "lr_injury_and_replacements": 1.0,
+     "lr_recent_game_results": 2.288,
+     "lr_nhl_participation_logistics": 1.0,
+     "lr_venue_or_media_sentiment": 1.0,
+     "lr_total_product": 1.3728,
+     "posterior_odds_usa_gold": 0.477685
+    },
+    "raw_bindings": {
+     "prior_probability_us_gold": 0.258,
+     "prior_odds_us_gold": 0.347964,
+     "likelihood_ratio_us_beat_latvia_5_1": 1.6,
+     "likelihood_ratio_us_beat_denmark_6_3": 1.3,
+     "likelihood_ratio_latvia_beat_germany": 1.1,
+     "likelihood_ratio_canada_clinched_group_a_favourite": 0.6,
+     "odds_after_evidence_1": 0.556742,
+     "odds_after_evidence_2": 0.723765,
+     "odds_after_evidence_3": 0.434259,
+     "odds_after_evidence_4": 0.477685,
+     "reciprocal_lr_canada_strong_under_no_vs_yes": 1.67
+    }
+   },
+   {
+    "key": "bayesian|hockey_usa|s0|2026-02-20",
+    "date": "2026-02-20",
+    "sample": 0,
+    "target": 0.472,
+    "bindings": {
+     "prior_probability_usa_gold": 0.324,
+     "prior_odds_usa_gold": 0.479,
+     "lr_roster_strength_positive": 1.0,
+     "lr_opponent_canada_strength": 0.667,
+     "lr_injury_and_replacements": 1.0,
+     "lr_recent_game_results": 2.8,
+     "lr_nhl_participation_logistics": 1.0,
+     "lr_venue_or_media_sentiment": 1.0,
+     "lr_total_product": 1.8676,
+     "posterior_odds_usa_gold": 0.8949804
+    },
+    "raw_bindings": {
+     "prior_probability_usa_gold": 0.324,
+     "prior_probability_usa_not_gold": 0.676,
+     "prior_odds_usa_gold": 0.479,
+     "p_e1_qf_ot_win_given_gold": 0.98,
+     "p_e1_qf_ot_win_given_not_gold": 0.7,
+     "likelihood_ratio_e1": 1.4,
+     "p_e2_dominant_sf_win_given_gold": 0.95,
+     "likelihood_ratio_e2": 2.0,
+     "p_e3_canada_reaches_final_given_usa_gold": 0.6,
+     "p_e3_canada_reaches_final_given_usa_not_gold": 0.9,
+     "likelihood_ratio_e3": 0.667
+    }
+   },
+   {
+    "key": "bayesian|hockey_usa|s1|2026-01-14",
+    "date": "2026-01-14",
+    "sample": 1,
+    "target": 0.176,
+    "bindings": {
+     "prior_probability_usa_gold": 0.18,
+     "prior_odds_usa_gold": 0.219512,
+     "lr_roster_strength_positive": 1.4,
+     "lr_opponent_canada_strength": 0.6,
+     "lr_injury_and_replacements": 1.0,
+     "lr_recent_game_results": 1.1,
+     "lr_nhl_participation_logistics": 1.05,
+     "lr_venue_or_media_sentiment": 1.0,
+     "lr_total_product": 0.9702,
+     "posterior_odds_usa_gold": 0.2129707224
+    },
+    "raw_bindings": {
+     "prior_complement_probability": 0.82,
+     "prior_odds": 0.219512,
+     "likelihood_ratio_us_roster_star_content_and_chemistry": 1.4,
+     "likelihood_ratio_canada_roster_heavy_favourite": 0.6,
+     "likelihood_ratio_nhl_participation_and_arena_test_positive": 1.05,
+     "likelihood_ratio_recent_head_to_head_competitiveness": 1.1,
+     "us_roster_size_players": 25.0,
+     "top_tier_team_count_estimate_low": 4.0,
+     "top_tier_team_count_estimate_high": 5.0,
+     "implied_inverse_lr_canada_roster_given_no": 1.67
+    }
+   },
+   {
+    "key": "bayesian|hockey_usa|s1|2026-01-28",
+    "date": "2026-01-28",
+    "sample": 1,
+    "target": 0.141,
+    "bindings": {
+     "prior_probability_usa_gold": 0.176,
+     "prior_odds_usa_gold": 0.213592233,
+     "lr_roster_strength_positive": 1.0,
+     "lr_opponent_canada_strength": 1.0,
+     "lr_injury_and_replacements": 0.7,
+     "lr_recent_game_results": 1.0,
+     "lr_nhl_participation_logistics": 1.1,
+     "lr_venue_or_media_sentiment": 1.0,
+     "lr_total_product": 0.77,
+     "posterior_odds_usa_gold": 0.164466019
+    },
+    "raw_bindings": {
+     "prior_probability_us_gold": 0.176,
+     "prior_complement_probability": 0.824,
+     "prior_odds": 0.213592233,
+     "likelihood_ratio_jones_injury_replacement": 0.7,
+     "inverse_likelihood_ratio_jones_injury_replacement": 1.43,
+     "odds_after_jones_update": 0.149514563,
+     "likelihood_ratio_no_further_withdrawals": 1.1,
+     "final_odds_after_updates": 0.164466019
+    }
+   },
+   {
+    "key": "bayesian|hockey_usa|s1|2026-02-08",
+    "date": "2026-02-08",
+    "sample": 1,
+    "target": 0.191,
+    "bindings": {
+     "prior_probability_usa_gold": 0.141,
+     "prior_odds_usa_gold": 0.164223,
+     "lr_roster_strength_positive": 1.2,
+     "lr_opponent_canada_strength": 1.5,
+     "lr_injury_and_replacements": 1.0,
+     "lr_recent_game_results": 1.0,
+     "lr_nhl_participation_logistics": 1.0,
+     "lr_venue_or_media_sentiment": 0.8,
+     "lr_total_product": 1.44,
+     "posterior_odds_usa_gold": 0.2364816
+    },
+    "raw_bindings": {
+     "prior_probability_usa_mens_hockey_gold": 0.141,
+     "prior_complement_probability_not_gold": 0.859,
+     "prior_odds_usa_gold": 0.164223,
+     "likelihood_ratio_matthews_named_captain_and_first_practice": 1.2,
+     "likelihood_ratio_canada_roster_injuries_point_out_cirelli_replaced": 1.5,
+     "likelihood_ratio_media_reiterates_canada_favorite": 0.8,
+     "assumed_conditionally_independent_signals_count": 3.0,
+     "odds_after_lr1": 0.197068,
+     "odds_after_lr2": 0.295602,
+     "odds_after_lr3": 0.2364816
+    }
+   },
+   {
+    "key": "bayesian|hockey_usa|s1|2026-02-15",
+    "date": "2026-02-15",
+    "sample": 1,
+    "target": 0.218,
+    "bindings": {
+     "prior_probability_usa_gold": 0.191,
+     "prior_odds_usa_gold": 0.236,
+     "lr_roster_strength_positive": 1.0,
+     "lr_opponent_canada_strength": 0.8,
+     "lr_injury_and_replacements": 1.02,
+     "lr_recent_game_results": 1.25,
+     "lr_nhl_participation_logistics": 1.0,
+     "lr_venue_or_media_sentiment": 1.0,
+     "lr_total_product": 1.1781,
+     "posterior_odds_usa_gold": 0.278
+    },
+    "raw_bindings": {
+     "prior_probability_usa_gold": 0.191,
+     "prior_odds_usa_gold": 0.236,
+     "likelihood_ratio_usa_5_1_latvia_win": 1.25,
+     "likelihood_ratio_canada_5_0_czech_win": 0.8,
+     "likelihood_ratio_finland_mixed_results": 1.05,
+     "likelihood_ratio_increased_tournament_variance": 1.1,
+     "likelihood_ratio_switzerland_fiala_injury": 1.02,
+     "likelihood_ratio_total_product": 1.1781,
+     "posterior_odds_after_updates": 0.278
+    }
+   },
+   {
+    "key": "bayesian|hockey_usa|s1|2026-02-20",
+    "date": "2026-02-20",
+    "sample": 1,
+    "target": 0.352,
+    "bindings": {
+     "prior_probability_usa_gold": 0.218,
+     "prior_odds_usa_gold": 0.278768,
+     "lr_roster_strength_positive": 1.0,
+     "lr_opponent_canada_strength": 0.65,
+     "lr_injury_and_replacements": 1.0,
+     "lr_recent_game_results": 3.0,
+     "lr_nhl_participation_logistics": 1.0,
+     "lr_venue_or_media_sentiment": 1.0,
+     "lr_total_product": 1.95,
+     "posterior_odds_usa_gold": 0.5436026
+    },
+    "raw_bindings": {
+     "prior_probability_usa_wins_gold": 0.218,
+     "prior_probability_usa_does_not_win_gold": 0.782,
+     "prior_odds_usa_wins_gold": 0.278768,
+     "prob_usa_beats_sweden_given_usa_wins_gold": 0.75,
+     "prob_usa_beats_sweden_given_usa_does_not_win_gold": 0.5,
+     "likelihood_ratio_usa_beats_sweden": 1.5,
+     "prob_usa_big_semifinal_win_given_usa_wins_gold": 0.8,
+     "prob_usa_big_semifinal_win_given_usa_does_not_win_gold": 0.4,
+     "likelihood_ratio_usa_big_semifinal_win": 2.0,
+     "prob_canada_reaches_final_given_usa_wins_gold": 0.55,
+     "prob_canada_reaches_final_given_usa_does_not_win_gold": 0.85,
+     "likelihood_ratio_canada_reaches_final": 0.65,
+     "semifinal_lr_sensitivity_lower_bound": 1.5,
+     "semifinal_lr_sensitivity_upper_bound": 2.5,
+     "modeled_prob_usa_wins_final_vs_canada_upper_bound": 0.45
+    }
+   }
+  ],
+  "trajectory": {
+   "s0": {
+    "2026-01-14": {
+     "prior_probability_usa_gold": 0.2,
+     "prior_odds_usa_gold": 0.25,
+     "lr_roster_strength_positive": 1.6,
+     "lr_opponent_canada_strength": 0.7,
+     "lr_injury_and_replacements": 1.0,
+     "lr_recent_game_results": 1.15,
+     "lr_nhl_participation_logistics": 1.2,
+     "lr_venue_or_media_sentiment": 1.0,
+     "lr_total_product": 1.5456,
+     "posterior_odds_usa_gold": 0.3864,
+     "_target": 0.28
+    },
+    "2026-01-28": {
+     "prior_probability_usa_gold": 0.28,
+     "prior_odds_usa_gold": 0.3888889,
+     "lr_roster_strength_positive": 1.15,
+     "lr_opponent_canada_strength": 1.0,
+     "lr_injury_and_replacements": 0.67,
+     "lr_recent_game_results": 1.0,
+     "lr_nhl_participation_logistics": 1.0,
+     "lr_venue_or_media_sentiment": 0.95,
+     "lr_total_product": 0.733,
+     "posterior_odds_usa_gold": 0.285055664,
+     "_target": 0.222
+    },
+    "2026-02-08": {
+     "prior_probability_usa_gold": 0.222,
+     "prior_odds_usa_gold": 0.285596,
+     "lr_roster_strength_positive": 1.1,
+     "lr_opponent_canada_strength": 1.08,
+     "lr_injury_and_replacements": 1.0,
+     "lr_recent_game_results": 1.0,
+     "lr_nhl_participation_logistics": 1.02,
+     "lr_venue_or_media_sentiment": 1.0,
+     "lr_total_product": 1.214,
+     "posterior_odds_usa_gold": 0.3468,
+     "_target": 0.258
+    },
+    "2026-02-15": {
+     "prior_probability_usa_gold": 0.258,
+     "prior_odds_usa_gold": 0.347964,
+     "lr_roster_strength_positive": 1.0,
+     "lr_opponent_canada_strength": 0.6,
+     "lr_injury_and_replacements": 1.0,
+     "lr_recent_game_results": 2.288,
+     "lr_nhl_participation_logistics": 1.0,
+     "lr_venue_or_media_sentiment": 1.0,
+     "lr_total_product": 1.3728,
+     "posterior_odds_usa_gold": 0.477685,
+     "_target": 0.324
+    },
+    "2026-02-20": {
+     "prior_probability_usa_gold": 0.324,
+     "prior_odds_usa_gold": 0.479,
+     "lr_roster_strength_positive": 1.0,
+     "lr_opponent_canada_strength": 0.667,
+     "lr_injury_and_replacements": 1.0,
+     "lr_recent_game_results": 2.8,
+     "lr_nhl_participation_logistics": 1.0,
+     "lr_venue_or_media_sentiment": 1.0,
+     "lr_total_product": 1.8676,
+     "posterior_odds_usa_gold": 0.8949804,
+     "_target": 0.472
+    }
+   },
+   "s1": {
+    "2026-01-14": {
+     "prior_probability_usa_gold": 0.18,
+     "prior_odds_usa_gold": 0.219512,
+     "lr_roster_strength_positive": 1.4,
+     "lr_opponent_canada_strength": 0.6,
+     "lr_injury_and_replacements": 1.0,
+     "lr_recent_game_results": 1.1,
+     "lr_nhl_participation_logistics": 1.05,
+     "lr_venue_or_media_sentiment": 1.0,
+     "lr_total_product": 0.9702,
+     "posterior_odds_usa_gold": 0.2129707224,
+     "_target": 0.176
+    },
+    "2026-01-28": {
+     "prior_probability_usa_gold": 0.176,
+     "prior_odds_usa_gold": 0.213592233,
+     "lr_roster_strength_positive": 1.0,
+     "lr_opponent_canada_strength": 1.0,
+     "lr_injury_and_replacements": 0.7,
+     "lr_recent_game_results": 1.0,
+     "lr_nhl_participation_logistics": 1.1,
+     "lr_venue_or_media_sentiment": 1.0,
+     "lr_total_product": 0.77,
+     "posterior_odds_usa_gold": 0.164466019,
+     "_target": 0.141
+    },
+    "2026-02-08": {
+     "prior_probability_usa_gold": 0.141,
+     "prior_odds_usa_gold": 0.164223,
+     "lr_roster_strength_positive": 1.2,
+     "lr_opponent_canada_strength": 1.5,
+     "lr_injury_and_replacements": 1.0,
+     "lr_recent_game_results": 1.0,
+     "lr_nhl_participation_logistics": 1.0,
+     "lr_venue_or_media_sentiment": 0.8,
+     "lr_total_product": 1.44,
+     "posterior_odds_usa_gold": 0.2364816,
+     "_target": 0.191
+    },
+    "2026-02-15": {
+     "prior_probability_usa_gold": 0.191,
+     "prior_odds_usa_gold": 0.236,
+     "lr_roster_strength_positive": 1.0,
+     "lr_opponent_canada_strength": 0.8,
+     "lr_injury_and_replacements": 1.02,
+     "lr_recent_game_results": 1.25,
+     "lr_nhl_participation_logistics": 1.0,
+     "lr_venue_or_media_sentiment": 1.0,
+     "lr_total_product": 1.1781,
+     "posterior_odds_usa_gold": 0.278,
+     "_target": 0.218
+    },
+    "2026-02-20": {
+     "prior_probability_usa_gold": 0.218,
+     "prior_odds_usa_gold": 0.278768,
+     "lr_roster_strength_positive": 1.0,
+     "lr_opponent_canada_strength": 0.65,
+     "lr_injury_and_replacements": 1.0,
+     "lr_recent_game_results": 3.0,
+     "lr_nhl_participation_logistics": 1.0,
+     "lr_venue_or_media_sentiment": 1.0,
+     "lr_total_product": 1.95,
+     "posterior_odds_usa_gold": 0.5436026,
+     "_target": 0.352
+    }
+   }
+  }
+ },
+ "futuresim/hockey_can": {
+  "n_instances": 10,
+  "schema": [
+   "base_rate_canada_gold_nhl_bestonbest",
+   "adjustment_canada_roster_star_power",
+   "adjustment_usa_rival_strength",
+   "adjustment_goaltending_net",
+   "adjustment_venue_and_nhl_participation_risk",
+   "adjustment_opponent_field_depth",
+   "adjustment_single_elimination_variance",
+   "adjustment_recent_form_and_results",
+   "adjustment_injuries_and_roster_churn",
+   "prior_forecast_probability"
+  ],
+  "schema_notes": "Merged all base-rate variants into one; collapsed many specific plus/minus factors into a small set of net adjustment categories (roster, USA, goalie, venue/NHL participation, field depth, single-elim variance, recent form, injuries) and used the instance\u2019s latest stated prior/previous/public forecast as prior_forecast_probability (defaulting to base rate when absent).",
+  "excluded": [],
+  "program": "def forecast():\n    base = base_rate_canada_gold_nhl_bestonbest\n    prior = prior_forecast_probability\n\n    star = adjustment_canada_roster_star_power\n    usa = adjustment_usa_rival_strength\n    goalie = adjustment_goaltending_net\n    venue = adjustment_venue_and_nhl_participation_risk\n    depth = adjustment_opponent_field_depth\n    variance = adjustment_single_elimination_variance\n    form = adjustment_recent_form_and_results\n    injury = adjustment_injuries_and_roster_churn\n\n    total_adj = ZERO\n    total_adj += star\n    total_adj += usa\n    total_adj += goalie\n    total_adj += venue\n    total_adj += depth\n    total_adj += variance\n    total_adj += form\n    total_adj += injury\n\n    anchored = HALF * prior + HALF * base\n    raw = anchored + HALF * total_adj\n\n    out = clamp(raw, EPS, ONE)\n    return out",
+  "fit": {
+   "n": 10,
+   "n_ran": 10,
+   "n_failed": 0,
+   "mae": 0.01749999999999998,
+   "max": 0.050000000000000044,
+   "within_tol": 0.7,
+   "errors": []
+  },
+  "residuals": [
+   0.019999999999999907,
+   0.004999999999999893,
+   0.025000000000000022,
+   0.0050000000000000044,
+   0.050000000000000044,
+   0.04499999999999993,
+   0.010000000000000009,
+   0.010000000000000009,
+   0.0050000000000000044,
+   0.0
+  ],
+  "degeneracy": {
+   "max_abs_corr": 0.7377215371110868,
+   "max_corr_var": "adjustment_single_elimination_variance",
+   "passthrough": false,
+   "n_ops": 6,
+   "n_branches": 0,
+   "near_passthrough": false,
+   "lookup_smell": false,
+   "suspect": false
+  },
+  "ok": false,
+  "attempts": 4,
+  "history": [
+   {
+    "attempt": 1,
+    "stage": "validator",
+    "problems": "line 24: constant-construction -- expression built only from named constants -- declare the value as a step-1 variable instead\nline 31: constant-construction -- expression built only from named constants -- declare the value as a step-1 variable instead"
+   },
+   {
+    "attempt": 2,
+    "stage": "validator",
+    "problems": "line 1: undeclared -- 'adjustment_weight' is used but was never declared in step 1\nline 1: undeclared -- 'base_anchor_weight' is used but was never declared in step 1\nline 1: undeclared -- 'prior_anchor_weight' is used but was never declared in step 1\nline 1: undeclared -- 'probability_ceiling' is used but was never declared in step 1\nline 1: undeclared -- 'probability_floor' is used but was never declared in step 1"
+   },
+   {
+    "attempt": 3,
+    "stage": "fit",
+    "mae": 0.01749999999999998,
+    "within_tol": 0.7,
+    "degeneracy": {
+     "max_abs_corr": 0.7377215371110868,
+     "max_corr_var": "adjustment_single_elimination_variance",
+     "passthrough": false,
+     "n_ops": 6,
+     "n_branches": 0,
+     "near_passthrough": false,
+     "lookup_smell": false,
+     "suspect": false
+    }
+   },
+   {
+    "attempt": 4,
+    "stage": "validator",
+    "problems": "line 38: constant-construction -- expression built only from named constants -- declare the value as a step-1 variable instead"
+   }
+  ],
+  "oos": {
+   "train_sample": 0,
+   "train_n": 5,
+   "test_n": 5,
+   "train_mae": 0.020999999999999974,
+   "test_mae": 0.01399999999999999,
+   "test_within_tol": 0.8,
+   "test_failed": 0,
+   "program": "def forecast():\n    base = base_rate_canada_gold_nhl_bestonbest\n\n    star = adjustment_canada_roster_star_power\n    usa = adjustment_usa_rival_strength\n    goal = adjustment_goaltending_net\n    venue = adjustment_venue_and_nhl_participation_risk\n    depth = adjustment_opponent_field_depth\n    var = adjustment_single_elimination_variance\n    form = adjustment_recent_form_and_results\n    inj = adjustment_injuries_and_roster_churn\n\n    prior = prior_forecast_probability\n\n    evidence = star\n    evidence += usa\n    evidence += goal\n    evidence += venue\n    evidence += depth\n    evidence += var\n    evidence += form\n    evidence += inj\n\n    anchor = (base + prior) * HALF\n\n    drift = prior - base\n\n    pull = evidence - drift\n    p = prior + pull * HALF\n\n    p = clamp(p, ZERO, ONE)\n    return p",
+   "degeneracy": {
+    "max_abs_corr": 0.8522723503692818,
+    "max_corr_var": "adjustment_canada_roster_star_power",
+    "passthrough": false,
+    "n_ops": 7,
+    "n_branches": 0,
+    "near_passthrough": false,
+    "lookup_smell": false,
+    "suspect": false
+   }
+  },
+  "instances": [
+   {
+    "key": "futuresim|hockey_can|s0|2026-01-14",
+    "date": "2026-01-14",
+    "sample": 0,
+    "target": 0.56,
+    "bindings": {
+     "base_rate_canada_gold_nhl_bestonbest": 0.6,
+     "adjustment_canada_roster_star_power": 0.16,
+     "adjustment_usa_rival_strength": -0.08,
+     "adjustment_goaltending_net": 0.01,
+     "adjustment_venue_and_nhl_participation_risk": -0.03,
+     "adjustment_opponent_field_depth": -0.04,
+     "adjustment_single_elimination_variance": -0.06,
+     "adjustment_recent_form_and_results": 0.0,
+     "adjustment_injuries_and_roster_churn": 0.0,
+     "prior_forecast_probability": 0.6
+    },
+    "raw_bindings": {
+     "nhl_era_olympic_tournaments_count": 5.0,
+     "canada_nhl_era_gold_wins_count": 3.0,
+     "base_rate_canada_gold_given_nhl_participation": 0.6,
+     "canada_roster_strength_adjustment": 0.1,
+     "canada_team_chemistry_adjustment": 0.06,
+     "usa_strong_roster_adjustment": -0.08,
+     "venue_ice_safety_concerns_adjustment": -0.03,
+     "other_nations_depth_adjustment": -0.04,
+     "goaltending_uncertainty_adjustment": 0.01,
+     "single_elimination_format_variance_adjustment": -0.06,
+     "credible_interval_half_width": 0.15
+    }
+   },
+   {
+    "key": "futuresim|hockey_can|s0|2026-01-28",
+    "date": "2026-01-28",
+    "sample": 0,
+    "target": 0.57,
+    "bindings": {
+     "base_rate_canada_gold_nhl_bestonbest": 0.6,
+     "adjustment_canada_roster_star_power": 0.12,
+     "adjustment_usa_rival_strength": -0.08,
+     "adjustment_goaltending_net": 0.02,
+     "adjustment_venue_and_nhl_participation_risk": -0.01,
+     "adjustment_opponent_field_depth": 0.0,
+     "adjustment_single_elimination_variance": -0.06,
+     "adjustment_recent_form_and_results": 0.0,
+     "adjustment_injuries_and_roster_churn": -0.02,
+     "prior_forecast_probability": 0.56
+    },
+    "raw_bindings": {
+     "nhl_era_olympics_with_nhl_players_count": 5.0,
+     "canada_gold_medals_in_nhl_era_olympics_count": 3.0,
+     "base_rate_canada_gold_nhl_era": 0.6,
+     "canada_roster_size_players": 25.0,
+     "us_roster_size_players": 25.0,
+     "canada_players_from_4_nations_winner_count": 19.0,
+     "adjustment_roster_strength_and_continuity": 0.12,
+     "adjustment_strong_us_rival": -0.08,
+     "adjustment_canada_goaltending_positive": 0.02,
+     "adjustment_rink_construction_residual_risk": -0.01,
+     "adjustment_tournament_variance_elimination_format": -0.06,
+     "adjustment_residual_late_injury_or_nhl_change_risk": -0.02,
+     "adjustment_market_bookmakers_neutral": 0.0,
+     "prior_forecast_value": 0.56
+    }
+   },
+   {
+    "key": "futuresim|hockey_can|s0|2026-02-08",
+    "date": "2026-02-08",
+    "sample": 0,
+    "target": 0.61,
+    "bindings": {
+     "base_rate_canada_gold_nhl_bestonbest": 0.6,
+     "adjustment_canada_roster_star_power": 0.09,
+     "adjustment_usa_rival_strength": -0.06,
+     "adjustment_goaltending_net": -0.05,
+     "adjustment_venue_and_nhl_participation_risk": 0.02,
+     "adjustment_opponent_field_depth": 0.0,
+     "adjustment_single_elimination_variance": -0.03,
+     "adjustment_recent_form_and_results": 0.03,
+     "adjustment_injuries_and_roster_churn": 0.0,
+     "prior_forecast_probability": 0.57
+    },
+    "raw_bindings": {
+     "nhl_era_olympics_canada_titles": 3.0,
+     "nhl_era_olympics_total_tournaments": 5.0,
+     "base_rate_canada_win_nhl_era_olympics": 0.6,
+     "adjustment_star_top_end_roster": 0.09,
+     "adjustment_usa_similarly_starry_roster": -0.06,
+     "adjustment_recent_head_to_head_ot_win_vs_usa": 0.03,
+     "adjustment_goaltending_uncertainty_variance": -0.05,
+     "adjustment_single_elim_tournament_volatility": -0.03,
+     "adjustment_nhl_participation_confirmed_no_major_injuries": 0.02,
+     "adjustment_bookmakers_media_favoring_canada": 0.01,
+     "previous_forecast_probability_earlier": 0.56,
+     "previous_forecast_probability_later": 0.57
+    }
+   },
+   {
+    "key": "futuresim|hockey_can|s0|2026-02-15",
+    "date": "2026-02-15",
+    "sample": 0,
+    "target": 0.62,
+    "bindings": {
+     "base_rate_canada_gold_nhl_bestonbest": 0.6,
+     "adjustment_canada_roster_star_power": 0.04,
+     "adjustment_usa_rival_strength": -0.08,
+     "adjustment_goaltending_net": 0.03,
+     "adjustment_venue_and_nhl_participation_risk": 0.0,
+     "adjustment_opponent_field_depth": 0.0,
+     "adjustment_single_elimination_variance": -0.05,
+     "adjustment_recent_form_and_results": 0.06,
+     "adjustment_injuries_and_roster_churn": 0.02,
+     "prior_forecast_probability": 0.61
+    },
+    "raw_bindings": {
+     "base_rate_nhl_era_olympic_canada_gold": 0.6,
+     "comparable_nhl_era_tournaments_count": 5.0,
+     "canada_gold_wins_in_reference_class": 3.0,
+     "adjustment_star_studded_final_roster": 0.04,
+     "adjustment_dominant_group_stage_results_and_clinched_quarters": 0.06,
+     "adjustment_goaltending_form_binnington_shutout_signal": 0.03,
+     "adjustment_no_major_injuries_through_feb_15": 0.02,
+     "adjustment_strong_rivals_remaining": -0.08,
+     "adjustment_single_elimination_knockout_variance": -0.05,
+     "prior_forecast_1": 0.56,
+     "prior_forecast_2": 0.57,
+     "prior_forecast_3": 0.61,
+     "binnigton_shutout_saves_vs_czech": 26.0
+    }
+   },
+   {
+    "key": "futuresim|hockey_can|s0|2026-02-20",
+    "date": "2026-02-20",
+    "sample": 0,
+    "target": 0.61,
+    "bindings": {
+     "base_rate_canada_gold_nhl_bestonbest": 0.6,
+     "adjustment_canada_roster_star_power": 0.0,
+     "adjustment_usa_rival_strength": -0.03,
+     "adjustment_goaltending_net": 0.02,
+     "adjustment_venue_and_nhl_participation_risk": 0.0,
+     "adjustment_opponent_field_depth": 0.0,
+     "adjustment_single_elimination_variance": 0.0,
+     "adjustment_recent_form_and_results": 0.1,
+     "adjustment_injuries_and_roster_churn": 0.01,
+     "prior_forecast_probability": 0.62
+    },
+    "raw_bindings": {
+     "base_rate_canada_gold_nhl_era": 0.6,
+     "adjustment_reached_gold_medal_game": 0.08,
+     "adjustment_group_stage_dominance_goalie_shutout": 0.02,
+     "adjustment_narrow_knockout_wins_fragility": -0.07,
+     "adjustment_usa_dominant_form_matchup": -0.03,
+     "adjustment_no_major_injuries_full_roster": 0.01,
+     "canada_group_stage_goals_for_vs_czech": 5.0,
+     "canada_group_stage_goals_against_vs_czech": 0.0,
+     "binnington_saves_vs_czech": 26.0,
+     "canada_group_stage_goals_for_vs_switzerland": 5.0,
+     "canada_group_stage_goals_against_vs_switzerland": 1.0,
+     "canada_quarterfinal_goals_for_vs_czechia": 4.0,
+     "canada_quarterfinal_goals_against_vs_czechia": 3.0,
+     "canada_semifinal_goals_for_vs_finland": 3.0,
+     "canada_semifinal_goals_against_vs_finland": 2.0,
+     "usa_semifinal_goals_for_vs_slovakia": 6.0,
+     "usa_semifinal_goals_against_vs_slovakia": 2.0,
+     "canada_shots_against_finland": 39.0,
+     "previous_public_forecast_probability": 0.62
+    }
+   },
+   {
+    "key": "futuresim|hockey_can|s1|2026-01-14",
+    "date": "2026-01-14",
+    "sample": 1,
+    "target": 0.55,
+    "bindings": {
+     "base_rate_canada_gold_nhl_bestonbest": 0.6,
+     "adjustment_canada_roster_star_power": 0.1,
+     "adjustment_usa_rival_strength": -0.08,
+     "adjustment_goaltending_net": 0.0,
+     "adjustment_venue_and_nhl_participation_risk": 0.01,
+     "adjustment_opponent_field_depth": 0.01,
+     "adjustment_single_elimination_variance": -0.05,
+     "adjustment_recent_form_and_results": 0.0,
+     "adjustment_injuries_and_roster_churn": 0.0,
+     "prior_forecast_probability": 0.6
+    },
+    "raw_bindings": {
+     "best_on_best_tournaments_count": 5.0,
+     "canada_best_on_best_gold_count": 3.0,
+     "base_rate_canada_gold_best_on_best": 0.6,
+     "adjustment_canada_roster_quality": 0.1,
+     "adjustment_usa_roster_strength": -0.08,
+     "adjustment_nhl_participation_confirmation": 0.03,
+     "adjustment_venue_construction_ice_issues": -0.02,
+     "adjustment_single_elimination_variance_injury_risk": -0.05,
+     "adjustment_young_phenoms_depth_upside": 0.01,
+     "shrinkage_toward_even_probability": 0.04,
+     "shrinkage_target_probability": 0.5
+    }
+   },
+   {
+    "key": "futuresim|hockey_can|s1|2026-01-28",
+    "date": "2026-01-28",
+    "sample": 1,
+    "target": 0.61,
+    "bindings": {
+     "base_rate_canada_gold_nhl_bestonbest": 0.6,
+     "adjustment_canada_roster_star_power": 0.08,
+     "adjustment_usa_rival_strength": -0.05,
+     "adjustment_goaltending_net": 0.0,
+     "adjustment_venue_and_nhl_participation_risk": 0.02,
+     "adjustment_opponent_field_depth": 0.0,
+     "adjustment_single_elimination_variance": -0.06,
+     "adjustment_recent_form_and_results": 0.0,
+     "adjustment_injuries_and_roster_churn": 0.01,
+     "prior_forecast_probability": 0.6
+    },
+    "raw_bindings": {
+     "nhl_era_olympics_count": 5.0,
+     "canada_nhl_era_gold_count": 3.0,
+     "base_rate_canada_gold_nhl_era": 0.6,
+     "adjustment_superstar_roster_boost": 0.08,
+     "adjustment_strong_usa_rival_penalty": -0.05,
+     "adjustment_reduced_nhl_withdrawal_risk": 0.02,
+     "adjustment_no_major_canada_injuries": 0.01,
+     "adjustment_short_tournament_variance_penalty": -0.06,
+     "adjustment_market_consensus_boost": 0.01,
+     "net_adjustment_total": 0.01
+    }
+   },
+   {
+    "key": "futuresim|hockey_can|s1|2026-02-08",
+    "date": "2026-02-08",
+    "sample": 1,
+    "target": 0.63,
+    "bindings": {
+     "base_rate_canada_gold_nhl_bestonbest": 0.6,
+     "adjustment_canada_roster_star_power": 0.06,
+     "adjustment_usa_rival_strength": 0.0,
+     "adjustment_goaltending_net": -0.03,
+     "adjustment_venue_and_nhl_participation_risk": 0.04,
+     "adjustment_opponent_field_depth": -0.02,
+     "adjustment_single_elimination_variance": 0.0,
+     "adjustment_recent_form_and_results": 0.0,
+     "adjustment_injuries_and_roster_churn": -0.02,
+     "prior_forecast_probability": 0.61
+    },
+    "raw_bindings": {
+     "nhl_olympics_reference_tournaments_count": 5.0,
+     "canada_gold_in_reference_tournaments_count": 3.0,
+     "base_rate_canada_gold_nhl_olympics": 0.6,
+     "adjustment_strong_top_tier_roster": 0.06,
+     "adjustment_nhl_players_participating_confirmed": 0.03,
+     "adjustment_venue_ice_concerns_patched": 0.01,
+     "recent_injury_replacements_count": 2.0,
+     "adjustment_recent_injuries_replacements": -0.02,
+     "adjustment_goaltender_health_uncertainty_kuemper": -0.03,
+     "adjustment_strong_opposition_field": -0.02,
+     "prior_forecast_earlier": 0.55,
+     "prior_forecast_previous": 0.61,
+     "overconfidence_soft_cap_probability": 0.7,
+     "plausible_range_lower": 0.4,
+     "plausible_range_upper": 0.8
+    }
+   },
+   {
+    "key": "futuresim|hockey_can|s1|2026-02-15",
+    "date": "2026-02-15",
+    "sample": 1,
+    "target": 0.64,
+    "bindings": {
+     "base_rate_canada_gold_nhl_bestonbest": 0.6,
+     "adjustment_canada_roster_star_power": 0.08,
+     "adjustment_usa_rival_strength": -0.07,
+     "adjustment_goaltending_net": 0.03,
+     "adjustment_venue_and_nhl_participation_risk": 0.01,
+     "adjustment_opponent_field_depth": 0.0,
+     "adjustment_single_elimination_variance": 0.0,
+     "adjustment_recent_form_and_results": 0.05,
+     "adjustment_injuries_and_roster_churn": -0.04,
+     "prior_forecast_probability": 0.61
+    },
+    "raw_bindings": {
+     "base_rate_canada_gold_with_nhl_players": 0.6,
+     "adjustment_strong_nhl_roster_star_power": 0.08,
+     "adjustment_dominant_early_group_stage_form": 0.05,
+     "adjustment_goaltending_depth_and_form": 0.03,
+     "adjustment_injuries_and_roster_churn": -0.04,
+     "adjustment_strong_usa_and_knockout_volatility": -0.07,
+     "adjustment_venue_and_nhl_participation_risk_resolved": 0.01,
+     "adjustment_calibration_anti_overconfidence": -0.02,
+     "group_stage_wins_considered": 2.0,
+     "canada_goals_vs_czech": 5.0,
+     "czech_goals_vs_canada": 0.0,
+     "canada_goals_vs_switzerland": 5.0,
+     "switzerland_goals_vs_canada": 1.0,
+     "binnington_shutout_saves": 26.0
+    }
+   },
+   {
+    "key": "futuresim|hockey_can|s1|2026-02-20",
+    "date": "2026-02-20",
+    "sample": 1,
+    "target": 0.65,
+    "bindings": {
+     "base_rate_canada_gold_nhl_bestonbest": 0.6,
+     "adjustment_canada_roster_star_power": 0.08,
+     "adjustment_usa_rival_strength": -0.05,
+     "adjustment_goaltending_net": 0.02,
+     "adjustment_venue_and_nhl_participation_risk": 0.0,
+     "adjustment_opponent_field_depth": 0.0,
+     "adjustment_single_elimination_variance": 0.0,
+     "adjustment_recent_form_and_results": 0.07,
+     "adjustment_injuries_and_roster_churn": -0.06,
+     "prior_forecast_probability": 0.64
+    },
+    "raw_bindings": {
+     "base_rate_canada_gold_pre_tournament": 0.6,
+     "prior_most_recent_forecast": 0.64,
+     "adjustment_nhl_star_roster": 0.08,
+     "adjustment_group_stage_dominance": 0.04,
+     "adjustment_semifinal_win_vs_finland": 0.03,
+     "adjustment_crosby_injury_doubtful": -0.06,
+     "adjustment_usa_strong_semifinal_form": -0.05,
+     "adjustment_goaltending_binnington_positive": 0.02,
+     "adjustment_missing_market_odds_single_game_variance": -0.01,
+     "canada_group_stage_win_margin_vs_czech": 5.0,
+     "canada_group_stage_goals_for_vs_france": 10.0,
+     "canada_group_stage_goals_against_vs_france": 2.0,
+     "canada_group_stage_win_margin_vs_switzerland": 4.0,
+     "canada_semifinal_score_for_vs_finland": 3.0,
+     "canada_semifinal_score_against_vs_finland": 2.0,
+     "usa_semifinal_score_for_vs_slovakia": 6.0,
+     "usa_semifinal_score_against_vs_slovakia": 2.0,
+     "market_odds_found_indicator": 0.0
+    }
+   }
+  ],
+  "trajectory": {
+   "s0": {
+    "2026-01-14": {
+     "base_rate_canada_gold_nhl_bestonbest": 0.6,
+     "adjustment_canada_roster_star_power": 0.16,
+     "adjustment_usa_rival_strength": -0.08,
+     "adjustment_goaltending_net": 0.01,
+     "adjustment_venue_and_nhl_participation_risk": -0.03,
+     "adjustment_opponent_field_depth": -0.04,
+     "adjustment_single_elimination_variance": -0.06,
+     "adjustment_recent_form_and_results": 0.0,
+     "adjustment_injuries_and_roster_churn": 0.0,
+     "prior_forecast_probability": 0.6,
+     "_target": 0.56
+    },
+    "2026-01-28": {
+     "base_rate_canada_gold_nhl_bestonbest": 0.6,
+     "adjustment_canada_roster_star_power": 0.12,
+     "adjustment_usa_rival_strength": -0.08,
+     "adjustment_goaltending_net": 0.02,
+     "adjustment_venue_and_nhl_participation_risk": -0.01,
+     "adjustment_opponent_field_depth": 0.0,
+     "adjustment_single_elimination_variance": -0.06,
+     "adjustment_recent_form_and_results": 0.0,
+     "adjustment_injuries_and_roster_churn": -0.02,
+     "prior_forecast_probability": 0.56,
+     "_target": 0.57
+    },
+    "2026-02-08": {
+     "base_rate_canada_gold_nhl_bestonbest": 0.6,
+     "adjustment_canada_roster_star_power": 0.09,
+     "adjustment_usa_rival_strength": -0.06,
+     "adjustment_goaltending_net": -0.05,
+     "adjustment_venue_and_nhl_participation_risk": 0.02,
+     "adjustment_opponent_field_depth": 0.0,
+     "adjustment_single_elimination_variance": -0.03,
+     "adjustment_recent_form_and_results": 0.03,
+     "adjustment_injuries_and_roster_churn": 0.0,
+     "prior_forecast_probability": 0.57,
+     "_target": 0.61
+    },
+    "2026-02-15": {
+     "base_rate_canada_gold_nhl_bestonbest": 0.6,
+     "adjustment_canada_roster_star_power": 0.04,
+     "adjustment_usa_rival_strength": -0.08,
+     "adjustment_goaltending_net": 0.03,
+     "adjustment_venue_and_nhl_participation_risk": 0.0,
+     "adjustment_opponent_field_depth": 0.0,
+     "adjustment_single_elimination_variance": -0.05,
+     "adjustment_recent_form_and_results": 0.06,
+     "adjustment_injuries_and_roster_churn": 0.02,
+     "prior_forecast_probability": 0.61,
+     "_target": 0.62
+    },
+    "2026-02-20": {
+     "base_rate_canada_gold_nhl_bestonbest": 0.6,
+     "adjustment_canada_roster_star_power": 0.0,
+     "adjustment_usa_rival_strength": -0.03,
+     "adjustment_goaltending_net": 0.02,
+     "adjustment_venue_and_nhl_participation_risk": 0.0,
+     "adjustment_opponent_field_depth": 0.0,
+     "adjustment_single_elimination_variance": 0.0,
+     "adjustment_recent_form_and_results": 0.1,
+     "adjustment_injuries_and_roster_churn": 0.01,
+     "prior_forecast_probability": 0.62,
+     "_target": 0.61
+    }
+   },
+   "s1": {
+    "2026-01-14": {
+     "base_rate_canada_gold_nhl_bestonbest": 0.6,
+     "adjustment_canada_roster_star_power": 0.1,
+     "adjustment_usa_rival_strength": -0.08,
+     "adjustment_goaltending_net": 0.0,
+     "adjustment_venue_and_nhl_participation_risk": 0.01,
+     "adjustment_opponent_field_depth": 0.01,
+     "adjustment_single_elimination_variance": -0.05,
+     "adjustment_recent_form_and_results": 0.0,
+     "adjustment_injuries_and_roster_churn": 0.0,
+     "prior_forecast_probability": 0.6,
+     "_target": 0.55
+    },
+    "2026-01-28": {
+     "base_rate_canada_gold_nhl_bestonbest": 0.6,
+     "adjustment_canada_roster_star_power": 0.08,
+     "adjustment_usa_rival_strength": -0.05,
+     "adjustment_goaltending_net": 0.0,
+     "adjustment_venue_and_nhl_participation_risk": 0.02,
+     "adjustment_opponent_field_depth": 0.0,
+     "adjustment_single_elimination_variance": -0.06,
+     "adjustment_recent_form_and_results": 0.0,
+     "adjustment_injuries_and_roster_churn": 0.01,
+     "prior_forecast_probability": 0.6,
+     "_target": 0.61
+    },
+    "2026-02-08": {
+     "base_rate_canada_gold_nhl_bestonbest": 0.6,
+     "adjustment_canada_roster_star_power": 0.06,
+     "adjustment_usa_rival_strength": 0.0,
+     "adjustment_goaltending_net": -0.03,
+     "adjustment_venue_and_nhl_participation_risk": 0.04,
+     "adjustment_opponent_field_depth": -0.02,
+     "adjustment_single_elimination_variance": 0.0,
+     "adjustment_recent_form_and_results": 0.0,
+     "adjustment_injuries_and_roster_churn": -0.02,
+     "prior_forecast_probability": 0.61,
+     "_target": 0.63
+    },
+    "2026-02-15": {
+     "base_rate_canada_gold_nhl_bestonbest": 0.6,
+     "adjustment_canada_roster_star_power": 0.08,
+     "adjustment_usa_rival_strength": -0.07,
+     "adjustment_goaltending_net": 0.03,
+     "adjustment_venue_and_nhl_participation_risk": 0.01,
+     "adjustment_opponent_field_depth": 0.0,
+     "adjustment_single_elimination_variance": 0.0,
+     "adjustment_recent_form_and_results": 0.05,
+     "adjustment_injuries_and_roster_churn": -0.04,
+     "prior_forecast_probability": 0.61,
+     "_target": 0.64
+    },
+    "2026-02-20": {
+     "base_rate_canada_gold_nhl_bestonbest": 0.6,
+     "adjustment_canada_roster_star_power": 0.08,
+     "adjustment_usa_rival_strength": -0.05,
+     "adjustment_goaltending_net": 0.02,
+     "adjustment_venue_and_nhl_participation_risk": 0.0,
+     "adjustment_opponent_field_depth": 0.0,
+     "adjustment_single_elimination_variance": 0.0,
+     "adjustment_recent_form_and_results": 0.07,
+     "adjustment_injuries_and_roster_churn": -0.06,
+     "prior_forecast_probability": 0.64,
+     "_target": 0.65
+    }
+   }
+  }
+ },
+ "futuresim/hockey_usa": {
+  "n_instances": 10,
+  "schema": [
+   "base_rate_usa_gold",
+   "adj_nhl_participation",
+   "adj_usa_roster_strength",
+   "adj_usa_team_chemistry",
+   "adj_usa_goaltending",
+   "adj_usa_injury_seth_jones",
+   "adj_canada_strength",
+   "adj_tournament_format_variance",
+   "adj_other_risks_and_field_strength",
+   "previous_forecast_probability",
+   "interval_lower_bound",
+   "interval_upper_bound"
+  ],
+  "schema_notes": "Merged all base-rate variants into base_rate_usa_gold; grouped many named +/- adjustments into common buckets (NHL participation, USA roster/chemistry/goaltending/injury, Canada strength, tournament variance, and residual/field/rink risks); harmonized prior/previous forecast and all interval/range fields into unified previous_forecast_probability and interval bounds, using 0 as the implicit neutral when absent.",
+  "excluded": [],
+  "program": "def forecast():\n    base_p = base_rate_usa_gold\n\n    evidence = ZERO\n    evidence += adj_nhl_participation\n    evidence += adj_usa_roster_strength\n    evidence += adj_usa_team_chemistry\n    evidence += adj_usa_goaltending\n    evidence += adj_usa_injury_seth_jones\n    evidence += adj_canada_strength\n    evidence += adj_tournament_format_variance\n    evidence += adj_other_risks_and_field_strength\n\n    updated_p = base_p + evidence\n\n    lower = interval_lower_bound\n    upper = interval_upper_bound\n\n    if lower > ZERO:\n        if updated_p < lower:\n            updated_p = lower\n\n    if upper > ZERO:\n        if updated_p > upper:\n            updated_p = upper\n\n    prev = previous_forecast_probability\n    if prev > ZERO:\n        updated_p = (updated_p + prev) * HALF\n\n    return clamp(updated_p, ZERO, ONE)",
+  "fit": {
+   "n": 10,
+   "n_ran": 10,
+   "n_failed": 0,
+   "mae": 0.0445,
+   "max": 0.13000000000000003,
+   "within_tol": 0.5,
+   "errors": []
+  },
+  "residuals": [
+   0.01999999999999999,
+   0.06,
+   0.03,
+   0.035,
+   0.01999999999999999,
+   0.13000000000000003,
+   0.019999999999999962,
+   0.0,
+   0.12,
+   0.009999999999999981
+  ],
+  "degeneracy": {
+   "max_abs_corr": 0.9123318851783628,
+   "max_corr_var": "adj_usa_team_chemistry",
+   "passthrough": false,
+   "n_ops": 9,
+   "n_branches": 5,
+   "near_passthrough": false,
+   "lookup_smell": false,
+   "suspect": false
+  },
+  "ok": false,
+  "attempts": 4,
+  "history": [
+   {
+    "attempt": 1,
+    "stage": "fit",
+    "mae": 0.16435657695315714,
+    "within_tol": 0.0,
+    "degeneracy": {
+     "max_abs_corr": 0.9123318851783628,
+     "max_corr_var": "adj_usa_team_chemistry",
+     "passthrough": false,
+     "n_ops": 17,
+     "n_branches": 2,
+     "near_passthrough": false,
+     "lookup_smell": false,
+     "suspect": false
+    }
+   },
+   {
+    "attempt": 2,
+    "stage": "fit",
+    "mae": 0.0445,
+    "within_tol": 0.5,
+    "degeneracy": {
+     "max_abs_corr": 0.9123318851783628,
+     "max_corr_var": "adj_usa_team_chemistry",
+     "passthrough": false,
+     "n_ops": 9,
+     "n_branches": 5,
+     "near_passthrough": false,
+     "lookup_smell": false,
+     "suspect": false
+    }
+   },
+   {
+    "attempt": 3,
+    "stage": "validator",
+    "problems": "line 65: constant-construction -- expression built only from named constants -- declare the value as a step-1 variable instead"
+   },
+   {
+    "attempt": 4,
+    "stage": "validator",
+    "problems": "line 65: constant-construction -- expression built only from named constants -- declare the value as a step-1 variable instead"
+   }
+  ],
+  "oos": {
+   "train_sample": 0,
+   "train_n": 5,
+   "test_n": 5,
+   "train_mae": 0.10333366899578796,
+   "test_mae": 0.13480624483562292,
+   "test_within_tol": 0.2,
+   "test_failed": 0,
+   "program": "def forecast():\n    base = base_rate_usa_gold\n\n    nhl = adj_nhl_participation\n    roster = adj_usa_roster_strength\n    chem = adj_usa_team_chemistry\n    goalie = adj_usa_goaltending\n    injury = adj_usa_injury_seth_jones\n    canada = adj_canada_strength\n    variance = adj_tournament_format_variance\n    field = adj_other_risks_and_field_strength\n    prev = previous_forecast_probability\n    lo_in = interval_lower_bound\n    hi_in = interval_upper_bound\n\n    eps = EPS\n    one = ONE\n    zero = ZERO\n\n    one_minus_eps = one - eps\n\n    prior_p = clamp(base, eps, one_minus_eps)\n    prior_o = odds(prior_p)\n    prior_l = log(prior_o)\n\n    plus = zero\n    minus = zero\n\n    plus += max(nhl, zero)\n    minus += max(-nhl, zero)\n\n    plus += max(roster, zero)\n    minus += max(-roster, zero)\n\n    plus += max(chem, zero)\n    minus += max(-chem, zero)\n\n    plus += max(goalie, zero)\n    minus += max(-goalie, zero)\n\n    plus += max(injury, zero)\n    minus += max(-injury, zero)\n\n    plus += max(canada, zero)\n    minus += max(-canada, zero)\n\n    plus += max(variance, zero)\n    minus += max(-variance, zero)\n\n    plus += max(field, zero)\n    minus += max(-field, zero)\n\n    strength = plus - minus\n\n    damp = one - abs(variance)\n    damp = clamp(damp, HUNDREDTH, one)\n\n    step = strength * damp\n\n    l_post = prior_l + step\n    p_post = logistic(l_post)\n\n    lo = lo_in\n    hi = hi_in\n    if lo == zero:\n        lo = zero\n    if hi == zero:\n        hi = one\n    p_post = clamp(p_post, lo, hi)\n\n    prev_w = HALF\n    if prev == zero:\n        prev_w = zero\n\n    width = hi - lo\n    width = abs(width)\n    width = clamp(width, zero, one)\n\n    inv_width = one - width\n    new_w = one - prev_w\n    new_w *= inv_width\n    prev_w = one - new_w\n\n    mixed = p_post * new_w + prev * prev_w\n\n    anchor = base\n    pull = abs(canada)\n    pull += abs(field)\n    pull += abs(variance)\n    pull = clamp(pull, zero, one)\n\n    keep = one - pull\n    mixed = mixed * keep + anchor * pull\n\n    return clamp(mixed, zero, one)",
+   "degeneracy": {
+    "max_abs_corr": 0.9861168645694258,
+    "max_corr_var": "adj_usa_team_chemistry",
+    "passthrough": false,
+    "n_ops": 49,
+    "n_branches": 3,
+    "near_passthrough": false,
+    "lookup_smell": false,
+    "suspect": false
+   }
+  },
+  "instances": [
+   {
+    "key": "futuresim|hockey_usa|s0|2026-01-14",
+    "date": "2026-01-14",
+    "sample": 0,
+    "target": 0.25,
+    "bindings": {
+     "base_rate_usa_gold": 0.1,
+     "adj_nhl_participation": 0.1,
+     "adj_usa_roster_strength": 0.12,
+     "adj_usa_team_chemistry": 0.05,
+     "adj_usa_goaltending": 0.0,
+     "adj_usa_injury_seth_jones": 0.0,
+     "adj_canada_strength": -0.08,
+     "adj_tournament_format_variance": -0.02,
+     "adj_other_risks_and_field_strength": -0.04,
+     "previous_forecast_probability": 0.0,
+     "interval_lower_bound": 0.0,
+     "interval_upper_bound": 0.0
+    },
+    "raw_bindings": {
+     "nhl_era_olympics_in_reference_class": 5.0,
+     "usa_gold_wins_in_reference_class": 0.0,
+     "base_rate_usa_gold_prior": 0.1,
+     "adjustment_nhl_players_participating_pp": 0.1,
+     "adjustment_usa_strong_roster_announced_pp": 0.12,
+     "adjustment_canada_star_roster_strength_pp": -0.08,
+     "adjustment_usa_team_chemistry_from_4_nations_pp": 0.05,
+     "adjustment_residual_nhl_withdrawal_risk_pp": -0.02,
+     "adjustment_roster_omissions_and_tournament_variance_pp": -0.02
+    }
+   },
+   {
+    "key": "futuresim|hockey_usa|s0|2026-01-28",
+    "date": "2026-01-28",
+    "sample": 0,
+    "target": 0.12,
+    "bindings": {
+     "base_rate_usa_gold": 0.1,
+     "adj_nhl_participation": 0.04,
+     "adj_usa_roster_strength": 0.07,
+     "adj_usa_team_chemistry": -0.02,
+     "adj_usa_goaltending": 0.05,
+     "adj_usa_injury_seth_jones": -0.03,
+     "adj_canada_strength": -0.06,
+     "adj_tournament_format_variance": 0.0,
+     "adj_other_risks_and_field_strength": -0.04,
+     "previous_forecast_probability": 0.25,
+     "interval_lower_bound": 0.07,
+     "interval_upper_bound": 0.2
+    },
+    "raw_bindings": {
+     "base_rate_us_gold_best_on_best": 0.1,
+     "equal_team_baseline_probability": 0.083,
+     "number_of_equal_teams_assumed": 12.0,
+     "adjustment_nhl_participation_confirmed": 0.04,
+     "adjustment_us_star_roster_named": 0.07,
+     "adjustment_canada_all_star_favorite": -0.06,
+     "adjustment_us_lost_to_canada_ot_4_nations_final": -0.02,
+     "adjustment_seth_jones_out_replaced_by_lacombe": -0.03,
+     "adjustment_residual_rink_construction_risk": -0.01,
+     "adjustment_deeper_field_other_nations_strong": -0.02,
+     "adjustment_us_goaltending_strong": 0.05,
+     "previous_forecast_probability": 0.25,
+     "subjective_interval_lower_bound": 0.07,
+     "subjective_interval_upper_bound": 0.2
+    }
+   },
+   {
+    "key": "futuresim|hockey_usa|s0|2026-02-08",
+    "date": "2026-02-08",
+    "sample": 0,
+    "target": 0.15,
+    "bindings": {
+     "base_rate_usa_gold": 0.2,
+     "adj_nhl_participation": 0.0,
+     "adj_usa_roster_strength": 0.06,
+     "adj_usa_team_chemistry": 0.0,
+     "adj_usa_goaltending": 0.0,
+     "adj_usa_injury_seth_jones": -0.03,
+     "adj_canada_strength": -0.07,
+     "adj_tournament_format_variance": 0.0,
+     "adj_other_risks_and_field_strength": -0.04,
+     "previous_forecast_probability": 0.0,
+     "interval_lower_bound": 0.0,
+     "interval_upper_bound": 0.0
+    },
+    "raw_bindings": {
+     "nhl_player_olympics_reference_count": 5.0,
+     "us_gold_wins_in_nhl_player_olympics": 1.0,
+     "base_rate_us_gold_with_nhl_players": 0.2,
+     "adjustment_us_roster_elite_talent_pp": 6.0,
+     "adjustment_recent_loss_to_canada_pp": -4.0,
+     "adjustment_seth_jones_injury_pp": -3.0,
+     "adjustment_canada_favourite_roster_strength_pp": -8.0,
+     "adjustment_canada_injuries_offset_pp": 1.0,
+     "net_raw_adjustment_pp": -8.0,
+     "damping_factor_for_net_move": 0.6
+    }
+   },
+   {
+    "key": "futuresim|hockey_usa|s0|2026-02-15",
+    "date": "2026-02-15",
+    "sample": 0,
+    "target": 0.15,
+    "bindings": {
+     "base_rate_usa_gold": 0.2,
+     "adj_nhl_participation": 0.0,
+     "adj_usa_roster_strength": 0.04,
+     "adj_usa_team_chemistry": 0.0,
+     "adj_usa_goaltending": 0.0,
+     "adj_usa_injury_seth_jones": -0.03,
+     "adj_canada_strength": -0.06,
+     "adj_tournament_format_variance": -0.01,
+     "adj_other_risks_and_field_strength": -0.02,
+     "previous_forecast_probability": 0.25,
+     "interval_lower_bound": 0.0,
+     "interval_upper_bound": 0.0
+    },
+    "raw_bindings": {
+     "base_rate_us_gold_modern_nhl_era": 0.2,
+     "adjustment_roster_top_line_talent": 0.04,
+     "adjustment_seth_jones_injury": -0.03,
+     "adjustment_group_stage_wins": 0.03,
+     "adjustment_opponents_canada_finland_strength": -0.06,
+     "adjustment_seeding_format_risk": -0.01,
+     "adjustment_uncertainty_discount": -0.02,
+     "prior_forecast_1": 0.25,
+     "prior_forecast_2": 0.12,
+     "prior_forecast_3": 0.15,
+     "latvia_game_goal_margin": 4.0,
+     "denmark_game_goal_margin": 3.0,
+     "canada_game_goal_margin": 5.0,
+     "finland_game_goal_margin": 11.0
+    }
+   },
+   {
+    "key": "futuresim|hockey_usa|s0|2026-02-20",
+    "date": "2026-02-20",
+    "sample": 0,
+    "target": 0.17,
+    "bindings": {
+     "base_rate_usa_gold": 0.2,
+     "adj_nhl_participation": 0.0,
+     "adj_usa_roster_strength": 0.05,
+     "adj_usa_team_chemistry": 0.0,
+     "adj_usa_goaltending": 0.0,
+     "adj_usa_injury_seth_jones": -0.03,
+     "adj_canada_strength": -0.07,
+     "adj_tournament_format_variance": 0.0,
+     "adj_other_risks_and_field_strength": 0.0,
+     "previous_forecast_probability": 0.15,
+     "interval_lower_bound": 0.12,
+     "interval_upper_bound": 0.25
+    },
+    "raw_bindings": {
+     "base_rate_usa_wins_olympic_mens_hockey_with_nhl": 0.2,
+     "adjustment_top_end_roster_talent": 0.05,
+     "adjustment_group_stage_wins_signal": 0.02,
+     "adjustment_key_defensive_injury_seth_jones_out": -0.03,
+     "adjustment_opponents_canada_finland_dominant_favourites": -0.07,
+     "previous_forecast_probability": 0.15,
+     "prior_forecast_range_lower": 0.12,
+     "prior_forecast_range_upper": 0.25,
+     "latvia_game_goal_margin": 4.0,
+     "denmark_game_goal_margin": 3.0,
+     "canada_reported_group_stage_goals_against": 0.0,
+     "finland_reported_group_stage_goals_against": 0.0
+    }
+   },
+   {
+    "key": "futuresim|hockey_usa|s1|2026-01-14",
+    "date": "2026-01-14",
+    "sample": 1,
+    "target": 0.28,
+    "bindings": {
+     "base_rate_usa_gold": 0.2,
+     "adj_nhl_participation": 0.1,
+     "adj_usa_roster_strength": 0.1,
+     "adj_usa_team_chemistry": 0.08,
+     "adj_usa_goaltending": 0.02,
+     "adj_usa_injury_seth_jones": -0.01,
+     "adj_canada_strength": -0.08,
+     "adj_tournament_format_variance": -0.03,
+     "adj_other_risks_and_field_strength": 0.0,
+     "previous_forecast_probability": 0.0,
+     "interval_lower_bound": 0.12,
+     "interval_upper_bound": 0.15
+    },
+    "raw_bindings": {
+     "nhl_olympics_reference_tournaments_count": 5.0,
+     "usa_gold_wins_in_reference_class": 1.0,
+     "base_rate_usa_gold_with_nhl_players": 0.2,
+     "adjustment_us_elite_talent_nhl_participation": 0.1,
+     "adjustment_canada_roster_strength_and_recent_win": -0.06,
+     "adjustment_4_nations_usa_final_close_loss_signal": 0.05,
+     "adjustment_usa_roster_continuity_chemistry": 0.03,
+     "adjustment_usa_goaltending_defensive_core": 0.02,
+     "adjustment_tournament_variance_knockout_format": -0.03,
+     "adjustment_usa_omissions_and_injury_risk": -0.01,
+     "adjustment_additional_canada_edge_cohesion_history": -0.02,
+     "credible_interval_half_width_low": 0.12,
+     "credible_interval_half_width_high": 0.15
+    }
+   },
+   {
+    "key": "futuresim|hockey_usa|s1|2026-01-28",
+    "date": "2026-01-28",
+    "sample": 1,
+    "target": 0.22,
+    "bindings": {
+     "base_rate_usa_gold": 0.2,
+     "adj_nhl_participation": 0.0,
+     "adj_usa_roster_strength": 0.1,
+     "adj_usa_team_chemistry": 0.04,
+     "adj_usa_goaltending": 0.02,
+     "adj_usa_injury_seth_jones": -0.02,
+     "adj_canada_strength": -0.12,
+     "adj_tournament_format_variance": -0.02,
+     "adj_other_risks_and_field_strength": 0.0,
+     "previous_forecast_probability": 0.0,
+     "interval_lower_bound": 0.0,
+     "interval_upper_bound": 0.0
+    },
+    "raw_bindings": {
+     "usa_gold_base_rate_nhl_olympics": 0.2,
+     "nhl_player_olympics_sample_size": 5.0,
+     "usa_gold_count_in_sample": 1.0,
+     "adjustment_us_superstar_roster": 0.1,
+     "adjustment_team_chemistry_4nations_core": 0.04,
+     "adjustment_us_goaltending_elite": 0.02,
+     "adjustment_canada_stronger_roster_4nations_win": -0.1,
+     "adjustment_canada_depth_addition_celebrini": -0.02,
+     "adjustment_us_injury_seth_jones_out": -0.02,
+     "adjustment_us_omissions_fox_robertson": -0.01,
+     "adjustment_rink_size_effect": 0.01,
+     "adjustment_tournament_variance_other_strong_teams": -0.02
+    }
+   },
+   {
+    "key": "futuresim|hockey_usa|s1|2026-02-08",
+    "date": "2026-02-08",
+    "sample": 1,
+    "target": 0.25,
+    "bindings": {
+     "base_rate_usa_gold": 0.2,
+     "adj_nhl_participation": 0.02,
+     "adj_usa_roster_strength": 0.09,
+     "adj_usa_team_chemistry": 0.04,
+     "adj_usa_goaltending": 0.0,
+     "adj_usa_injury_seth_jones": -0.03,
+     "adj_canada_strength": -0.04,
+     "adj_tournament_format_variance": -0.03,
+     "adj_other_risks_and_field_strength": 0.0,
+     "previous_forecast_probability": 0.0,
+     "interval_lower_bound": 0.0,
+     "interval_upper_bound": 0.0
+    },
+    "raw_bindings": {
+     "base_rate_us_gold_nhl_era": 0.2,
+     "adjustment_us_top_line_talent": 0.08,
+     "adjustment_canada_depth_favorite": -0.06,
+     "adjustment_seth_jones_injury": -0.03,
+     "adjustment_us_chemistry_continuity": 0.04,
+     "adjustment_nhl_players_confirmed": 0.02,
+     "adjustment_canada_injury_replacements": 0.02,
+     "adjustment_matthews_named_captain": 0.01,
+     "adjustment_tournament_variance_discount": -0.03,
+     "us_win_4_nations_final_indicator": 0.0,
+     "canada_win_4_nations_indicator": 1.0,
+     "gold_medal_game_day_of_month": 22.0
+    }
+   },
+   {
+    "key": "futuresim|hockey_usa|s1|2026-02-15",
+    "date": "2026-02-15",
+    "sample": 1,
+    "target": 0.24,
+    "bindings": {
+     "base_rate_usa_gold": 0.2,
+     "adj_nhl_participation": 0.0,
+     "adj_usa_roster_strength": 0.08,
+     "adj_usa_team_chemistry": 0.05,
+     "adj_usa_goaltending": -0.02,
+     "adj_usa_injury_seth_jones": -0.02,
+     "adj_canada_strength": -0.1,
+     "adj_tournament_format_variance": 0.0,
+     "adj_other_risks_and_field_strength": -0.01,
+     "previous_forecast_probability": 0.0,
+     "interval_lower_bound": 0.1,
+     "interval_upper_bound": 0.12
+    },
+    "raw_bindings": {
+     "base_rate_us_gold_nhl_era": 0.2,
+     "adjustment_top_end_roster_pp": 0.08,
+     "adjustment_team_chemistry_continuity_pp": 0.05,
+     "adjustment_seth_jones_injury_pp": -0.03,
+     "adjustment_lacombe_replacement_mitigation_pp": 0.01,
+     "adjustment_group_stage_two_wins_pp": 0.06,
+     "adjustment_canada_dominance_depth_pp": -0.08,
+     "adjustment_prior_ot_loss_to_canada_pp": -0.02,
+     "adjustment_goaltending_uncertainty_pp": -0.02,
+     "adjustment_other_strong_teams_competition_pp": -0.01,
+     "group_stage_wins_so_far": 2.0,
+     "latvia_game_goal_margin": 4.0,
+     "denmark_game_goal_margin": 3.0,
+     "uncertainty_band_low_pp": 0.1,
+     "uncertainty_band_high_pp": 0.12
+    }
+   },
+   {
+    "key": "futuresim|hockey_usa|s1|2026-02-20",
+    "date": "2026-02-20",
+    "sample": 1,
+    "target": 0.22,
+    "bindings": {
+     "base_rate_usa_gold": 0.2,
+     "adj_nhl_participation": 0.0,
+     "adj_usa_roster_strength": 0.12,
+     "adj_usa_team_chemistry": 0.0,
+     "adj_usa_goaltending": 0.0,
+     "adj_usa_injury_seth_jones": -0.03,
+     "adj_canada_strength": -0.06,
+     "adj_tournament_format_variance": -0.01,
+     "adj_other_risks_and_field_strength": 0.0,
+     "previous_forecast_probability": 0.24,
+     "interval_lower_bound": 0.12,
+     "interval_upper_bound": 0.36
+    },
+    "raw_bindings": {
+     "base_rate_usa_gold_nhl_participation": 0.2,
+     "adjustment_for_reaching_semifinal": 0.08,
+     "adjustment_for_strong_top_line_talent": 0.04,
+     "adjustment_for_defensive_injury_seth_jones_out": -0.03,
+     "adjustment_for_canada_heavy_favorite_status": -0.06,
+     "adjustment_for_narrow_ot_quarterfinal_win_vulnerability": -0.01,
+     "net_adjustment_total": 0.02,
+     "plausible_range_lower_bound": 0.12,
+     "plausible_range_upper_bound": 0.36,
+     "plausible_range_coverage_probability": 0.9,
+     "previous_forecast_value": 0.24
+    }
+   }
+  ],
+  "trajectory": {
+   "s0": {
+    "2026-01-14": {
+     "base_rate_usa_gold": 0.1,
+     "adj_nhl_participation": 0.1,
+     "adj_usa_roster_strength": 0.12,
+     "adj_usa_team_chemistry": 0.05,
+     "adj_usa_goaltending": 0.0,
+     "adj_usa_injury_seth_jones": 0.0,
+     "adj_canada_strength": -0.08,
+     "adj_tournament_format_variance": -0.02,
+     "adj_other_risks_and_field_strength": -0.04,
+     "previous_forecast_probability": 0.0,
+     "interval_lower_bound": 0.0,
+     "interval_upper_bound": 0.0,
+     "_target": 0.25
+    },
+    "2026-01-28": {
+     "base_rate_usa_gold": 0.1,
+     "adj_nhl_participation": 0.04,
+     "adj_usa_roster_strength": 0.07,
+     "adj_usa_team_chemistry": -0.02,
+     "adj_usa_goaltending": 0.05,
+     "adj_usa_injury_seth_jones": -0.03,
+     "adj_canada_strength": -0.06,
+     "adj_tournament_format_variance": 0.0,
+     "adj_other_risks_and_field_strength": -0.04,
+     "previous_forecast_probability": 0.25,
+     "interval_lower_bound": 0.07,
+     "interval_upper_bound": 0.2,
+     "_target": 0.12
+    },
+    "2026-02-08": {
+     "base_rate_usa_gold": 0.2,
+     "adj_nhl_participation": 0.0,
+     "adj_usa_roster_strength": 0.06,
+     "adj_usa_team_chemistry": 0.0,
+     "adj_usa_goaltending": 0.0,
+     "adj_usa_injury_seth_jones": -0.03,
+     "adj_canada_strength": -0.07,
+     "adj_tournament_format_variance": 0.0,
+     "adj_other_risks_and_field_strength": -0.04,
+     "previous_forecast_probability": 0.0,
+     "interval_lower_bound": 0.0,
+     "interval_upper_bound": 0.0,
+     "_target": 0.15
+    },
+    "2026-02-15": {
+     "base_rate_usa_gold": 0.2,
+     "adj_nhl_participation": 0.0,
+     "adj_usa_roster_strength": 0.04,
+     "adj_usa_team_chemistry": 0.0,
+     "adj_usa_goaltending": 0.0,
+     "adj_usa_injury_seth_jones": -0.03,
+     "adj_canada_strength": -0.06,
+     "adj_tournament_format_variance": -0.01,
+     "adj_other_risks_and_field_strength": -0.02,
+     "previous_forecast_probability": 0.25,
+     "interval_lower_bound": 0.0,
+     "interval_upper_bound": 0.0,
+     "_target": 0.15
+    },
+    "2026-02-20": {
+     "base_rate_usa_gold": 0.2,
+     "adj_nhl_participation": 0.0,
+     "adj_usa_roster_strength": 0.05,
+     "adj_usa_team_chemistry": 0.0,
+     "adj_usa_goaltending": 0.0,
+     "adj_usa_injury_seth_jones": -0.03,
+     "adj_canada_strength": -0.07,
+     "adj_tournament_format_variance": 0.0,
+     "adj_other_risks_and_field_strength": 0.0,
+     "previous_forecast_probability": 0.15,
+     "interval_lower_bound": 0.12,
+     "interval_upper_bound": 0.25,
+     "_target": 0.17
+    }
+   },
+   "s1": {
+    "2026-01-14": {
+     "base_rate_usa_gold": 0.2,
+     "adj_nhl_participation": 0.1,
+     "adj_usa_roster_strength": 0.1,
+     "adj_usa_team_chemistry": 0.08,
+     "adj_usa_goaltending": 0.02,
+     "adj_usa_injury_seth_jones": -0.01,
+     "adj_canada_strength": -0.08,
+     "adj_tournament_format_variance": -0.03,
+     "adj_other_risks_and_field_strength": 0.0,
+     "previous_forecast_probability": 0.0,
+     "interval_lower_bound": 0.12,
+     "interval_upper_bound": 0.15,
+     "_target": 0.28
+    },
+    "2026-01-28": {
+     "base_rate_usa_gold": 0.2,
+     "adj_nhl_participation": 0.0,
+     "adj_usa_roster_strength": 0.1,
+     "adj_usa_team_chemistry": 0.04,
+     "adj_usa_goaltending": 0.02,
+     "adj_usa_injury_seth_jones": -0.02,
+     "adj_canada_strength": -0.12,
+     "adj_tournament_format_variance": -0.02,
+     "adj_other_risks_and_field_strength": 0.0,
+     "previous_forecast_probability": 0.0,
+     "interval_lower_bound": 0.0,
+     "interval_upper_bound": 0.0,
+     "_target": 0.22
+    },
+    "2026-02-08": {
+     "base_rate_usa_gold": 0.2,
+     "adj_nhl_participation": 0.02,
+     "adj_usa_roster_strength": 0.09,
+     "adj_usa_team_chemistry": 0.04,
+     "adj_usa_goaltending": 0.0,
+     "adj_usa_injury_seth_jones": -0.03,
+     "adj_canada_strength": -0.04,
+     "adj_tournament_format_variance": -0.03,
+     "adj_other_risks_and_field_strength": 0.0,
+     "previous_forecast_probability": 0.0,
+     "interval_lower_bound": 0.0,
+     "interval_upper_bound": 0.0,
+     "_target": 0.25
+    },
+    "2026-02-15": {
+     "base_rate_usa_gold": 0.2,
+     "adj_nhl_participation": 0.0,
+     "adj_usa_roster_strength": 0.08,
+     "adj_usa_team_chemistry": 0.05,
+     "adj_usa_goaltending": -0.02,
+     "adj_usa_injury_seth_jones": -0.02,
+     "adj_canada_strength": -0.1,
+     "adj_tournament_format_variance": 0.0,
+     "adj_other_risks_and_field_strength": -0.01,
+     "previous_forecast_probability": 0.0,
+     "interval_lower_bound": 0.1,
+     "interval_upper_bound": 0.12,
+     "_target": 0.24
+    },
+    "2026-02-20": {
+     "base_rate_usa_gold": 0.2,
+     "adj_nhl_participation": 0.0,
+     "adj_usa_roster_strength": 0.12,
+     "adj_usa_team_chemistry": 0.0,
+     "adj_usa_goaltending": 0.0,
+     "adj_usa_injury_seth_jones": -0.03,
+     "adj_canada_strength": -0.06,
+     "adj_tournament_format_variance": -0.01,
+     "adj_other_risks_and_field_strength": 0.0,
+     "previous_forecast_probability": 0.24,
+     "interval_lower_bound": 0.12,
+     "interval_upper_bound": 0.36,
+     "_target": 0.22
+    }
+   }
+  }
+ },
+ "react/hockey_can": {
+  "n_instances": 10,
+  "schema": [
+   "tournament_team_count",
+   "prior_win_probability",
+   "adj_roster_quality",
+   "adj_rivals_strength",
+   "adj_tournament_variance_structure",
+   "adj_injuries_availability",
+   "adj_momentum_leadership_form",
+   "adj_venue_logistics",
+   "adj_goaltending_uncertainty",
+   "adj_misc_other",
+   "roster_size_players",
+   "roster_continuity_players",
+   "notable_injuries_or_replacements_count"
+  ],
+  "schema_notes": "Merged synonymous baselines into prior_win_probability; collapsed many additive deltas/adjustments into a small set of canonical adjustment buckets (roster quality, rivals, variance/structure, injuries, momentum/leadership, venue, goaltending, misc), and treated missing quantities as neutral 0.",
+  "excluded": [],
+  "program": "def forecast():\n    p = prior_win_probability\n\n    ev = adj_roster_quality\n    ev += adj_rivals_strength\n    ev += adj_tournament_variance_structure\n    ev += adj_injuries_availability\n    ev += adj_momentum_leadership_form\n    ev += adj_venue_logistics\n    ev += adj_goaltending_uncertainty\n    ev += adj_misc_other\n\n    o = odds(p)\n    o = o * exp(ev)\n\n    tourney = tournament_team_count\n    tourney = tourney / max(tournament_team_count, ONE)\n\n    variance_pull = abs(adj_tournament_variance_structure)\n    variance_pull = variance_pull * tourney\n    variance_pull = clamp(variance_pull, ZERO, ONE)\n\n    parity_odds = ONE\n    o = o * (ONE - variance_pull) + parity_odds * variance_pull\n\n    have_roster = roster_size_players + roster_continuity_players\n    have_roster = have_roster / (ONE + abs(have_roster))\n\n    inj = notable_injuries_or_replacements_count\n    inj = inj / (ONE + notable_injuries_or_replacements_count)\n\n    damp = ONE - inj\n    damp = clamp(damp, ZERO, ONE)\n\n    prior_o = odds(prior_win_probability)\n\n    roster_weight = have_roster * damp\n    o = o * roster_weight + prior_o * (ONE - roster_weight)\n\n    p = prob(o)\n    p = clamp(p, ZERO, ONE)\n    return p",
+  "fit": {
+   "n": 10,
+   "n_ran": 10,
+   "n_failed": 0,
+   "mae": 0.07004316316283841,
+   "max": 0.24,
+   "within_tol": 0.2,
+   "errors": []
+  },
+  "residuals": [
+   0.24,
+   0.005501392536851446,
+   0.02714549478336936,
+   0.024417267157408218,
+   0.01700000000000007,
+   0.0967,
+   0.05966747715075518,
+   0.03999999999999998,
+   0.06999999999999995,
+   0.12
+  ],
+  "degeneracy": {
+   "max_abs_corr": 0.699047927194868,
+   "max_corr_var": "prior_win_probability",
+   "passthrough": false,
+   "n_ops": 28,
+   "n_branches": 0,
+   "near_passthrough": false,
+   "lookup_smell": false,
+   "suspect": false
+  },
+  "ok": false,
+  "attempts": 4,
+  "history": [
+   {
+    "attempt": 1,
+    "stage": "fit",
+    "mae": 0.023030013,
+    "within_tol": 0.7,
+    "degeneracy": {
+     "max_abs_corr": 0.699047927194868,
+     "max_corr_var": "prior_win_probability",
+     "passthrough": false,
+     "n_ops": 7,
+     "n_branches": 0,
+     "near_passthrough": false,
+     "lookup_smell": false,
+     "suspect": false
+    }
+   },
+   {
+    "attempt": 2,
+    "stage": "fit",
+    "mae": 0.08853416043452877,
+    "within_tol": 0.2,
+    "degeneracy": {
+     "max_abs_corr": 0.699047927194868,
+     "max_corr_var": "prior_win_probability",
+     "passthrough": false,
+     "n_ops": 30,
+     "n_branches": 0,
+     "near_passthrough": false,
+     "lookup_smell": false,
+     "suspect": false
+    }
+   },
+   {
+    "attempt": 3,
+    "stage": "validator",
+    "problems": "line 28: constant-construction -- expression built only from named constants -- declare the value as a step-1 variable instead"
+   },
+   {
+    "attempt": 4,
+    "stage": "fit",
+    "mae": 0.07004316316283841,
+    "within_tol": 0.2,
+    "degeneracy": {
+     "max_abs_corr": 0.699047927194868,
+     "max_corr_var": "prior_win_probability",
+     "passthrough": false,
+     "n_ops": 28,
+     "n_branches": 0,
+     "near_passthrough": false,
+     "lookup_smell": false,
+     "suspect": false
+    }
+   }
+  ],
+  "oos": {
+   "train_sample": 0,
+   "train_n": 5,
+   "test_n": 5,
+   "train_mae": 0.11954469599358623,
+   "test_mae": 0.07320268385492193,
+   "test_within_tol": 0.4,
+   "test_failed": 0,
+   "program": "def forecast():\n    prior = prior_win_probability\n\n    total_adj = ZERO\n    total_adj += adj_roster_quality\n    total_adj += adj_rivals_strength\n    total_adj += adj_tournament_variance_structure\n    total_adj += adj_injuries_availability\n    total_adj += adj_momentum_leadership_form\n    total_adj += adj_venue_logistics\n    total_adj += adj_goaltending_uncertainty\n    total_adj += adj_misc_other\n\n    teamcount_on = tournament_team_count / max(tournament_team_count, ONE)\n    uninformed = ONE / max(tournament_team_count, ONE)\n\n    base = prior * (ONE - teamcount_on) + uninformed * teamcount_on\n\n    damp = ONE + abs(adj_roster_quality) + abs(adj_rivals_strength) + abs(adj_tournament_variance_structure)\n    damp += abs(adj_injuries_availability) + abs(adj_goaltending_uncertainty)\n\n    step = total_adj / damp\n    linear = base + step\n\n    compress = ONE + abs(total_adj)\n    centered = linear - HALF\n    squashed = HALF + centered / compress\n\n    out = clamp(squashed, ZERO, ONE)\n    return out",
+   "degeneracy": {
+    "max_abs_corr": 0.8935907129534708,
+    "max_corr_var": "notable_injuries_or_replacements_count",
+    "passthrough": false,
+    "n_ops": 25,
+    "n_branches": 0,
+    "near_passthrough": false,
+    "lookup_smell": false,
+    "suspect": false
+   }
+  },
+  "instances": [
+   {
+    "key": "react|hockey_can|s0|2026-01-14",
+    "date": "2026-01-14",
+    "sample": 0,
+    "target": 0.323,
+    "bindings": {
+     "tournament_team_count": 12.0,
+     "prior_win_probability": 0.083,
+     "adj_roster_quality": 0.35,
+     "adj_rivals_strength": -0.12,
+     "adj_tournament_variance_structure": -0.13,
+     "adj_injuries_availability": 0.0,
+     "adj_momentum_leadership_form": 0.15,
+     "adj_venue_logistics": -0.01,
+     "adj_goaltending_uncertainty": -0.05,
+     "adj_misc_other": 0.0,
+     "roster_size_players": 0.0,
+     "roster_continuity_players": 0.0,
+     "notable_injuries_or_replacements_count": 0.0
+    },
+    "raw_bindings": {
+     "number_of_teams_in_tournament": 12.0,
+     "uninformed_equal_chance_probability": 0.083,
+     "baseline_probability_percentage_points": 8.3,
+     "adjustment_team_quality_roster_star_power_percentage_points": 35.0,
+     "adjustment_recent_form_chemistry_percentage_points": 15.0,
+     "adjustment_strength_of_main_competitors_percentage_points": -12.0,
+     "adjustment_goaltending_and_single_game_variance_percentage_points": -5.0,
+     "adjustment_tournament_structure_randomness_percentage_points": -8.0,
+     "adjustment_venue_rink_logistics_percentage_points": -1.0
+    }
+   },
+   {
+    "key": "react|hockey_can|s0|2026-01-28",
+    "date": "2026-01-28",
+    "sample": 0,
+    "target": 0.33,
+    "bindings": {
+     "tournament_team_count": 0.0,
+     "prior_win_probability": 0.323,
+     "adj_roster_quality": 0.04,
+     "adj_rivals_strength": -0.02,
+     "adj_tournament_variance_structure": -0.002,
+     "adj_injuries_availability": -0.003,
+     "adj_momentum_leadership_form": 0.0,
+     "adj_venue_logistics": 0.002,
+     "adj_goaltending_uncertainty": 0.0,
+     "adj_misc_other": -0.01,
+     "roster_size_players": 25.0,
+     "roster_continuity_players": 19.0,
+     "notable_injuries_or_replacements_count": 0.0
+    },
+    "raw_bindings": {
+     "baseline_probability_previous_forecast": 0.323,
+     "canada_roster_quality_adjustment": 0.04,
+     "chief_rivals_strength_adjustment": -0.02,
+     "russia_roc_uncertainty_adjustment": -0.01,
+     "venue_rink_concerns_resolved_adjustment": 0.002,
+     "injury_roster_volatility_risk_adjustment": -0.003,
+     "single_game_knockout_variance_adjustment": -0.002,
+     "net_adjustments_sum": 0.007,
+     "canada_roster_size_players": 25.0,
+     "four_nations_faceoff_players_returning_count": 19.0,
+     "number_of_elite_canadian_offensive_stars_cited": 3.0,
+     "number_of_elite_canadian_defensemen_cited": 1.0,
+     "number_of_nhl_goalies_cited": 2.0
+    }
+   },
+   {
+    "key": "react|hockey_can|s0|2026-02-08",
+    "date": "2026-02-08",
+    "sample": 0,
+    "target": 0.36,
+    "bindings": {
+     "tournament_team_count": 12.0,
+     "prior_win_probability": 0.33,
+     "adj_roster_quality": 0.06,
+     "adj_rivals_strength": -0.03,
+     "adj_tournament_variance_structure": -0.01,
+     "adj_injuries_availability": -0.02,
+     "adj_momentum_leadership_form": 0.01,
+     "adj_venue_logistics": 0.0,
+     "adj_goaltending_uncertainty": -0.01,
+     "adj_misc_other": 0.03,
+     "roster_size_players": 25.0,
+     "roster_continuity_players": 0.0,
+     "notable_injuries_or_replacements_count": 2.0
+    },
+    "raw_bindings": {
+     "prior_forecast_baseline_probability": 0.33,
+     "delta_nhl_participation_and_roster_quality": 0.06,
+     "delta_injuries_and_late_replacements": -0.02,
+     "delta_strength_of_principal_rivals": -0.03,
+     "delta_tournament_structure_single_elim_variance": -0.01,
+     "delta_momentum_recent_4_nations_win": 0.01,
+     "delta_goaltending_and_in_tournament_unknowns": -0.01,
+     "smoothing_bump_for_roster_clarity_and_favourites_label": 0.03,
+     "canada_roster_size_players": 25.0,
+     "number_recent_roster_replacements_due_to_injury": 2.0,
+     "tournament_number_of_teams": 12.0,
+     "tournament_duration_days": 12.0
+    }
+   },
+   {
+    "key": "react|hockey_can|s0|2026-02-15",
+    "date": "2026-02-15",
+    "sample": 0,
+    "target": 0.34,
+    "bindings": {
+     "tournament_team_count": 12.0,
+     "prior_win_probability": 0.36,
+     "adj_roster_quality": 0.08,
+     "adj_rivals_strength": -0.04,
+     "adj_tournament_variance_structure": -0.05,
+     "adj_injuries_availability": -0.03,
+     "adj_momentum_leadership_form": 0.02,
+     "adj_venue_logistics": 0.0,
+     "adj_goaltending_uncertainty": 0.0,
+     "adj_misc_other": 0.0,
+     "roster_size_players": 25.0,
+     "roster_continuity_players": 0.0,
+     "notable_injuries_or_replacements_count": 0.0
+    },
+    "raw_bindings": {
+     "prior_forecast_probability": 0.36,
+     "adjustment_roster_quality_nhl_continuity": 0.08,
+     "adjustment_crosby_captaincy_leadership": 0.02,
+     "adjustment_injuries_roster_replacements": -0.03,
+     "adjustment_strength_of_rivals": -0.04,
+     "adjustment_tournament_structure_variance": -0.05,
+     "sum_of_adjustments": -0.02,
+     "one_sigma_uncertainty_range": 0.1,
+     "canada_roster_size_players": 25.0,
+     "number_of_teams_in_tournament": 12.0
+    }
+   },
+   {
+    "key": "react|hockey_can|s0|2026-02-20",
+    "date": "2026-02-20",
+    "sample": 0,
+    "target": 0.323,
+    "bindings": {
+     "tournament_team_count": 0.0,
+     "prior_win_probability": 0.34,
+     "adj_roster_quality": 0.0,
+     "adj_rivals_strength": 0.0,
+     "adj_tournament_variance_structure": 0.0,
+     "adj_injuries_availability": 0.0,
+     "adj_momentum_leadership_form": 0.0,
+     "adj_venue_logistics": 0.0,
+     "adj_goaltending_uncertainty": 0.0,
+     "adj_misc_other": 0.0,
+     "roster_size_players": 0.0,
+     "roster_continuity_players": 0.0,
+     "notable_injuries_or_replacements_count": 0.0
+    },
+    "raw_bindings": {
+     "prior_probability": 0.34,
+     "adjustment_factor_quarterfinal_win": 1.15,
+     "adjustment_factor_ot_comeback_vulnerability": 0.9,
+     "adjustment_factor_crosby_injury_uncertainty": 0.9,
+     "adjustment_factor_remaining_opponents_mix": 1.02,
+     "quarterfinal_score_canada": 4.0,
+     "quarterfinal_score_czech": 3.0,
+     "quarterfinal_went_to_overtime": 1.0,
+     "crosby_missed_third_period": 1.0,
+     "number_of_strong_contenders_remaining_cited": 2.0
+    }
+   },
+   {
+    "key": "react|hockey_can|s1|2026-01-14",
+    "date": "2026-01-14",
+    "sample": 1,
+    "target": 0.18,
+    "bindings": {
+     "tournament_team_count": 12.0,
+     "prior_win_probability": 0.0833,
+     "adj_roster_quality": 0.2,
+     "adj_rivals_strength": -0.06,
+     "adj_tournament_variance_structure": -0.04,
+     "adj_injuries_availability": -0.03,
+     "adj_momentum_leadership_form": 0.04,
+     "adj_venue_logistics": 0.0,
+     "adj_goaltending_uncertainty": 0.0,
+     "adj_misc_other": -0.01,
+     "roster_size_players": 0.0,
+     "roster_continuity_players": 0.0,
+     "notable_injuries_or_replacements_count": 0.0
+    },
+    "raw_bindings": {
+     "tournament_team_count": 12.0,
+     "baseline_equal_chance": 0.0833,
+     "adjustment_roster_strength": 0.2,
+     "adjustment_direct_competition": -0.06,
+     "adjustment_tournament_variance": -0.04,
+     "adjustment_historical_performance_nhl_stars": 0.04,
+     "adjustment_injuries_form_chemistry_uncertainty": -0.03,
+     "adjustment_other_tournament_specific_factors": -0.01,
+     "sensitivity_subtract_if_major_star_misses_low": -0.08,
+     "sensitivity_subtract_if_major_star_misses_high": -0.12,
+     "sensitivity_add_if_goalie_elite_and_rivals_injured_low": 0.05,
+     "sensitivity_add_if_goalie_elite_and_rivals_injured_high": 0.1
+    }
+   },
+   {
+    "key": "react|hockey_can|s1|2026-01-28",
+    "date": "2026-01-28",
+    "sample": 1,
+    "target": 0.25,
+    "bindings": {
+     "tournament_team_count": 0.0,
+     "prior_win_probability": 0.18,
+     "adj_roster_quality": 0.07,
+     "adj_rivals_strength": -0.03,
+     "adj_tournament_variance_structure": -0.01,
+     "adj_injuries_availability": -0.01,
+     "adj_momentum_leadership_form": 0.03,
+     "adj_venue_logistics": 0.0,
+     "adj_goaltending_uncertainty": 0.0,
+     "adj_misc_other": 0.02,
+     "roster_size_players": 25.0,
+     "roster_continuity_players": 19.0,
+     "notable_injuries_or_replacements_count": 0.0
+    },
+    "raw_bindings": {
+     "prior_probability_baseline": 0.18,
+     "adjustment_roster_quality": 0.07,
+     "roster_size_players": 25.0,
+     "adjustment_team_chemistry": 0.03,
+     "players_from_4_nations_team": 19.0,
+     "adjustment_nhl_participation_resolved": 0.02,
+     "adjustment_strong_competition": -0.03,
+     "adjustment_tournament_variance": -0.01,
+     "adjustment_injury_availability_risk": -0.01
+    }
+   },
+   {
+    "key": "react|hockey_can|s1|2026-02-08",
+    "date": "2026-02-08",
+    "sample": 1,
+    "target": 0.29,
+    "bindings": {
+     "tournament_team_count": 0.0,
+     "prior_win_probability": 0.25,
+     "adj_roster_quality": 0.0,
+     "adj_rivals_strength": 0.0,
+     "adj_tournament_variance_structure": 0.0,
+     "adj_injuries_availability": 0.0,
+     "adj_momentum_leadership_form": 0.0,
+     "adj_venue_logistics": 0.0,
+     "adj_goaltending_uncertainty": 0.0,
+     "adj_misc_other": 0.0,
+     "roster_size_players": 25.0,
+     "roster_continuity_players": 19.0,
+     "notable_injuries_or_replacements_count": 2.0
+    },
+    "raw_bindings": {
+     "team_quality_factor_weight": 0.35,
+     "team_quality_conditional_win_probability": 0.4,
+     "injuries_factor_weight": 0.15,
+     "injuries_conditional_win_probability": 0.18,
+     "rivals_strength_factor_weight": 0.25,
+     "rivals_strength_conditional_win_probability": 0.2,
+     "tournament_variance_factor_weight": 0.15,
+     "tournament_variance_conditional_win_probability": 0.25,
+     "momentum_leadership_factor_weight": 0.1,
+     "momentum_leadership_conditional_win_probability": 0.35,
+     "roster_continuity_players_from_four_nations": 19.0,
+     "canada_roster_total_players": 25.0,
+     "notable_injury_absences_count": 2.0,
+     "previous_forecast_probability": 0.25,
+     "bookmaker_probability_soft_ceiling": 0.35
+    }
+   },
+   {
+    "key": "react|hockey_can|s1|2026-02-15",
+    "date": "2026-02-15",
+    "sample": 1,
+    "target": 0.36,
+    "bindings": {
+     "tournament_team_count": 12.0,
+     "prior_win_probability": 0.29,
+     "adj_roster_quality": 0.03,
+     "adj_rivals_strength": 0.0,
+     "adj_tournament_variance_structure": 0.0,
+     "adj_injuries_availability": -0.02,
+     "adj_momentum_leadership_form": 0.06,
+     "adj_venue_logistics": 0.0,
+     "adj_goaltending_uncertainty": 0.0,
+     "adj_misc_other": 0.0,
+     "roster_size_players": 0.0,
+     "roster_continuity_players": 0.0,
+     "notable_injuries_or_replacements_count": 0.0
+    },
+    "raw_bindings": {
+     "baseline_previous_forecast_probability": 0.29,
+     "adjustment_strong_group_stage_form": 0.06,
+     "adjustment_roster_star_power_relative_to_field": 0.03,
+     "adjustment_injuries_and_replacements": -0.02,
+     "adjustment_knockout_variance_additional": -0.0,
+     "probability_reach_quarterfinals": 1.0,
+     "probability_win_quarterfinal": 0.75,
+     "probability_win_semifinal_given_semifinal": 0.6,
+     "probability_win_final_given_final": 0.67,
+     "multiplicative_crosscheck_product": 0.3,
+     "number_of_teams_in_tournament": 12.0,
+     "age_macklin_celebrini_years": 19.0
+    }
+   },
+   {
+    "key": "react|hockey_can|s1|2026-02-20",
+    "date": "2026-02-20",
+    "sample": 1,
+    "target": 0.48,
+    "bindings": {
+     "tournament_team_count": 0.0,
+     "prior_win_probability": 0.36,
+     "adj_roster_quality": 0.0,
+     "adj_rivals_strength": 0.0,
+     "adj_tournament_variance_structure": 0.0,
+     "adj_injuries_availability": 0.0,
+     "adj_momentum_leadership_form": 0.0,
+     "adj_venue_logistics": 0.0,
+     "adj_goaltending_uncertainty": 0.0,
+     "adj_misc_other": 0.0,
+     "roster_size_players": 0.0,
+     "roster_continuity_players": 0.0,
+     "notable_injuries_or_replacements_count": 0.0
+    },
+    "raw_bindings": {
+     "previous_unconditional_forecast_probability": 0.36,
+     "neutral_single_game_final_baseline_probability": 0.5,
+     "weight_roster_depth_and_talent": 0.3,
+     "score_roster_depth_and_talent_canada_edge": 0.3,
+     "weight_recent_tournament_form": 0.2,
+     "score_recent_tournament_form_usa_edge": -0.2,
+     "weight_crosby_injury_availability": 0.15,
+     "score_crosby_injury_negative_for_canada": -0.4,
+     "weight_goaltending": 0.2,
+     "score_goaltending_usa_edge": -0.1,
+     "weight_special_teams_coaching_intangibles": 0.15,
+     "score_special_teams_coaching_intangibles_canada_edge": 0.05
+    }
+   }
+  ],
+  "trajectory": {
+   "s0": {
+    "2026-01-14": {
+     "tournament_team_count": 12.0,
+     "prior_win_probability": 0.083,
+     "adj_roster_quality": 0.35,
+     "adj_rivals_strength": -0.12,
+     "adj_tournament_variance_structure": -0.13,
+     "adj_injuries_availability": 0.0,
+     "adj_momentum_leadership_form": 0.15,
+     "adj_venue_logistics": -0.01,
+     "adj_goaltending_uncertainty": -0.05,
+     "adj_misc_other": 0.0,
+     "roster_size_players": 0.0,
+     "roster_continuity_players": 0.0,
+     "notable_injuries_or_replacements_count": 0.0,
+     "_target": 0.323
+    },
+    "2026-01-28": {
+     "tournament_team_count": 0.0,
+     "prior_win_probability": 0.323,
+     "adj_roster_quality": 0.04,
+     "adj_rivals_strength": -0.02,
+     "adj_tournament_variance_structure": -0.002,
+     "adj_injuries_availability": -0.003,
+     "adj_momentum_leadership_form": 0.0,
+     "adj_venue_logistics": 0.002,
+     "adj_goaltending_uncertainty": 0.0,
+     "adj_misc_other": -0.01,
+     "roster_size_players": 25.0,
+     "roster_continuity_players": 19.0,
+     "notable_injuries_or_replacements_count": 0.0,
+     "_target": 0.33
+    },
+    "2026-02-08": {
+     "tournament_team_count": 12.0,
+     "prior_win_probability": 0.33,
+     "adj_roster_quality": 0.06,
+     "adj_rivals_strength": -0.03,
+     "adj_tournament_variance_structure": -0.01,
+     "adj_injuries_availability": -0.02,
+     "adj_momentum_leadership_form": 0.01,
+     "adj_venue_logistics": 0.0,
+     "adj_goaltending_uncertainty": -0.01,
+     "adj_misc_other": 0.03,
+     "roster_size_players": 25.0,
+     "roster_continuity_players": 0.0,
+     "notable_injuries_or_replacements_count": 2.0,
+     "_target": 0.36
+    },
+    "2026-02-15": {
+     "tournament_team_count": 12.0,
+     "prior_win_probability": 0.36,
+     "adj_roster_quality": 0.08,
+     "adj_rivals_strength": -0.04,
+     "adj_tournament_variance_structure": -0.05,
+     "adj_injuries_availability": -0.03,
+     "adj_momentum_leadership_form": 0.02,
+     "adj_venue_logistics": 0.0,
+     "adj_goaltending_uncertainty": 0.0,
+     "adj_misc_other": 0.0,
+     "roster_size_players": 25.0,
+     "roster_continuity_players": 0.0,
+     "notable_injuries_or_replacements_count": 0.0,
+     "_target": 0.34
+    },
+    "2026-02-20": {
+     "tournament_team_count": 0.0,
+     "prior_win_probability": 0.34,
+     "adj_roster_quality": 0.0,
+     "adj_rivals_strength": 0.0,
+     "adj_tournament_variance_structure": 0.0,
+     "adj_injuries_availability": 0.0,
+     "adj_momentum_leadership_form": 0.0,
+     "adj_venue_logistics": 0.0,
+     "adj_goaltending_uncertainty": 0.0,
+     "adj_misc_other": 0.0,
+     "roster_size_players": 0.0,
+     "roster_continuity_players": 0.0,
+     "notable_injuries_or_replacements_count": 0.0,
+     "_target": 0.323
+    }
+   },
+   "s1": {
+    "2026-01-14": {
+     "tournament_team_count": 12.0,
+     "prior_win_probability": 0.0833,
+     "adj_roster_quality": 0.2,
+     "adj_rivals_strength": -0.06,
+     "adj_tournament_variance_structure": -0.04,
+     "adj_injuries_availability": -0.03,
+     "adj_momentum_leadership_form": 0.04,
+     "adj_venue_logistics": 0.0,
+     "adj_goaltending_uncertainty": 0.0,
+     "adj_misc_other": -0.01,
+     "roster_size_players": 0.0,
+     "roster_continuity_players": 0.0,
+     "notable_injuries_or_replacements_count": 0.0,
+     "_target": 0.18
+    },
+    "2026-01-28": {
+     "tournament_team_count": 0.0,
+     "prior_win_probability": 0.18,
+     "adj_roster_quality": 0.07,
+     "adj_rivals_strength": -0.03,
+     "adj_tournament_variance_structure": -0.01,
+     "adj_injuries_availability": -0.01,
+     "adj_momentum_leadership_form": 0.03,
+     "adj_venue_logistics": 0.0,
+     "adj_goaltending_uncertainty": 0.0,
+     "adj_misc_other": 0.02,
+     "roster_size_players": 25.0,
+     "roster_continuity_players": 19.0,
+     "notable_injuries_or_replacements_count": 0.0,
+     "_target": 0.25
+    },
+    "2026-02-08": {
+     "tournament_team_count": 0.0,
+     "prior_win_probability": 0.25,
+     "adj_roster_quality": 0.0,
+     "adj_rivals_strength": 0.0,
+     "adj_tournament_variance_structure": 0.0,
+     "adj_injuries_availability": 0.0,
+     "adj_momentum_leadership_form": 0.0,
+     "adj_venue_logistics": 0.0,
+     "adj_goaltending_uncertainty": 0.0,
+     "adj_misc_other": 0.0,
+     "roster_size_players": 25.0,
+     "roster_continuity_players": 19.0,
+     "notable_injuries_or_replacements_count": 2.0,
+     "_target": 0.29
+    },
+    "2026-02-15": {
+     "tournament_team_count": 12.0,
+     "prior_win_probability": 0.29,
+     "adj_roster_quality": 0.03,
+     "adj_rivals_strength": 0.0,
+     "adj_tournament_variance_structure": 0.0,
+     "adj_injuries_availability": -0.02,
+     "adj_momentum_leadership_form": 0.06,
+     "adj_venue_logistics": 0.0,
+     "adj_goaltending_uncertainty": 0.0,
+     "adj_misc_other": 0.0,
+     "roster_size_players": 0.0,
+     "roster_continuity_players": 0.0,
+     "notable_injuries_or_replacements_count": 0.0,
+     "_target": 0.36
+    },
+    "2026-02-20": {
+     "tournament_team_count": 0.0,
+     "prior_win_probability": 0.36,
+     "adj_roster_quality": 0.0,
+     "adj_rivals_strength": 0.0,
+     "adj_tournament_variance_structure": 0.0,
+     "adj_injuries_availability": 0.0,
+     "adj_momentum_leadership_form": 0.0,
+     "adj_venue_logistics": 0.0,
+     "adj_goaltending_uncertainty": 0.0,
+     "adj_misc_other": 0.0,
+     "roster_size_players": 0.0,
+     "roster_continuity_players": 0.0,
+     "notable_injuries_or_replacements_count": 0.0,
+     "_target": 0.48
+    }
+   }
+  }
+ },
+ "react/hockey_usa": {
+  "n_instances": 10,
+  "schema": [
+   "baseline_win_probability",
+   "field_size_teams",
+   "stage_win_probability_product",
+   "prior_forecast_probability",
+   "roster_quality_weight",
+   "roster_quality_adjustment_or_contribution",
+   "opponent_strength_weight",
+   "opponent_strength_adjustment_or_contribution",
+   "tournament_variance_weight",
+   "tournament_variance_adjustment_or_contribution",
+   "recent_form_adjustment_or_contribution",
+   "calibration_or_rounding_bump",
+   "roster_size_players",
+   "stage_specific_win_probability"
+  ],
+  "schema_notes": "Merged all baseline/prior forecast probabilities into baseline_win_probability and prior_forecast_probability; unified roster quality, opponent strength, tournament variance, and recent form signals as weights plus adjustments/contributions, and mapped various stage/round win inputs into stage_specific_win_probability and their product; absent quantities were set to neutral 0.0 (or 1.0 for multiplicative product).",
+  "excluded": [],
+  "program": "",
+  "fit": {},
+  "residuals": [],
+  "degeneracy": {},
+  "ok": false,
+  "attempts": 4,
+  "history": [
+   {
+    "attempt": 1,
+    "stage": "validator",
+    "problems": "line 34: constant-construction -- expression built only from named constants -- declare the value as a step-1 variable instead\nline 43: constant-construction -- expression built only from named constants -- declare the value as a step-1 variable instead\nline 34: constant-construction -- expression built only from named constants -- declare the value as a step-1 variable instead"
+   },
+   {
+    "attempt": 2,
+    "stage": "validator",
+    "problems": "line 19: constant-construction -- expression built only from named constants -- declare the value as a step-1 variable instead\nline 22: constant-construction -- expression built only from named constants -- declare the value as a step-1 variable instead"
+   },
+   {
+    "attempt": 3,
+    "stage": "validator",
+    "problems": "line 19: constant-construction -- expression built only from named constants -- declare the value as a step-1 variable instead"
+   },
+   {
+    "attempt": 4,
+    "stage": "validator",
+    "problems": "line 1: undeclared -- 'three_const' is used but was never declared in step 1"
+   }
+  ],
+  "oos": {
+   "train_sample": 0,
+   "train_n": 5,
+   "test_n": 5,
+   "train_mae": 0.12972170597211072,
+   "test_mae": 0.1777267309661323,
+   "test_within_tol": 0.0,
+   "test_failed": 0,
+   "program": "def forecast():\n    p0 = baseline_win_probability\n\n    additive_pp = roster_quality_adjustment_or_contribution\n    additive_pp += opponent_strength_adjustment_or_contribution\n    additive_pp += tournament_variance_adjustment_or_contribution\n    additive_pp += recent_form_adjustment_or_contribution\n    additive_pp += calibration_or_rounding_bump\n\n    p_add = p0 + additive_pp\n\n    p_lo = min(p0, p_add)\n    p_hi = max(p0, p_add)\n\n    p_clip = clamp(p_add, ZERO, ONE)\n\n    spread = p_hi - p_lo\n    denom = abs(additive_pp) + ONE\n    shrink = spread / denom\n\n    p_shrunk = p_clip\n    if p_add > p0:\n        p_shrunk = p0 + shrink\n    else:\n        p_shrunk = p0 - shrink\n\n    stage_mix = stage_win_probability_product\n    stage_path = p_shrunk * stage_specific_win_probability\n    stage_path = stage_path * stage_mix\n\n    base_path = (ONE - stage_mix) * p_shrunk\n\n    p_stage = stage_path + base_path\n\n    inertia_w = abs(prior_forecast_probability - p0) + ONE\n    inertia_adj = abs(p_stage - p0) / inertia_w\n\n    p_final = p0\n    if p_stage > p0:\n        p_final = p0 + inertia_adj\n    else:\n        p_final = p0 - inertia_adj\n\n    return clamp(p_final, ZERO, ONE)",
+   "degeneracy": {
+    "max_abs_corr": 0.9450393429746001,
+    "max_corr_var": "baseline_win_probability",
+    "passthrough": false,
+    "n_ops": 26,
+    "n_branches": 2,
+    "near_passthrough": false,
+    "lookup_smell": false,
+    "suspect": false
+   }
+  },
+  "instances": [
+   {
+    "key": "react|hockey_usa|s0|2026-01-14",
+    "date": "2026-01-14",
+    "sample": 0,
+    "target": 0.22,
+    "bindings": {
+     "baseline_win_probability": 0.15,
+     "field_size_teams": 12.0,
+     "stage_win_probability_product": 1.0,
+     "prior_forecast_probability": 0.15,
+     "roster_quality_weight": 0.0,
+     "roster_quality_adjustment_or_contribution": 0.07,
+     "opponent_strength_weight": 0.0,
+     "opponent_strength_adjustment_or_contribution": -0.04,
+     "tournament_variance_weight": 0.0,
+     "tournament_variance_adjustment_or_contribution": -0.01,
+     "recent_form_adjustment_or_contribution": -0.01,
+     "calibration_or_rounding_bump": 0.0,
+     "roster_size_players": 0.0,
+     "stage_specific_win_probability": 0.15
+    },
+    "raw_bindings": {
+     "baseline_us_win_probability": 0.15,
+     "num_teams_in_tournament": 12.0,
+     "equal_team_baseline_probability": 0.083,
+     "adjustment_us_nhl_star_talent_pp": 0.07,
+     "adjustment_us_goaltending_defense_pp": 0.04,
+     "adjustment_recent_ot_loss_vs_canada_pp": -0.01,
+     "adjustment_strength_of_rivals_canada_pp": -0.04,
+     "adjustment_nhl_style_play_rink_size_pp": 0.02,
+     "adjustment_tournament_variance_injuries_bracket_pp": -0.01,
+     "net_adjustment_sum_pp": 0.07,
+     "alternative_baseline_low_example": 0.12,
+     "alternative_baseline_high_example": 0.18,
+     "implied_canada_win_probability_range_low": 0.28,
+     "implied_canada_win_probability_range_high": 0.3
+    }
+   },
+   {
+    "key": "react|hockey_usa|s0|2026-01-28",
+    "date": "2026-01-28",
+    "sample": 0,
+    "target": 0.26,
+    "bindings": {
+     "baseline_win_probability": 0.22,
+     "field_size_teams": 0.0,
+     "stage_win_probability_product": 0.4704,
+     "prior_forecast_probability": 0.22,
+     "roster_quality_weight": 0.0,
+     "roster_quality_adjustment_or_contribution": 0.0,
+     "opponent_strength_weight": 0.0,
+     "opponent_strength_adjustment_or_contribution": 0.0,
+     "tournament_variance_weight": 0.0,
+     "tournament_variance_adjustment_or_contribution": 0.0,
+     "recent_form_adjustment_or_contribution": 0.0,
+     "calibration_or_rounding_bump": 0.0,
+     "roster_size_players": 0.0,
+     "stage_specific_win_probability": 0.55
+    },
+    "raw_bindings": {
+     "prob_advance_from_group": 0.98,
+     "prob_win_quarterfinal_given_advance": 0.8,
+     "prob_win_semifinal_given_semifinal": 0.6,
+     "prob_win_final_given_final": 0.55,
+     "step_product_group_and_quarter": 0.784,
+     "step_product_through_semifinal": 0.4704,
+     "prior_forecast_probability_reference": 0.22,
+     "rounding_significant_digits": 2.0
+    }
+   },
+   {
+    "key": "react|hockey_usa|s0|2026-02-08",
+    "date": "2026-02-08",
+    "sample": 0,
+    "target": 0.29,
+    "bindings": {
+     "baseline_win_probability": 0.24,
+     "field_size_teams": 0.0,
+     "stage_win_probability_product": 1.0,
+     "prior_forecast_probability": 0.24,
+     "roster_quality_weight": 0.35,
+     "roster_quality_adjustment_or_contribution": 0.33,
+     "opponent_strength_weight": 0.25,
+     "opponent_strength_adjustment_or_contribution": 0.25,
+     "tournament_variance_weight": 0.15,
+     "tournament_variance_adjustment_or_contribution": 0.27,
+     "recent_form_adjustment_or_contribution": 0.3,
+     "calibration_or_rounding_bump": 0.01,
+     "roster_size_players": 0.0,
+     "stage_specific_win_probability": 0.24
+    },
+    "raw_bindings": {
+     "previous_forecast_jan_14": 0.22,
+     "previous_forecast_jan_28": 0.26,
+     "weight_roster_quality": 0.35,
+     "conditional_prob_gold_given_roster_quality": 0.33,
+     "weight_competition_strength": 0.25,
+     "conditional_prob_gold_given_competition_strength": 0.25,
+     "weight_health_roster_availability": 0.15,
+     "conditional_prob_gold_given_health_roster_availability": 0.28,
+     "weight_team_chemistry_recent_form": 0.1,
+     "conditional_prob_gold_given_team_chemistry_recent_form": 0.3,
+     "weight_tournament_format_variance": 0.15,
+     "conditional_prob_gold_given_tournament_format_variance": 0.27,
+     "rounded_probability_step": 0.01
+    }
+   },
+   {
+    "key": "react|hockey_usa|s0|2026-02-15",
+    "date": "2026-02-15",
+    "sample": 0,
+    "target": 0.33,
+    "bindings": {
+     "baseline_win_probability": 0.29,
+     "field_size_teams": 0.0,
+     "stage_win_probability_product": 1.0,
+     "prior_forecast_probability": 0.29,
+     "roster_quality_weight": 0.3,
+     "roster_quality_adjustment_or_contribution": 0.35,
+     "opponent_strength_weight": 0.15,
+     "opponent_strength_adjustment_or_contribution": 0.25,
+     "tournament_variance_weight": 0.2,
+     "tournament_variance_adjustment_or_contribution": 0.2,
+     "recent_form_adjustment_or_contribution": 0.4,
+     "calibration_or_rounding_bump": 0.02,
+     "roster_size_players": 0.0,
+     "stage_specific_win_probability": 0.29
+    },
+    "raw_bindings": {
+     "prior_probability_baseline": 0.29,
+     "weight_roster_quality": 0.3,
+     "weight_tournament_form": 0.25,
+     "weight_single_elimination_variance": 0.2,
+     "weight_opponent_field_strength": 0.15,
+     "weight_injuries_roster_stability": 0.1,
+     "conditional_win_probability_given_roster_quality": 0.35,
+     "conditional_win_probability_given_tournament_form": 0.4,
+     "conditional_win_probability_given_single_elimination_variance": 0.2,
+     "conditional_win_probability_given_opponent_field_strength": 0.25,
+     "conditional_win_probability_given_injuries_roster_stability": 0.3,
+     "group_stage_wins_to_date": 2.0,
+     "usa_latvia_score_usa_goals": 5.0,
+     "usa_latvia_score_opponent_goals": 1.0,
+     "usa_denmark_score_usa_goals": 6.0,
+     "usa_denmark_score_opponent_goals": 3.0,
+     "calibration_bump_for_recent_momentum": 0.02
+    }
+   },
+   {
+    "key": "react|hockey_usa|s0|2026-02-20",
+    "date": "2026-02-20",
+    "sample": 0,
+    "target": 0.44,
+    "bindings": {
+     "baseline_win_probability": 0.33,
+     "field_size_teams": 0.0,
+     "stage_win_probability_product": 0.438,
+     "prior_forecast_probability": 0.33,
+     "roster_quality_weight": 0.3,
+     "roster_quality_adjustment_or_contribution": 0.1,
+     "opponent_strength_weight": 0.2,
+     "opponent_strength_adjustment_or_contribution": -0.08,
+     "tournament_variance_weight": 0.15,
+     "tournament_variance_adjustment_or_contribution": -0.03,
+     "recent_form_adjustment_or_contribution": 0.0,
+     "calibration_or_rounding_bump": 0.0,
+     "roster_size_players": 0.0,
+     "stage_specific_win_probability": 0.6
+    },
+    "raw_bindings": {
+     "prior_probability_us_gold": 0.33,
+     "weight_team_quality_roster": 0.3,
+     "adjustment_team_quality_roster": 0.1,
+     "weight_tournament_progress_semifinal": 0.35,
+     "adjustment_tournament_progress_semifinal": 0.12,
+     "weight_opponents_strength_nhl_participation": 0.2,
+     "adjustment_opponents_strength_nhl_participation": -0.08,
+     "weight_single_game_variance": 0.15,
+     "adjustment_single_game_variance": -0.03,
+     "estimated_probability_win_semifinal": 0.6,
+     "estimated_probability_win_final_given_win_semifinal": 0.73,
+     "historical_years_since_us_mens_olympic_gold": 46.0
+    }
+   },
+   {
+    "key": "react|hockey_usa|s1|2026-01-14",
+    "date": "2026-01-14",
+    "sample": 1,
+    "target": 0.21,
+    "bindings": {
+     "baseline_win_probability": 0.2,
+     "field_size_teams": 0.0,
+     "stage_win_probability_product": 1.0,
+     "prior_forecast_probability": 0.2,
+     "roster_quality_weight": 0.45,
+     "roster_quality_adjustment_or_contribution": 0.12,
+     "opponent_strength_weight": 0.15,
+     "opponent_strength_adjustment_or_contribution": -0.12,
+     "tournament_variance_weight": 0.1,
+     "tournament_variance_adjustment_or_contribution": -0.06,
+     "recent_form_adjustment_or_contribution": 0.03,
+     "calibration_or_rounding_bump": 0.0,
+     "roster_size_players": 0.0,
+     "stage_specific_win_probability": 0.2
+    },
+    "raw_bindings": {
+     "top_contenders_count": 5.0,
+     "baseline_equal_top_contenders_probability": 0.2,
+     "weight_us_roster_quality": 0.45,
+     "adjustment_us_roster_quality": 0.12,
+     "weight_goaltending_defense": 0.15,
+     "adjustment_goaltending_defense": 0.05,
+     "weight_team_chemistry_recent_form": 0.1,
+     "adjustment_team_chemistry_recent_form": 0.03,
+     "weight_opponent_strength": 0.15,
+     "adjustment_opponent_strength": -0.12,
+     "weight_tournament_variance": 0.1,
+     "adjustment_tournament_variance": -0.06,
+     "weight_venue_ice_risk": 0.05,
+     "adjustment_venue_ice_risk": -0.01
+    }
+   },
+   {
+    "key": "react|hockey_usa|s1|2026-01-28",
+    "date": "2026-01-28",
+    "sample": 1,
+    "target": 0.22,
+    "bindings": {
+     "baseline_win_probability": 0.2,
+     "field_size_teams": 0.0,
+     "stage_win_probability_product": 1.0,
+     "prior_forecast_probability": 0.21,
+     "roster_quality_weight": 0.0,
+     "roster_quality_adjustment_or_contribution": 0.04,
+     "opponent_strength_weight": 0.0,
+     "opponent_strength_adjustment_or_contribution": -0.04,
+     "tournament_variance_weight": 0.0,
+     "tournament_variance_adjustment_or_contribution": 0.005,
+     "recent_form_adjustment_or_contribution": 0.035,
+     "calibration_or_rounding_bump": 0.0,
+     "roster_size_players": 25.0,
+     "stage_specific_win_probability": 0.2
+    },
+    "raw_bindings": {
+     "baseline_probability_after_nhl_participation_confirmed": 0.2,
+     "prior_forecast_calibration_check": 0.21,
+     "adjustment_strong_usa_roster": 0.04,
+     "adjustment_team_chemistry_from_4_nations_run": 0.035,
+     "adjustment_rivals_strength_canada_favorite": -0.04,
+     "adjustment_injury_seth_jones_out": -0.015,
+     "adjustment_tournament_format_variance": 0.005,
+     "adjustment_venue_rink_differences": -0.005,
+     "usa_roster_player_count_announced": 25.0
+    }
+   },
+   {
+    "key": "react|hockey_usa|s1|2026-02-08",
+    "date": "2026-02-08",
+    "sample": 1,
+    "target": 0.24,
+    "bindings": {
+     "baseline_win_probability": 0.215,
+     "field_size_teams": 12.0,
+     "stage_win_probability_product": 1.0,
+     "prior_forecast_probability": 0.215,
+     "roster_quality_weight": 0.4,
+     "roster_quality_adjustment_or_contribution": 0.0,
+     "opponent_strength_weight": 0.25,
+     "opponent_strength_adjustment_or_contribution": 0.0,
+     "tournament_variance_weight": 0.15,
+     "tournament_variance_adjustment_or_contribution": 0.0,
+     "recent_form_adjustment_or_contribution": 0.02,
+     "calibration_or_rounding_bump": 0.0,
+     "roster_size_players": 0.0,
+     "stage_specific_win_probability": 0.215
+    },
+    "raw_bindings": {
+     "prior_forecast_jan_14": 0.21,
+     "prior_forecast_jan_28": 0.22,
+     "weight_roster_talent_star_power": 0.4,
+     "weight_roster_health_injuries": 0.1,
+     "weight_head_to_head_competition_favoritism": 0.25,
+     "weight_tournament_format_single_game_variance": 0.15,
+     "weight_off_ice_factors": 0.1,
+     "team_count_in_tournament": 12.0,
+     "roster_change_count_injury_replacement": 1.0,
+     "adjustment_up_for_leadership_chemistry_signal": 0.02,
+     "adjustment_down_for_defense_injury": 0.01
+    }
+   },
+   {
+    "key": "react|hockey_usa|s1|2026-02-15",
+    "date": "2026-02-15",
+    "sample": 1,
+    "target": 0.27,
+    "bindings": {
+     "baseline_win_probability": 0.27,
+     "field_size_teams": 0.0,
+     "stage_win_probability_product": 1.0,
+     "prior_forecast_probability": 0.27,
+     "roster_quality_weight": 0.0,
+     "roster_quality_adjustment_or_contribution": 0.15,
+     "opponent_strength_weight": 0.0,
+     "opponent_strength_adjustment_or_contribution": 0.04,
+     "tournament_variance_weight": 0.0,
+     "tournament_variance_adjustment_or_contribution": 0.03,
+     "recent_form_adjustment_or_contribution": 0.05,
+     "calibration_or_rounding_bump": 0.0,
+     "roster_size_players": 25.0,
+     "stage_specific_win_probability": 0.27
+    },
+    "raw_bindings": {
+     "baseline_team_quality_contribution": 0.07,
+     "star_player_upside_contribution": 0.08,
+     "recent_form_momentum_contribution": 0.05,
+     "draw_competition_difficulty_contribution": 0.04,
+     "tournament_variance_roster_disruption_contribution": 0.03,
+     "usa_latvia_opening_win_margin_goals": 4.0,
+     "usa_goals_vs_latvia": 5.0,
+     "latvia_goals_vs_usa": 1.0,
+     "usa_roster_size_players": 25.0
+    }
+   },
+   {
+    "key": "react|hockey_usa|s1|2026-02-20",
+    "date": "2026-02-20",
+    "sample": 1,
+    "target": 0.44,
+    "bindings": {
+     "baseline_win_probability": 0.42,
+     "field_size_teams": 0.0,
+     "stage_win_probability_product": 1.0,
+     "prior_forecast_probability": 0.24,
+     "roster_quality_weight": 0.0,
+     "roster_quality_adjustment_or_contribution": 0.0,
+     "opponent_strength_weight": 0.0,
+     "opponent_strength_adjustment_or_contribution": -0.03,
+     "tournament_variance_weight": 0.0,
+     "tournament_variance_adjustment_or_contribution": 0.0,
+     "recent_form_adjustment_or_contribution": 0.07,
+     "calibration_or_rounding_bump": 0.0,
+     "roster_size_players": 0.0,
+     "stage_specific_win_probability": 0.42
+    },
+    "raw_bindings": {
+     "baseline_final_win_probability_usa_vs_canada": 0.42,
+     "adjustment_us_semifinal_dominance": 0.05,
+     "adjustment_canada_semifinal_close_win_tilt_to_usa": 0.02,
+     "adjustment_goalie_visibility_concern_negative": -0.02,
+     "adjustment_canada_depth_and_pedigree_negative": -0.03,
+     "us_semifinal_goals_for": 6.0,
+     "us_semifinal_goals_against": 2.0,
+     "canada_semifinal_goals_for": 3.0,
+     "canada_semifinal_goals_against": 2.0,
+     "plausible_range_lower_bound_us_win_probability": 0.35,
+     "plausible_range_upper_bound_us_win_probability": 0.55,
+     "previous_forecast_low_tournament_win_probability": 0.21,
+     "previous_forecast_high_tournament_win_probability": 0.27,
+     "residual_uncertainty_adjustment": 0.0
+    }
+   }
+  ],
+  "trajectory": {
+   "s0": {
+    "2026-01-14": {
+     "baseline_win_probability": 0.15,
+     "field_size_teams": 12.0,
+     "stage_win_probability_product": 1.0,
+     "prior_forecast_probability": 0.15,
+     "roster_quality_weight": 0.0,
+     "roster_quality_adjustment_or_contribution": 0.07,
+     "opponent_strength_weight": 0.0,
+     "opponent_strength_adjustment_or_contribution": -0.04,
+     "tournament_variance_weight": 0.0,
+     "tournament_variance_adjustment_or_contribution": -0.01,
+     "recent_form_adjustment_or_contribution": -0.01,
+     "calibration_or_rounding_bump": 0.0,
+     "roster_size_players": 0.0,
+     "stage_specific_win_probability": 0.15,
+     "_target": 0.22
+    },
+    "2026-01-28": {
+     "baseline_win_probability": 0.22,
+     "field_size_teams": 0.0,
+     "stage_win_probability_product": 0.4704,
+     "prior_forecast_probability": 0.22,
+     "roster_quality_weight": 0.0,
+     "roster_quality_adjustment_or_contribution": 0.0,
+     "opponent_strength_weight": 0.0,
+     "opponent_strength_adjustment_or_contribution": 0.0,
+     "tournament_variance_weight": 0.0,
+     "tournament_variance_adjustment_or_contribution": 0.0,
+     "recent_form_adjustment_or_contribution": 0.0,
+     "calibration_or_rounding_bump": 0.0,
+     "roster_size_players": 0.0,
+     "stage_specific_win_probability": 0.55,
+     "_target": 0.26
+    },
+    "2026-02-08": {
+     "baseline_win_probability": 0.24,
+     "field_size_teams": 0.0,
+     "stage_win_probability_product": 1.0,
+     "prior_forecast_probability": 0.24,
+     "roster_quality_weight": 0.35,
+     "roster_quality_adjustment_or_contribution": 0.33,
+     "opponent_strength_weight": 0.25,
+     "opponent_strength_adjustment_or_contribution": 0.25,
+     "tournament_variance_weight": 0.15,
+     "tournament_variance_adjustment_or_contribution": 0.27,
+     "recent_form_adjustment_or_contribution": 0.3,
+     "calibration_or_rounding_bump": 0.01,
+     "roster_size_players": 0.0,
+     "stage_specific_win_probability": 0.24,
+     "_target": 0.29
+    },
+    "2026-02-15": {
+     "baseline_win_probability": 0.29,
+     "field_size_teams": 0.0,
+     "stage_win_probability_product": 1.0,
+     "prior_forecast_probability": 0.29,
+     "roster_quality_weight": 0.3,
+     "roster_quality_adjustment_or_contribution": 0.35,
+     "opponent_strength_weight": 0.15,
+     "opponent_strength_adjustment_or_contribution": 0.25,
+     "tournament_variance_weight": 0.2,
+     "tournament_variance_adjustment_or_contribution": 0.2,
+     "recent_form_adjustment_or_contribution": 0.4,
+     "calibration_or_rounding_bump": 0.02,
+     "roster_size_players": 0.0,
+     "stage_specific_win_probability": 0.29,
+     "_target": 0.33
+    },
+    "2026-02-20": {
+     "baseline_win_probability": 0.33,
+     "field_size_teams": 0.0,
+     "stage_win_probability_product": 0.438,
+     "prior_forecast_probability": 0.33,
+     "roster_quality_weight": 0.3,
+     "roster_quality_adjustment_or_contribution": 0.1,
+     "opponent_strength_weight": 0.2,
+     "opponent_strength_adjustment_or_contribution": -0.08,
+     "tournament_variance_weight": 0.15,
+     "tournament_variance_adjustment_or_contribution": -0.03,
+     "recent_form_adjustment_or_contribution": 0.0,
+     "calibration_or_rounding_bump": 0.0,
+     "roster_size_players": 0.0,
+     "stage_specific_win_probability": 0.6,
+     "_target": 0.44
+    }
+   },
+   "s1": {
+    "2026-01-14": {
+     "baseline_win_probability": 0.2,
+     "field_size_teams": 0.0,
+     "stage_win_probability_product": 1.0,
+     "prior_forecast_probability": 0.2,
+     "roster_quality_weight": 0.45,
+     "roster_quality_adjustment_or_contribution": 0.12,
+     "opponent_strength_weight": 0.15,
+     "opponent_strength_adjustment_or_contribution": -0.12,
+     "tournament_variance_weight": 0.1,
+     "tournament_variance_adjustment_or_contribution": -0.06,
+     "recent_form_adjustment_or_contribution": 0.03,
+     "calibration_or_rounding_bump": 0.0,
+     "roster_size_players": 0.0,
+     "stage_specific_win_probability": 0.2,
+     "_target": 0.21
+    },
+    "2026-01-28": {
+     "baseline_win_probability": 0.2,
+     "field_size_teams": 0.0,
+     "stage_win_probability_product": 1.0,
+     "prior_forecast_probability": 0.21,
+     "roster_quality_weight": 0.0,
+     "roster_quality_adjustment_or_contribution": 0.04,
+     "opponent_strength_weight": 0.0,
+     "opponent_strength_adjustment_or_contribution": -0.04,
+     "tournament_variance_weight": 0.0,
+     "tournament_variance_adjustment_or_contribution": 0.005,
+     "recent_form_adjustment_or_contribution": 0.035,
+     "calibration_or_rounding_bump": 0.0,
+     "roster_size_players": 25.0,
+     "stage_specific_win_probability": 0.2,
+     "_target": 0.22
+    },
+    "2026-02-08": {
+     "baseline_win_probability": 0.215,
+     "field_size_teams": 12.0,
+     "stage_win_probability_product": 1.0,
+     "prior_forecast_probability": 0.215,
+     "roster_quality_weight": 0.4,
+     "roster_quality_adjustment_or_contribution": 0.0,
+     "opponent_strength_weight": 0.25,
+     "opponent_strength_adjustment_or_contribution": 0.0,
+     "tournament_variance_weight": 0.15,
+     "tournament_variance_adjustment_or_contribution": 0.0,
+     "recent_form_adjustment_or_contribution": 0.02,
+     "calibration_or_rounding_bump": 0.0,
+     "roster_size_players": 0.0,
+     "stage_specific_win_probability": 0.215,
+     "_target": 0.24
+    },
+    "2026-02-15": {
+     "baseline_win_probability": 0.27,
+     "field_size_teams": 0.0,
+     "stage_win_probability_product": 1.0,
+     "prior_forecast_probability": 0.27,
+     "roster_quality_weight": 0.0,
+     "roster_quality_adjustment_or_contribution": 0.15,
+     "opponent_strength_weight": 0.0,
+     "opponent_strength_adjustment_or_contribution": 0.04,
+     "tournament_variance_weight": 0.0,
+     "tournament_variance_adjustment_or_contribution": 0.03,
+     "recent_form_adjustment_or_contribution": 0.05,
+     "calibration_or_rounding_bump": 0.0,
+     "roster_size_players": 25.0,
+     "stage_specific_win_probability": 0.27,
+     "_target": 0.27
+    },
+    "2026-02-20": {
+     "baseline_win_probability": 0.42,
+     "field_size_teams": 0.0,
+     "stage_win_probability_product": 1.0,
+     "prior_forecast_probability": 0.24,
+     "roster_quality_weight": 0.0,
+     "roster_quality_adjustment_or_contribution": 0.0,
+     "opponent_strength_weight": 0.0,
+     "opponent_strength_adjustment_or_contribution": -0.03,
+     "tournament_variance_weight": 0.0,
+     "tournament_variance_adjustment_or_contribution": 0.0,
+     "recent_form_adjustment_or_contribution": 0.07,
+     "calibration_or_rounding_bump": 0.0,
+     "roster_size_players": 0.0,
+     "stage_specific_win_probability": 0.42,
+     "_target": 0.44
+    }
+   }
+  }
+ }
+}

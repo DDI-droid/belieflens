@@ -1,0 +1,4 @@
+gpt-5-mini   low        67s  forecasts=[0.25, 0.28] searches=[3, 3] []
+   sample text tail: ookmakers' markets (not found in my searches) significantly favored or disfavored the US, I would adjust; but with available reporting up to 2026-01-28, 0.28 reflects current news.  I will stop here because further searching (e.g., more bookmaker odds) might shift the number slightly but is unlikely to change the broad conclusion: US is a leading contender but not the top favorite.  FORECAST: 0.28
+gpt-5-mini   medium    111s  forecasts=[0.18, 0.2] searches=[4, 4] []
+gpt-5        low        93s  forecasts=[0.3, 0.28] searches=[7, 4] []

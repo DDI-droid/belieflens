@@ -1,0 +1,13 @@
+# Re-downloadable data -- bootstrap.py fetches/builds all of this
+data/corpus/
+data/questions/
+data/news.db
+
+# Local caches and noise
+cache/
+__pycache__/
+*.pyc
+.env
+
+# Session scratch
+/tmp/

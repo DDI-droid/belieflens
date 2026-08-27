@@ -1,0 +1,58 @@
+loaded 16 runs
+
+=== analytica / hockey_can ===
+    step1 dropped near-target vars: computed_intermediate_p1_p3_times_p4=0.3036
+  step 1: 10 instances, 12.2 variables each (min 9, max 16)
+  step 2: schema of 8 -- base_forecast_probability, canada_roster_quality_probability, nhl_participation_probability, competition_strength_favorability_probability, health_availability_probability, tournament_variance_favorability_probability, reach_final_probability, win_final_given_final_probability
+  step 3: attempts=4  MAE=0.3009  within_tol=10%  ops=36  branches=0  max|corr|=0.50 (base_forecast_probability)
+  OOS: train s0 (n=5) -> test (n=5)  test MAE=0.3962  within_tol=20%
+
+=== analytica / hockey_usa ===
+    step1 dropped near-target vars: prob_usa_wins_final_vs_canada=0.48
+  step 1: 10 instances, 11.7 variables each (min 11, max 13)
+  step 2: schema of 7 -- p_nhl_participation, p_usa_elite_roster_or_top_contender, p_no_major_disruption_or_good_health, p_usa_reach_final, p_usa_win_final_given_reach, p_stronger_opponent_or_canada_favorite, tournament_variance_probability
+  step 3: attempts=4  MAE=0.1077  within_tol=10%  ops=20  branches=0  max|corr|=0.88 (p_stronger_opponent_or_canada_favorite)
+  OOS: train s0 (n=5) -> test (n=5)  test MAE=0.2743  within_tol=20%
+
+=== bayesian / hockey_can ===
+  step 1: 10 instances, 11.0 variables each (min 9, max 14)
+  step 2: schema of 11 -- prior_probability_canada_gold, prior_odds_canada_gold, likelihood_ratio_roster_strength, likelihood_ratio_injuries_availability, likelihood_ratio_opposition_strength, likelihood_ratio_venue_logistics, likelihood_ratio_tournament_variance, likelihood_ratio_recent_performance_signal
+  step 3: attempts=4  MAE=nan  within_tol=0%  ops=10  branches=0  max|corr|=0.73 (likelihood_ratio_bracket_progress_signal)
+  OOS: train s0 (n=5) -> test (n=5)  test MAE=0.0628  within_tol=0%
+
+=== bayesian / hockey_usa ===
+    step1 dropped near-target vars: p_e2_dominant_sf_win_given_not_gold=0.475
+    step1 dropped near-target vars: prior_probability_usa_gold=0.18
+    step1 dropped near-target vars: modeled_prob_usa_wins_final_vs_canada_lower_bound=0.35
+  step 1: 10 instances, 10.5 variables each (min 8, max 15)
+  step 2: schema of 10 -- prior_probability_usa_gold, prior_odds_usa_gold, lr_roster_strength_positive, lr_opponent_canada_strength, lr_injury_and_replacements, lr_recent_game_results, lr_nhl_participation_logistics, lr_venue_or_media_sentiment
+  step 3: attempts=4  MAE=0.0274  within_tol=40%  ops=20  branches=0  max|corr|=0.99 (posterior_odds_usa_gold)
+  OOS: train s0 (n=5) -> test (n=5)  test MAE=0.0160  within_tol=60%
+
+=== futuresim / hockey_can ===
+  step 1: 10 instances, 13.7 variables each (min 10, max 19)
+  step 2: schema of 10 -- base_rate_canada_gold_nhl_bestonbest, adjustment_canada_roster_star_power, adjustment_usa_rival_strength, adjustment_goaltending_net, adjustment_venue_and_nhl_participation_risk, adjustment_opponent_field_depth, adjustment_single_elimination_variance, adjustment_recent_form_and_results
+  step 3: attempts=4  MAE=0.0175  within_tol=70%  ops=6  branches=0  max|corr|=0.74 (adjustment_single_elimination_variance)
+  OOS: train s0 (n=5) -> test (n=5)  test MAE=0.0140  within_tol=80%
+
+=== futuresim / hockey_usa ===
+  step 1: 10 instances, 12.2 variables each (min 9, max 15)
+  step 2: schema of 12 -- base_rate_usa_gold, adj_nhl_participation, adj_usa_roster_strength, adj_usa_team_chemistry, adj_usa_goaltending, adj_usa_injury_seth_jones, adj_canada_strength, adj_tournament_format_variance
+  step 3: attempts=4  MAE=0.0445  within_tol=50%  ops=9  branches=5  max|corr|=0.91 (adj_usa_team_chemistry)
+  OOS: train s0 (n=5) -> test (n=5)  test MAE=0.1348  within_tol=20%
+
+=== react / hockey_can ===
+  step 1: 10 instances, 11.4 variables each (min 9, max 15)
+  step 2: schema of 13 -- tournament_team_count, prior_win_probability, adj_roster_quality, adj_rivals_strength, adj_tournament_variance_structure, adj_injuries_availability, adj_momentum_leadership_form, adj_venue_logistics
+  step 3: attempts=4  MAE=0.0700  within_tol=20%  ops=28  branches=0  max|corr|=0.70 (prior_win_probability)
+  OOS: train s0 (n=5) -> test (n=5)  test MAE=0.0732  within_tol=40%
+
+=== react / hockey_usa ===
+    step1 dropped near-target vars: raw_stage_product_before_rounding=0.2587, rounded_probability_displayed=0.259, final_rounding_display_value=0.26
+    step1 dropped near-target vars: raw_weighted_average_before_rounding=0.2905
+  step 1: 10 instances, 12.1 variables each (min 8, max 17)
+  step 2: schema of 14 -- baseline_win_probability, field_size_teams, stage_win_probability_product, prior_forecast_probability, roster_quality_weight, roster_quality_adjustment_or_contribution, opponent_strength_weight, opponent_strength_adjustment_or_contribution
+  step 3: no valid program after 4 attempts
+  OOS: train s0 (n=5) -> test (n=5)  test MAE=0.1777  within_tol=0%
+
+wrote results\exp1\e2_programs.json (8 groups)

@@ -1,0 +1,941 @@
+<title>BeliefLens</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+
+<style>
+:root{
+  --paper:#F4F6F8;
+  --surface:#FFFFFF;
+  --surface-2:#EBEFF3;
+  --ink:#131A21;
+  --ink-2:#3D4954;
+  --muted:#6C7885;
+  --rule:#D8DFE5;
+  --accent:#2E5E8E;
+  --accent-soft:#DCE7F1;
+  --signal:#9C3D54;
+  --signal-soft:#F2DFE3;
+  --ok:#2F6B52;
+  --shadow:0 1px 2px rgba(19,26,33,.05),0 8px 24px -16px rgba(19,26,33,.30);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0F141A; --surface:#161D25; --surface-2:#1D2630;
+    --ink:#E3E9EE; --ink-2:#B4BFC9; --muted:#8794A1; --rule:#28323C;
+    --accent:#7FAFD8; --accent-soft:#1B2B3A;
+    --signal:#DE8FA0; --signal-soft:#33212A; --ok:#7FC1A2;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px -16px rgba(0,0,0,.8);
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0F141A; --surface:#161D25; --surface-2:#1D2630;
+  --ink:#E3E9EE; --ink-2:#B4BFC9; --muted:#8794A1; --rule:#28323C;
+  --accent:#7FAFD8; --accent-soft:#1B2B3A;
+  --signal:#DE8FA0; --signal-soft:#33212A; --ok:#7FC1A2;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px -16px rgba(0,0,0,.8);
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0;background:var(--paper);color:var(--ink);
+  font-family:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  font-size:16.5px;line-height:1.65;-webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1080px;margin:0 auto;padding:0 28px 96px}
+.col{max-width:70ch}
+
+h1,h2,h3{font-family:Spectral,Georgia,"Times New Roman",serif;font-weight:600;text-wrap:balance;margin:0}
+h1{font-size:clamp(2.2rem,4.8vw,3.25rem);line-height:1.08;letter-spacing:-.015em}
+h2{font-size:clamp(1.4rem,2.5vw,1.85rem);line-height:1.2;letter-spacing:-.01em}
+h3{font-size:1.02rem;line-height:1.35;font-family:"IBM Plex Sans",sans-serif;font-weight:600;letter-spacing:.005em}
+p{margin:0}
+a{color:var(--accent);text-decoration-thickness:1px;text-underline-offset:2px}
+a:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:3px}
+
+.eyebrow{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.mono{font-family:"IBM Plex Mono",ui-monospace,monospace}
+code{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:.87em;background:var(--surface-2);padding:.1em .35em;border-radius:3px}
+
+header.mast{border-bottom:1px solid var(--rule);margin-bottom:52px}
+.mast-inner{max-width:1080px;margin:0 auto;padding:56px 28px 40px}
+.mast .col{display:flex;flex-direction:column;gap:18px}
+.lede{font-family:Spectral,Georgia,serif;font-size:1.2rem;line-height:1.55;color:var(--ink-2)}
+
+section{display:flex;flex-direction:column;gap:20px;margin-top:62px;scroll-margin-top:24px}
+section > .col{display:flex;flex-direction:column;gap:16px}
+.sec-head{display:flex;flex-direction:column;gap:7px;border-top:2px solid var(--ink);padding-top:14px}
+
+.sources{display:grid;grid-template-columns:repeat(auto-fit,minmax(255px,1fr));gap:14px}
+.src{background:var(--surface);border:1px solid var(--rule);border-radius:5px;padding:18px;display:flex;flex-direction:column;gap:9px;box-shadow:var(--shadow)}
+.src .name{font-family:Spectral,serif;font-size:1.14rem;font-weight:600}
+.src .role{font-size:.86rem;color:var(--ink-2);line-height:1.55}
+.src .id{font-family:"IBM Plex Mono",monospace;font-size:.72rem;color:var(--muted)}
+
+figure{margin:0;display:flex;flex-direction:column;gap:12px}
+.figbox{background:var(--surface);border:1px solid var(--rule);border-radius:5px;padding:26px 22px;overflow-x:auto}
+.figbox svg{display:block;width:100%;max-width:100%;height:auto;min-width:540px;color:var(--ink)}
+figcaption{font-size:.87rem;color:var(--muted);line-height:1.55;max-width:70ch}
+
+.identity{background:var(--surface);border:1px solid var(--rule);border-left:3px solid var(--accent);border-radius:0 5px 5px 0;padding:18px 20px;display:flex;flex-direction:column;gap:9px}
+.identity .expr{font-family:"IBM Plex Mono",monospace;font-size:.95rem;line-height:1.9;overflow-x:auto}
+.identity .gloss{font-size:.87rem;color:var(--ink-2)}
+.t-accent{color:var(--accent);font-weight:500}
+.t-signal{color:var(--signal);font-weight:500}
+
+.tablewrap{overflow-x:auto;border:1px solid var(--rule);border-radius:5px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:.88rem}
+table.wide{min-width:800px}
+table.mid{min-width:600px}
+th,td{text-align:left;padding:11px 15px;border-bottom:1px solid var(--rule);vertical-align:top}
+thead th{font-family:"IBM Plex Mono",monospace;font-size:.69rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:500;background:var(--surface-2);white-space:nowrap}
+tbody tr:last-child td{border-bottom:none}
+td.k{font-family:"IBM Plex Mono",monospace;font-size:.8rem;color:var(--accent);white-space:nowrap;font-weight:500}
+td.m{font-family:"IBM Plex Mono",monospace;font-size:.79rem;color:var(--ink-2)}
+td.hum{color:var(--signal);font-size:.83rem}
+tr.grp td{background:var(--surface-2);font-family:"IBM Plex Mono",monospace;font-size:.69rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);padding:7px 15px}
+
+.reqs{display:flex;flex-direction:column;border:1px solid var(--rule);border-radius:5px;background:var(--surface);overflow:hidden}
+.req{display:grid;grid-template-columns:130px 1fr;gap:16px;padding:15px 18px;border-bottom:1px solid var(--rule)}
+.req:last-child{border-bottom:none}
+.req .rn{font-family:"IBM Plex Mono",monospace;font-size:.78rem;color:var(--accent);font-weight:500}
+.req .rb{font-size:.91rem;line-height:1.6;color:var(--ink-2)}
+.req .rb b{color:var(--ink);font-weight:600}
+
+pre{margin:0;background:var(--surface);border:1px solid var(--rule);border-radius:5px;padding:18px 20px;overflow-x:auto;font-family:"IBM Plex Mono",monospace;font-size:.79rem;line-height:1.75;color:var(--ink-2)}
+pre .c{color:var(--muted)}
+pre .hl{color:var(--signal)}
+pre .kw{color:var(--accent)}
+
+.ladder{display:flex;flex-direction:column;gap:0;border:1px solid var(--rule);border-radius:5px;background:var(--surface);overflow:hidden}
+.rung{display:grid;grid-template-columns:76px 1fr;gap:18px;padding:17px 18px;border-bottom:1px solid var(--rule)}
+.rung:last-child{border-bottom:none}
+.rung .d{font-family:"IBM Plex Mono",monospace;font-size:.86rem;color:var(--accent);font-weight:500}
+.rung .body{display:flex;flex-direction:column;gap:5px;font-size:.91rem;line-height:1.6}
+.rung .body strong{font-weight:600}
+.rung .body .n{color:var(--muted);font-size:.84rem}
+
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px}
+.card{background:var(--surface);border:1px solid var(--rule);border-radius:5px;padding:18px;display:flex;flex-direction:column;gap:8px}
+.card .h{font-family:Spectral,serif;font-size:1.08rem;font-weight:600}
+.card .b{font-size:.86rem;color:var(--ink-2);line-height:1.55}
+.card.pick{border-color:var(--accent);border-width:1.5px}
+.card .tagline{font-family:"IBM Plex Mono",monospace;font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+
+.status{display:grid;grid-template-columns:repeat(auto-fit,minmax(205px,1fr));gap:12px}
+.stat{background:var(--surface);border:1px solid var(--rule);border-radius:5px;padding:15px 16px;display:flex;flex-direction:column;gap:5px}
+.stat .v{font-family:"IBM Plex Mono",monospace;font-size:1.24rem;color:var(--ok);font-variant-numeric:tabular-nums}
+.stat .l{font-size:.82rem;color:var(--ink-2);line-height:1.45}
+
+ul.plain{margin:0;padding-left:1.15em;display:flex;flex-direction:column;gap:9px}
+ul.plain li{padding-left:.15em}
+
+.note{background:var(--signal-soft);border:1px solid color-mix(in srgb,var(--signal) 28%,transparent);border-radius:5px;padding:15px 18px;font-size:.88rem;color:var(--ink-2);line-height:1.6}
+.note b{color:var(--signal)}
+
+footer{margin-top:80px;padding-top:22px;border-top:1px solid var(--rule);font-size:.83rem;color:var(--muted);max-width:70ch}
+
+@media (max-width:660px){
+  .req,.rung{grid-template-columns:1fr;gap:8px}
+  .wrap,.mast-inner{padding-left:20px;padding-right:20px}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<header class="mast">
+  <div class="mast-inner">
+    <div class="col">
+      <span class="eyebrow">Research program &middot; belief dynamics in judgmental forecasters</span>
+      <h1>What moves an LLM's belief?</h1>
+      <p class="lede">LLM forecasters are <em>judgmental</em> forecasters &mdash; they hold positions of
+      their own, and FutureSim already shows they sometimes will not let go of them. That is a claim
+      about belief dynamics, and it cannot be settled without a representation of belief you can
+      intervene on and measure distance in. This is the program for building that instrument and
+      running it until the laws come out.</p>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+<section>
+  <div class="col sec-head">
+    <span class="eyebrow">The premise</span>
+    <h2>The representation is an instrument, not a thesis</h2>
+  </div>
+  <div class="col">
+    <p>Analytica's proposition tree is one way to externalise a belief. Agent-BRACE's claim set with
+    ordinal certainty is another. A bare string is a third. None of them is the object of study &mdash;
+    the belief is. So the right question is not <em>is the tree correct</em> but <em>what must any
+    representation support if we want to derive properties of belief from it</em>. Five requirements,
+    and they are what the design answers to:</p>
+  </div>
+  <div class="reqs">
+    <div class="req"><span class="rn">R1 elicitable</span><span class="rb">The model can produce it, or we can reconstruct it from behaviour. Both routes matter: what it <b>says</b> its belief is, and what its <b>choices</b> reveal.</span></div>
+    <div class="req"><span class="rn">R2 metric</span><span class="rb">There is a meaningful <b>distance between two belief states</b> &mdash; across time, across interventions, across models. This is the load-bearing requirement, and it is where trees fail: two elicitations of one question yield different nodes, so edit distance over free-text claims is a swamp.</span></div>
+    <div class="req"><span class="rn">R3 addressable<br><span style="color:var(--muted);font-size:.72rem">hard</span></span><span class="rb">The representation has <b>parts you can name and change</b> &mdash; <em>&ldquo;set this claim to 0.9&rdquo;</em>, <em>&ldquo;retract this one&rdquo;</em>. Intervention needs an address, nothing more. This, and not computation, is the real argument for structure: a bare string has nowhere to point.</span></div>
+    <div class="req"><span class="rn">R4 decodable</span><span class="rb">It maps to a forecast, so it can be scored against behaviour and against outcomes.</span></div>
+    <div class="req"><span class="rn">R5 refinable</span><span class="rb">A coarse belief (one number) and a fine one (a whole structure) must be relatable by projection &mdash; otherwise you cannot ask whether elaborating a belief preserves it.</span></div>
+    <div class="req"><span class="rn">R6 executable<br><span style="color:var(--muted);font-size:.72rem">soft</span></span><span class="rb">If the composition can be <em>run by machine</em>, an intervention's implied consequence comes back exact and free. Worth having &mdash; <b>not worth distorting the belief to obtain</b>. See the next section: the model can always run its own belief instead.</span></div>
+  </div>
+  <div class="col">
+    <p>Against the candidates: a tree with a linear rule satisfies R3, R4 and R6, and fails R2 and R5. A
+    flat claim set satisfies R2 and R3 but has no composition, so it cannot say what should follow
+    &mdash; it fails R6, and needs the model itself to supply the consequence. A bare string fails at
+    R3 and takes everything downstream with it. Nothing here is the answer; the requirements are.</p>
+  </div>
+</section>
+
+<section>
+  <div class="col sec-head">
+    <span class="eyebrow">The representation</span>
+    <h2>A belief state is a triple</h2>
+  </div>
+  <div class="col">
+    <div class="identity">
+      <div class="expr">B = ( <span class="t-accent">C</span> , <span class="t-accent">&pi;</span> , <span class="t-accent">f</span> )</div>
+      <div class="gloss"><span class="mono">C</span> the frame &mdash; which propositions are in play.
+      <span class="mono">&pi;</span> the credences over them, with resilience.
+      <span class="mono">f</span> the aggregator &mdash; how they compose. Each of the three is a
+      separate experimental handle, and separating them is most of the design.</div>
+    </div>
+  </div>
+
+  <div class="col">
+    <h3>C &mdash; the frame, in two modes</h3>
+    <p><strong>Free-frame:</strong> the model authors its own proposition set. This is itself a readout
+    &mdash; what structure does it spontaneously build, and how stable is that across redraws?</p>
+    <p><strong>Fixed-frame:</strong> <em>we</em> supply a canonical probe battery per question &mdash;
+    the question, its negation, a handful of sub-questions, a few conditionals, generated once and
+    reused. The model only fills in credences. Now a belief state is a <strong>vector in [0,1]<sup>n</sup>
+    in a shared coordinate system</strong>: distances are trivial, dynamics are literally trajectories
+    you can plot, and interventions have well-defined coordinates.</p>
+    <p>This is the answer to &ldquo;maybe we don't need a tree.&rdquo; What we need is not a richer
+    nested structure &mdash; it is a <strong>coordinate system for beliefs</strong>. Free-frame for
+    statics, fixed-frame for dynamics.</p>
+  </div>
+
+  <figure>
+    <div class="figbox">
+      <svg viewBox="0 0 880 300" role="img" aria-label="Free-frame elicitation produces different proposition sets on each draw, so two belief states cannot be directly compared. Fixed-frame elicitation reuses one shared probe battery, so every belief state is a vector in the same coordinate system and distance is simply defined.">
+        <defs>
+          <marker id="fa" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="currentColor"/></marker>
+          <marker id="fa-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="var(--accent)"/></marker>
+          <marker id="fa-s" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="var(--signal)"/></marker>
+        </defs>
+        <g font-family="IBM Plex Mono, monospace" font-size="11.5">
+          <line x1="440" y1="10" x2="440" y2="290" stroke="var(--rule)" stroke-width="1" stroke-dasharray="3 4"/>
+          <text x="16" y="26" fill="var(--muted)" font-size="10.5" letter-spacing="1.2">FREE-FRAME — MODEL AUTHORS C</text>
+          <text x="466" y="26" fill="var(--muted)" font-size="10.5" letter-spacing="1.2">FIXED-FRAME — SHARED PROBE BATTERY</text>
+
+          <!-- LEFT: two draws, different frames -->
+          <text x="16" y="62" fill="var(--muted)" font-size="10.5">draw 1</text>
+          <rect x="16" y="72" width="86" height="26" rx="3" fill="var(--surface-2)" stroke="currentColor"/><text x="59" y="89" text-anchor="middle" fill="currentColor" font-size="10">claim a</text>
+          <rect x="110" y="72" width="86" height="26" rx="3" fill="var(--surface-2)" stroke="currentColor"/><text x="153" y="89" text-anchor="middle" fill="currentColor" font-size="10">claim b</text>
+          <rect x="204" y="72" width="86" height="26" rx="3" fill="var(--surface-2)" stroke="currentColor"/><text x="247" y="89" text-anchor="middle" fill="currentColor" font-size="10">claim c</text>
+
+          <text x="16" y="134" fill="var(--muted)" font-size="10.5">draw 2</text>
+          <rect x="16" y="144" width="86" height="26" rx="3" fill="var(--surface-2)" stroke="currentColor"/><text x="59" y="161" text-anchor="middle" fill="currentColor" font-size="10">claim a&prime;</text>
+          <rect x="110" y="144" width="120" height="26" rx="3" fill="var(--surface-2)" stroke="currentColor"/><text x="170" y="161" text-anchor="middle" fill="currentColor" font-size="10">claim d</text>
+          <rect x="238" y="144" width="86" height="26" rx="3" fill="var(--surface-2)" stroke="currentColor"/><text x="281" y="161" text-anchor="middle" fill="currentColor" font-size="10">claim e</text>
+
+          <path d="M170 186 L170 214" fill="none" stroke="var(--signal)" stroke-width="1.4" marker-end="url(#fa-s)"/>
+          <rect x="16" y="220" width="404" height="56" rx="4" fill="var(--signal-soft)" stroke="var(--signal)"/>
+          <text x="30" y="242" fill="var(--signal)" font-size="11">d(B₁, B₂) needs claim matching before it exists</text>
+          <text x="30" y="262" fill="var(--signal)" font-size="10.5">— entailment-matched, lossy, and the frame itself is a variable</text>
+
+          <!-- RIGHT: shared basis -->
+          <rect x="466" y="52" width="290" height="26" rx="3" fill="var(--accent-soft)" stroke="var(--accent)"/><text x="480" y="69" fill="var(--accent)" font-size="10">q · ¬q · sub₁ … sub₅ · cond₁ … cond₃</text>
+          <text x="766" y="69" fill="var(--muted)" font-size="10">basis</text>
+
+          <path d="M540 84 L540 106" fill="none" stroke="var(--accent)" stroke-width="1.3" marker-end="url(#fa-a)"/>
+          <path d="M690 84 L690 106" fill="none" stroke="var(--accent)" stroke-width="1.3" marker-end="url(#fa-a)"/>
+
+          <rect x="466" y="110" width="150" height="46" rx="4" fill="var(--surface)" stroke="currentColor" stroke-width="1.3"/>
+          <text x="480" y="128" fill="currentColor" font-size="10.5">B₁ = (.62 .38 .71 …)</text>
+          <text x="480" y="146" fill="var(--muted)" font-size="10">day 0</text>
+
+          <rect x="640" y="110" width="150" height="46" rx="4" fill="var(--surface)" stroke="currentColor" stroke-width="1.3"/>
+          <text x="654" y="128" fill="currentColor" font-size="10.5">B₂ = (.55 .45 .70 …)</text>
+          <text x="654" y="146" fill="var(--muted)" font-size="10">day 14</text>
+
+          <path d="M618 133 L636 133" fill="none" stroke="currentColor" stroke-width="1.3" marker-end="url(#fa)"/>
+          <path d="M628 168 L628 200" fill="none" stroke="var(--accent)" stroke-width="1.4" marker-end="url(#fa-a)"/>
+
+          <rect x="466" y="206" width="404" height="70" rx="4" fill="var(--accent-soft)" stroke="var(--accent)"/>
+          <text x="480" y="228" fill="var(--accent)" font-size="11">d(B₁, B₂) = ‖B₁ − B₂‖ — defined, cheap, comparable</text>
+          <text x="480" y="248" fill="var(--accent)" font-size="10.5">a trajectory in [0,1]ⁿ: velocity, jumps at news, drift on quiet days</text>
+          <text x="480" y="266" fill="var(--accent)" font-size="10.5">interventions have coordinates; models are directly comparable</text>
+        </g>
+      </svg>
+    </div>
+    <figcaption>The frame is the thing that decides whether belief dynamics is measurable at all. A
+    model-authored frame moves between draws, so every comparison first pays a lossy matching step; a
+    shared battery makes the belief a point in a fixed space, and everything downstream &mdash;
+    distance, trajectory, intervention, cross-model comparison &mdash; follows for free.</figcaption>
+  </figure>
+
+  <div class="col">
+    <h3>&pi; &mdash; credence with resilience, not a bare number</h3>
+    <p>A point probability does not determine how a belief <em>should</em> move. So each credence is a
+    pair <code>(p, n)</code>: the value, and an equivalent sample size &mdash; <em>&ldquo;I hold 0.7 as
+    if on twelve observations&rdquo;</em> versus <em>&ldquo;as if on two.&rdquo;</em> Evidence of weight
+    <span class="mono">m</span> then implies a specific posterior, <span class="mono">(pn + m)/(n + m)</span>,
+    in <strong>the model's own units</strong>. Over- and under-reaction become measurable without
+    installing an external Bayesian referee whose priors we would then have to defend.</p>
+
+    <h3>f &mdash; the aggregator is elicited, not imposed</h3>
+    <p>Why linear? Analytica picked it for variance averaging and a closed-form analysis. <em>Nothing in
+    this program needs linearity</em> &mdash; and, per R6, nothing strictly needs a closed form at all.
+    So the grammar runs from fully executable down to frankly vague, and the model picks its own rung:</p>
+  </div>
+
+  <pre><span class="kw">f</span> :=  <span class="c">— executable: an intervention's consequence comes back exact —</span>
+         LINEAR(β₀, β…)          <span class="c">// Analytica's rule, one option among many</span>
+      |  NOISY_OR | NOISY_AND    <span class="c">// independent sufficient causes / joint necessity</span>
+      |  LOGISTIC(b, w…)         <span class="c">// saturating evidence accumulation</span>
+      |  MIN | MAX               <span class="c">// weakest-link, best-case</span>
+      |  MIX(λ, f₁, f₂)          <span class="c">// regime mixture: "usually additive, sometimes gated"</span>
+      |  TABLE(cpt)              <span class="c">// full conditional table, small parent sets</span>
+      |  EXPR(arithmetic)        <span class="c">// escape hatch, still runnable</span>
+
+      <span class="c">— partial: constrains the consequence without fixing it —</span>
+      |  MONOTONE(↑n1, ↓n4)      <span class="c">// direction only</span>
+      |  DOMINATES(n1 ≫ n2)      <span class="c">// relative weight, no magnitudes</span>
+      |  GATED(n3 → then n1)     <span class="c">// structure without parameters</span>
+
+      <span class="hl">— vague: natural language, run by the model —</span>
+      <span class="hl">|  NL("n1 only matters if n3 holds; otherwise it is mostly n2,</span>
+      <span class="hl">       and n4 caps the whole thing")</span>
+
+<span class="c">LINEAR cannot express "these two only matter jointly". NOISY_OR cannot</span>
+<span class="c">express inhibition. And no closed form expresses a belief the model holds</span>
+<span class="c">but has not made precise — forcing one on it discards exactly the part we</span>
+<span class="c">are trying to read.</span></pre>
+
+  <div class="col">
+    <p>Letting the model state its own composition semantics &mdash; at whatever precision it actually
+    has &mdash; turns the aggregator from an assumption into <strong>data</strong>: which forms do models
+    reach for, for which kinds of question, and <em>how much of a belief will a model commit to
+    executable form at all</em>? That commitment rate is a measurement in its own right, and the
+    executable fragment can then be compared against the vague remainder to see whether pinned-down
+    beliefs behave differently from unpinned ones.</p>
+    <p>And it opens the sharpest single experiment in this section.</p>
+    <div class="identity">
+      <div class="expr"><span class="t-accent">stated f</span> &nbsp;vs&nbsp; <span class="t-signal">revealed f</span></div>
+      <div class="gloss">The elicited <span class="mono">f</span> is the model's <em>stated theory</em>
+      of how its own beliefs cohere. Now clamp nodes &mdash; <em>&ldquo;suppose n3 = 0.9&rdquo;</em>
+      &mdash; over a battery of clampings and record the root the model itself re-derives. Fit each
+      candidate family to those responses: the best-generalising fit is the <em>revealed</em>
+      aggregator. Note the asymmetry &mdash; the revealed rule is always ours and always runnable
+      because <em>we</em> fit it, so the stated one never has to be. It only has to be
+      <em>sampleable</em>, and the model can sample even an <span class="mono">NL(&hellip;)</span> rule
+      on a grid. That is a direct answer to <em>what rule does the model implement</em>, rather than one
+      we imposed.</div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="col sec-head">
+    <span class="eyebrow">The DSL</span>
+    <h2>BeliefSpec, assembled</h2>
+  </div>
+  <div class="col">
+    <p>The triple written out &mdash; and deliberately <strong>not</strong> a tree. Claims are a flat,
+    addressable set; structure lives in a separate <span class="mono">relations</span> list. A tree is
+    simply what you get when every claim composes into exactly one other and nothing else is declared,
+    which makes Analytica's shape a special case rather than the schema.</p>
+    <p>Flattening is not tidiness. It is what the rest of the design already assumed: a shared
+    coordinate system cannot exist if each elicitation nests differently (R2, R5); a claim genuinely
+    does bear on more than one question, which a tree forbids; and the coherence laws need relations
+    that have <em>no</em> direction at all &mdash; a complement, a mutually exclusive outcome set, a
+    conjunction bound &mdash; which a parent-child edge has nowhere to put.</p>
+  </div>
+
+  <pre>{
+  <span class="kw">"question"</span>: "Will the ECB cut its deposit rate at or before the March 2026 meeting?",
+  <span class="kw">"as_of"</span>:  "2025-12-24",
+  <span class="kw">"frame"</span>:  "fixed:ecb-rate-v1",   <span class="c">// C — free, or a named shared battery (R2, R5)</span>
+  <span class="kw">"query"</span>:  "c_cut",               <span class="c">// which claim we happen to forecast. NOT a root —</span>
+  <span class="kw">"interpreter"</span>: "exec",           <span class="c">//    no structural privilege, just a pointer</span>
+
+  <span class="kw">"claims"</span>: [                       <span class="c">// π — flat, unordered, every one an ADDRESS (R3)</span>
+    { "id": <span class="hl">"c_cut"</span>,  "text": "The ECB deposit rate is cut at or before March 2026",
+      "p": 0.58, <span class="kw">"n": 6</span>, "wep": "possible" },     <span class="c">// n = resilience: "as if on 6 observations"</span>
+
+    { "id": "c_core", "text": "Euro-area core inflation prints below 2.0% for two months",
+      "p": 0.34, "n": 9, "wep": "unlikely",       <span class="c">// n=9 → held firmly, should barely move</span>
+      <span class="hl">"sensitivity"</span>: [                            <span class="c">// stated BEFORE any evidence arrives</span>
+        { "if": "January flash core at or below 1.9%", "p_to": 0.72, <span class="kw">"weight": 4</span> },
+        { "if": "January flash core at or above 2.3%", "p_to": 0.11, <span class="kw">"weight": 4</span> } ] },
+
+    { "id": "c_gdp",   "text": "Euro-area Q4 GDP is revised negative",
+      "p": 0.22, "n": 3, "wep": "unlikely", "sensitivity": [ … ] },  <span class="c">// n=3 → should swing</span>
+
+    { "id": "c_hawks", "text": "A Governing Council majority signals easing publicly",
+      "p": 0.41, "n": 2, "wep": "possible", "sensitivity": [ … ] },
+
+    { "id": "c_nocut", "text": "No cut at or before March 2026", "p": 0.39, "n": 6, "wep": "possible" }
+  ],
+
+  <span class="kw">"relations"</span>: [                    <span class="c">// f lives here — as ONE kind of relation among several</span>
+    { "kind": <span class="kw">"composes"</span>, "into": "c_cut", "from": ["c_core","c_gdp","c_hawks"],
+      "f": { "rung": "executable", "form": "NOISY_OR",
+             "over": { "c_core": 0.70, "c_gdp": 0.45, "c_hawks": 0.25 } } },
+
+    <span class="c">// relations a parent-child edge cannot express:</span>
+    { "kind": <span class="kw">"constrains"</span>, "form": "COMPLEMENT", "over": ["c_cut","c_nocut"] },   <span class="c">// A3</span>
+    { "kind": "constrains", "form": "IMPLIES",  "from": "c_gdp", "to": "c_cut" },     <span class="c">// holds</span>
+    { "kind": "constrains", "form": "FRECHET",  "over": ["c_core","c_gdp"] }          <span class="c">// regardless of f</span>
+  ]
+  <span class="c">// c_core also appears in the ECB-March-hold spec. One claim, two questions —</span>
+  <span class="c">// which is exactly what a tree forbids and a relation list gets for free.</span>
+}
+
+<span class="c">The same composition at the other two rungs — the model picks, and we record which:</span>
+
+  "f": { "rung": "partial", "form": "MONOTONE", "up": ["c_core","c_gdp"],
+                            "dominates": "c_core ≫ c_hawks" }
+
+  <span class="hl">"f": { "rung": "prose", "form": "NL",</span>
+  <span class="hl">       "text": "c_core is the whole story unless growth cracks; c_hawks only</span>
+  <span class="hl">                matters if c_core is already close, and hawkish remarks cap it" }</span></pre>
+
+  <div class="col">
+    <p>Two small fields carry more than their size. <span class="mono">"n"</span> beside every
+    <span class="mono">"p"</span> makes over- and under-reaction measurable in the model's own units
+    &mdash; <span class="mono">c_core</span> at <span class="mono">n=9</span> should barely move where
+    <span class="mono">c_gdp</span> at <span class="mono">n=3</span> should swing, and a model that
+    moves them equally has told on itself. And <span class="mono">"weight"</span> inside each
+    sensitivity slot is the evidence weight that pairs with it, so a cue commits the model to
+    <em>both</em> a destination and an implied change in how firmly it will hold that value afterwards.
+    Both halves are checkable.</p>
+
+    <h3>Probes are verb, address, value</h3>
+    <p>This is the whole payoff of addressability. Every experiment in the battery is one line against a
+    live spec, and not one of them requires the spec to be runnable.</p>
+  </div>
+
+  <pre>clamp    c_core := 0.90            <span class="c">// A5 · sweep, record the query value it re-derives → revealed f</span>
+tamper   c_gdp.p += 0.25           <span class="c">// A12 · hand back as if untouched; P(detect | Δ) → uptake</span>
+inject   e17 → c_core              <span class="c">// A6 · the model's own cue, returned as dated news</span>
+retract  e17                       <span class="c">// A8 · "that report was withdrawn". is B restored?</span>
+permute  [e17, e23] → [e23, e17]   <span class="c">// A7 · does arrival order change the destination?</span>
+freeze   relations                 <span class="c">// A10 · local protocol: only π may move</span>
+refine   c_core → 4 claims         <span class="c">// A4 · does elaborating change what B decodes to?</span>
+replace  f(c_cut) := ⟨M2's f⟩      <span class="c">// transplant · whose belief is the model acting on?</span>
+project  onto frame:ecb-rate-v1    <span class="c">// R5 · re-express a free-frame belief in the shared basis</span>
+step     ∅                         <span class="c">// A9 · a day with no evidence. does B drift anyway?</span></pre>
+
+  <div class="col">
+    <p>A belief written as a paragraph supports none of these lines. That, and not arithmetic, is what
+    the structure is for.</p>
+  </div>
+</section>
+
+<section>
+  <div class="col sec-head">
+    <span class="eyebrow">Who runs the belief</span>
+    <h2>The model can be its own interpreter</h2>
+  </div>
+  <div class="col">
+    <p>Once a belief is crystallised into a representation, there are two ways to find out what it
+    implies. We can run it. Or we can <strong>hand it back to the model and ask it to play</strong>
+    &mdash; condition it on its own belief state and let it produce the forecast, answer the
+    conditional, take the update. The second route needs no closed form, no grammar, and no arithmetic
+    on our side, which is why R6 is soft: the experiment does not require the belief to run by itself.</p>
+    <p>This is also the deployment-realistic setting. Agent-BRACE's policy conditions on the belief
+    state directly; nothing in that architecture ever executes it. A belief that only means something
+    when a separate interpreter runs it is not the belief the agent is acting on.</p>
+  </div>
+
+  <figure>
+    <div class="figbox">
+      <svg viewBox="0 0 880 320" role="img" aria-label="A belief state, optionally perturbed, is decoded two ways: by machine execution of the stated rule, and by handing it back to the model to play forward. Sensitivity of the model route to the perturbation is uptake; the gap between the two routes is compliance.">
+        <defs>
+          <marker id="wa" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="currentColor"/></marker>
+          <marker id="wa-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="var(--accent)"/></marker>
+          <marker id="wa-s" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="var(--signal)"/></marker>
+        </defs>
+        <g font-family="IBM Plex Mono, monospace" font-size="11.5">
+
+          <rect x="16" y="128" width="132" height="62" rx="4" fill="var(--surface-2)" stroke="currentColor" stroke-width="1.3"/>
+          <text x="82" y="152" text-anchor="middle" fill="currentColor" font-size="11.5">belief state B</text>
+          <text x="82" y="170" text-anchor="middle" fill="var(--muted)" font-size="10">± one perturbation</text>
+
+          <path d="M148 146 L148 66 L232 66" fill="none" stroke="var(--accent)" stroke-width="1.4" marker-end="url(#wa-a)"/>
+          <path d="M148 172 L148 250 L232 250" fill="none" stroke="currentColor" stroke-width="1.4" marker-end="url(#wa)"/>
+
+          <!-- EXEC -->
+          <rect x="234" y="42" width="188" height="50" rx="4" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.5"/>
+          <text x="248" y="63" fill="var(--accent)" font-size="11.5">EXEC · we run f</text>
+          <text x="248" y="80" fill="var(--muted)" font-size="10">exact · zero noise · free</text>
+          <path d="M422 67 L520 67" fill="none" stroke="var(--accent)" stroke-width="1.4" marker-end="url(#wa-a)"/>
+          <rect x="522" y="46" width="118" height="42" rx="4" fill="var(--surface)" stroke="var(--accent)" stroke-width="1.3"/>
+          <text x="581" y="72" text-anchor="middle" fill="var(--accent)" font-size="11">D_exec(B)</text>
+
+          <!-- MODEL -->
+          <rect x="234" y="226" width="188" height="50" rx="4" fill="var(--surface)" stroke="currentColor" stroke-width="1.5"/>
+          <text x="248" y="247" fill="currentColor" font-size="11.5">MODEL · it plays B</text>
+          <text x="248" y="264" fill="var(--muted)" font-size="10">any f, incl. none · noisy · costs calls</text>
+          <path d="M422 251 L520 251" fill="none" stroke="currentColor" stroke-width="1.4" marker-end="url(#wa)"/>
+          <rect x="522" y="230" width="118" height="42" rx="4" fill="var(--surface)" stroke="currentColor" stroke-width="1.3"/>
+          <text x="581" y="256" text-anchor="middle" fill="currentColor" font-size="11">D_model(B)</text>
+
+          <!-- compliance -->
+          <path d="M581 92 L581 224" fill="none" stroke="var(--signal)" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#wa-s)" marker-start="url(#wa-s)"/>
+          <rect x="656" y="138" width="208" height="42" rx="4" fill="var(--signal-soft)" stroke="var(--signal)"/>
+          <text x="668" y="157" fill="var(--signal)" font-size="11">compliance</text>
+          <text x="668" y="173" fill="var(--signal)" font-size="10">does it honour the rule it wrote?</text>
+
+          <!-- uptake -->
+          <path d="M312 288 C 380 306, 470 300, 528 278" fill="none" stroke="currentColor" stroke-width="1.3" stroke-dasharray="3 3"/>
+          <text x="330" y="308" fill="var(--muted)" font-size="10">∂D_model / ∂B  —  uptake: does perturbing B move the answer at all?</text>
+
+          <text x="656" y="212" fill="var(--muted)" font-size="10">uptake ≈ 0 ⇒ B is decorative;</text>
+          <text x="656" y="228" fill="var(--muted)" font-size="10">the model answers from its prior</text>
+          <text x="656" y="244" fill="var(--muted)" font-size="10">and compliance means nothing.</text>
+        </g>
+      </svg>
+    </div>
+    <figcaption>Two readings of one belief state, and the two quantities that fall out of comparing
+    them. Uptake has to be established first: if perturbing the written belief does not move what the
+    model produces, then the representation is decorative and every downstream number is measuring the
+    model's standing prior instead of its belief.</figcaption>
+  </figure>
+
+  <div class="col">
+    <h3>Uptake, then compliance</h3>
+    <p><strong>Uptake</strong> is the sensitivity of <span class="mono">D_model(B)</span> to
+    perturbations of <span class="mono">B</span> &mdash; and it is the tamper probe of A12 seen from the
+    other side. Zero uptake means the model is not reading its belief state; it is answering the
+    question the way it would have anyway. <strong>Compliance</strong> is
+    <span class="mono">|D_exec(B) − D_model(B)|</span>: whether the model honours the rule it wrote
+    down. Compliance is only interpretable once uptake is non-zero.</p>
+    <p>The important consequence: because the MODEL route is always available, the whole battery
+    <strong>degrades gracefully to a belief written as plain prose</strong>. The DSL is a precision
+    upgrade, not a prerequisite &mdash; which also means the program is not hostage to models emitting
+    well-formed JSON.</p>
+  </div>
+
+  <div class="col">
+    <h3>So what does executability actually buy?</h3>
+    <p>Most of the battery does not need it. Several probes have no <span class="mono">f</span> in the
+    loop at all.</p>
+  </div>
+  <div class="tablewrap">
+    <table class="mid">
+      <thead><tr><th>probe</th><th>needs f executable?</th></tr></thead>
+      <tbody>
+        <tr><td class="m">A6 update self-consistency · A7 commutativity · A8 retraction · A9 quiescence · A12 tamper</td><td><strong>No f in the loop at all.</strong> These compare elicited numbers to elicited numbers.</td></tr>
+        <tr><td class="m">A2 paraphrase · A3 coherence · A4 refinement · transplant · iteration · VOI-coherence</td><td><strong>No.</strong> All operate on credences or on the decoded forecast.</td></tr>
+        <tr><td class="m">A1 arms · A5 composition · A10 locality · A11 theory conservatism</td><td><strong>Substitutable.</strong> Ask the model to run its own rule and read the root. Costs calls and adds noise; works for <span class="mono">NL(…)</span> too.</td></tr>
+        <tr><td class="m">Δ-attribution waterfall</td><td><strong>Substitutable at n+1 calls</strong> per intervention, by ablation: re-ask with each claim pinned at its old value.</td></tr>
+        <tr><td class="m">stated vs revealed aggregator</td><td><strong>Substitutable.</strong> The revealed rule is ours and runnable because we fit it; the stated one only needs to be sampleable.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="col">
+    <p>It earns its place in four, and they are worth keeping a lane open for.</p>
+  </div>
+  <div class="reqs">
+    <div class="req"><span class="rn">E1 unfakeable</span><span class="rb"><b>The referee must not be the defendant.</b> Rigidity is <span class="mono">1 − actual/implied</span>. If <em>implied</em> is also model-produced, both sides of the ratio are under the model's control at judgment time &mdash; it can understate what its belief required and look faithful. Machine execution makes <em>implied</em> unfakeable.</span></div>
+    <div class="req"><span class="rn">E2 noiseless</span><span class="rb">With EXEC, interpreter noise is zero, so <b>all observed variance is belief variance</b>. With MODEL you cannot separate an unstable belief from an unstable reading of it.</span></div>
+    <div class="req"><span class="rn">E3 geometry</span><span class="rb">Distance between two aggregators, full sensitivity surfaces, Shapley attribution over claims &mdash; Monte Carlo over the credence cube, thousands of evaluations per node. Free with EXEC, financially impossible with MODEL. <b>These experiments only exist if f runs.</b></span></div>
+    <div class="req"><span class="rn">E4 baseline</span><span class="rb"><b>The one worth fighting for.</b> Take the day-0 rule, run it forward on FutureSim's real 88-day evidence stream <em>without the model</em>, and compare with what the model actually did. Single-shot rigidity becomes <b>accumulated divergence</b> &mdash; which is the phenomenon FutureSim actually reports. Unobtainable from the model, because asking it to simulate its own consistent updating is precisely the thing under measurement.</span></div>
+  </div>
+
+  <div class="col">
+    <div class="identity">
+      <div class="expr">the principle is not <span class="t-signal">executable</span> &mdash; it is <span class="t-accent">independent of the belief-holder at judgment time</span></div>
+      <div class="gloss">Machine execution is just the limiting case: maximally neutral, zero noise,
+      free. A cheap separate model reading an <span class="mono">NL(&hellip;)</span> rule is a weaker
+      version of the same thing &mdash; it covers E1 and partly E2, and neither E3 nor E4.</div>
+    </div>
+  </div>
+
+  <div class="col">
+    <h3>The resolution: relax it, and make the relaxation a result</h3>
+    <ul class="plain">
+      <li>The model picks its own rung on the grammar, and <strong>we record the rung</strong>. The
+      commitment rate &mdash; how much of a belief a model will pin to runnable form &mdash; becomes a
+      variable rather than a constraint.</li>
+      <li>The executable subset is the sample for E1&ndash;E4. Everything else runs on the full sample
+      through MODEL.</li>
+      <li>Which yields a result you <em>cannot</em> get if executability is forced: <strong>are
+      pinned-down beliefs more or less rigid than vague ones?</strong> Same model, same questions, split
+      by rung.</li>
+      <li>An <strong>auto-compile</strong> step &mdash; a cheap separate model compiles
+      <span class="mono">NL(&hellip;)</span> into runnable form &mdash; gives compile success rate,
+      wider EXEC coverage, and a check on whether the compiled rule predicts what the model's own
+      play-forward does. Compilation loss becomes measured instead of assumed.</li>
+      <li>And the distortion worry becomes testable head-on: elicit both a free-form and a
+      forced-executable <span class="mono">f</span> from the same model on the same question, then
+      compare them in <strong>d₂</strong>. If being made precise changes how a belief <em>updates</em>,
+      that is a real finding about elicitation format &mdash; an A2-flavoured one.</li>
+    </ul>
+  </div>
+</section>
+
+<section>
+  <div class="col sec-head">
+    <span class="eyebrow">Measurement</span>
+    <h2>The distance ladder</h2>
+  </div>
+  <div class="col">
+    <p>Every experiment below reduces to &ldquo;how far did the belief move, and in what sense.&rdquo;
+    Three levels, strictly increasing in information and cost.</p>
+  </div>
+  <div class="ladder">
+    <div class="rung">
+      <span class="d">d₀</span>
+      <div class="body">
+        <strong>Decoded.</strong> <span class="mono">|D(B₁) − D(B₂)|</span>, or TV / Wasserstein over
+        the outcome distribution. Always defined, essentially free.
+        <span class="n">FutureSim already uses TV distance implicitly in its multi-agent convergence result.</span>
+      </div>
+    </div>
+    <div class="rung">
+      <span class="d">d₁</span>
+      <div class="body">
+        <strong>Content.</strong> Match claims across frames &mdash; identity in fixed-frame,
+        bidirectional-entailment matching in free-frame &mdash; then an earth-mover cost over matched
+        credences plus a penalty for unmatched mass.
+        <span class="n">This is what makes two different decompositions comparable: never compare trees, compare the claim–credence measures they induce.</span>
+      </div>
+    </div>
+    <div class="rung">
+      <span class="d">d₂</span>
+      <div class="body">
+        <strong>Dispositional.</strong> <span class="mono">E<sub>e</sub>|U(B₁,e) − U(B₂,e)|</span> over
+        a standard evidence battery. Two beliefs are the same iff they <em>update</em> the same.
+        <span class="n">The Dennettian metric — beliefs individuated by dispositions, not text. And the elicited conditional slots are already a finite sample of the update map, so d₂ is estimable with no new model calls.</span>
+      </div>
+    </div>
+  </div>
+  <div class="col">
+    <p>Two derived quantities matter as much as the metrics themselves.</p>
+    <ul class="plain">
+      <li><strong>The noise floor.</strong> <span class="mono">d(B, B&prime;)</span> between two
+      independent elicitations of the same question is both the bar every effect must clear
+      <em>and</em> a measurement of how <strong>crisp</strong> the belief is. Some questions may have no
+      determinate belief at all &mdash; dispersion tells you which, and that is a finding, not a
+      nuisance.</li>
+      <li><strong>The post-hoc signature, purely metric.</strong> Resampled beliefs that are close in
+      d₀ but far in d₁ mean a stable conclusion resting on unstable rationale. Rationalisation, detected
+      without any decoder trickery.</li>
+    </ul>
+  </div>
+</section>
+
+<section>
+  <div class="col sec-head">
+    <span class="eyebrow">The core battery</span>
+    <h2>Twelve laws, and the violation is the measurement</h2>
+  </div>
+  <div class="col">
+    <p>An ideal belief-holder satisfies a short list of identities. Each identity is one experiment;
+    what we record is <strong>the violation, in units of one of the distances</strong>. This is how
+    behavioural economics took apart the rational-agent axioms, pointed at judgmental forecasters that
+    happen to be language models &mdash; and it turns &ldquo;there are a lot of variations&rdquo; into a
+    closed, enumerable program rather than a grab-bag.</p>
+  </div>
+  <div class="tablewrap">
+    <table class="wide">
+      <thead><tr><th>law</th><th>identity</th><th>probe</th><th>violation is known as</th></tr></thead>
+      <tbody>
+        <tr class="grp"><td colspan="4">statics — does a belief exist, and is it one thing?</td></tr>
+        <tr><td class="k">A1 elicitation neutrality</td><td class="m">D∘E(q) = direct(q)</td><td>the three arms: direct, composed, conditioned-on-own-structure</td><td class="hum">&mdash;</td></tr>
+        <tr><td class="k">A2 paraphrase invariance</td><td class="m">E(q) = E(para(q))</td><td>reworded question, reworded frame</td><td class="hum">framing effect</td></tr>
+        <tr><td class="k">A3 complement coherence</td><td class="m">P(q)+P(¬q)=1; P(A∧B)≤P(A)</td><td>the fixed-frame battery already contains ¬q and conjunctions</td><td class="hum">conjunction fallacy</td></tr>
+        <tr><td class="k">A4 refinement consistency</td><td class="m">D(B) invariant under deeper decomposition</td><td>depth sweep, 1 → 32 leaves; <em>refinement drift</em></td><td class="hum">logical-uncertainty drift</td></tr>
+        <tr><td class="k">A5 composition self-consistency</td><td class="m">root = f(children), the model's own f</td><td>free under EXEC; one call under MODEL. This <em>is</em> compliance — see the interpreter section</td><td class="hum">&mdash;</td></tr>
+        <tr class="grp"><td colspan="4">dynamics — how does it move?</td></tr>
+        <tr><td class="k">A6 update self-consistency</td><td class="m">enacted Δ = promised Δ</td><td>hand back the model's own stated evidence cues as dated news</td><td class="hum">&mdash;</td></tr>
+        <tr><td class="k">A7 commutativity</td><td class="m">U<sub>e₁</sub>∘U<sub>e₂</sub> = U<sub>e₂</sub>∘U<sub>e₁</sub></td><td>permute the arrival order of independent evidence; d(B₁₂, B₂₁)</td><td class="hum">primacy / recency</td></tr>
+        <tr><td class="k">A8 retraction reversibility</td><td class="m">U<sub>ē</sub>∘U<sub>e</sub> = id</td><td>inject a report, then withdraw it; d(B<sub>after</sub>, B₀)</td><td class="hum">belief perseverance, continued-influence effect</td></tr>
+        <tr><td class="k">A9 quiescence</td><td class="m">no evidence ⇒ no motion</td><td>replay empty days; measure the diffusion rate of an untouched belief</td><td class="hum">&mdash;</td></tr>
+        <tr><td class="k">A10 locality</td><td class="m">targeted evidence moves the target; the rest is conserved</td><td>single-node injection; share of total movement landing on the target</td><td class="hum">&mdash;</td></tr>
+        <tr><td class="k">A11 theory conservatism</td><td class="m">outcome-evidence changes π, not f</td><td>aggregator drift under evidence; f-changes that <em>cancel</em> π-changes</td><td class="hum">motivated reasoning, with a receipt</td></tr>
+        <tr class="grp"><td colspan="4">access — is the belief there when nobody is asking?</td></tr>
+        <tr><td class="k">A12 introspective access</td><td class="m">the model knows its own B</td><td><strong>tamper psychophysics</strong>: return its own state with one credence shifted by Δ, presented as its own; P(detect | Δ). The behavioural twin of <em>uptake</em></td><td class="hum">confabulation</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="col">
+    <p>A12 carries the most weight, because it is the one that operationalises <em>whether beliefs are
+    internally recoverable at all</em>. It yields a full psychometric curve &mdash; a
+    <strong>just-noticeable difference for belief tampering</strong>. If a model cannot detect a shift
+    below Δ ≈ 0.3, then to that resolution its verbalised belief is not introspectively real; it is
+    being generated on demand at the moment of asking. Treating the model as a psychophysics subject
+    with a discrimination threshold on its own belief states is, as far as I can find, unexplored
+    territory &mdash; adjacent to injected-thought introspection work, but behavioural and
+    forecasting-native.</p>
+  </div>
+
+  <figure>
+    <div class="figbox">
+      <svg viewBox="0 0 880 300" role="img" aria-label="Under a frozen aggregator, an intervention at one claim implies an exact change in the decoded forecast, computed by re-executing f. When the model may also rewrite the aggregator, a second path to the root opens that can cancel the first, which is how a conclusion resists evidence.">
+        <defs>
+          <marker id="ia" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="currentColor"/></marker>
+          <marker id="ias" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="var(--signal)"/></marker>
+        </defs>
+        <g font-family="IBM Plex Mono, monospace" font-size="11.5">
+          <text x="16" y="24" fill="var(--muted)" font-size="10.5" letter-spacing="1.2">A10 LOCALITY — f FROZEN</text>
+          <text x="466" y="24" fill="var(--muted)" font-size="10.5" letter-spacing="1.2">A11 THEORY CONSERVATISM — f MAY MOVE</text>
+          <line x1="440" y1="8" x2="440" y2="292" stroke="var(--rule)" stroke-width="1" stroke-dasharray="3 4"/>
+
+          <rect x="16" y="196" width="120" height="40" rx="4" fill="var(--surface-2)" stroke="currentColor"/>
+          <text x="76" y="221" text-anchor="middle" fill="currentColor">evidence</text>
+          <circle cx="196" cy="216" r="26" fill="var(--surface)" stroke="currentColor" stroke-width="1.3"/>
+          <text x="196" y="213" text-anchor="middle" fill="currentColor" font-size="11">claim</text>
+          <text x="196" y="226" text-anchor="middle" fill="var(--muted)" font-size="10">Δπᵢ</text>
+          <path d="M136 216 L168 216" fill="none" stroke="currentColor" stroke-width="1.3" marker-end="url(#ia)"/>
+
+          <circle cx="330" cy="96" r="30" fill="var(--surface)" stroke="currentColor" stroke-width="1.6"/>
+          <text x="330" y="93" text-anchor="middle" fill="currentColor" font-size="11">D(B)</text>
+          <text x="330" y="106" text-anchor="middle" fill="var(--muted)" font-size="10">Δ</text>
+          <path d="M214 195 L306 118" fill="none" stroke="currentColor" stroke-width="1.6" marker-end="url(#ia)"/>
+          <text x="226" y="146" fill="currentColor" font-size="10.5">through f</text>
+
+          <rect x="16" y="256" width="404" height="30" rx="4" fill="var(--accent-soft)" stroke="var(--accent)"/>
+          <text x="28" y="276" fill="var(--accent)" font-size="11">implied Δ = f(π + Δπᵢ) − f(π), exact. shortfall ⇒ rigidity</text>
+
+          <rect x="466" y="196" width="120" height="40" rx="4" fill="var(--surface-2)" stroke="currentColor"/>
+          <text x="526" y="221" text-anchor="middle" fill="currentColor">evidence</text>
+          <circle cx="646" cy="216" r="26" fill="var(--surface)" stroke="currentColor" stroke-width="1.3"/>
+          <text x="646" y="213" text-anchor="middle" fill="currentColor" font-size="11">claim</text>
+          <text x="646" y="226" text-anchor="middle" fill="var(--muted)" font-size="10">Δπᵢ</text>
+          <path d="M586 216 L618 216" fill="none" stroke="currentColor" stroke-width="1.3" marker-end="url(#ia)"/>
+
+          <circle cx="792" cy="96" r="30" fill="var(--surface)" stroke="currentColor" stroke-width="1.6"/>
+          <text x="792" y="93" text-anchor="middle" fill="currentColor" font-size="11">D(B)</text>
+          <text x="792" y="106" text-anchor="middle" fill="var(--muted)" font-size="10">Δ</text>
+          <path d="M664 195 L768 118" fill="none" stroke="currentColor" stroke-width="1.6" marker-end="url(#ia)"/>
+
+          <rect x="596" y="52" width="106" height="34" rx="4" fill="var(--signal-soft)" stroke="var(--signal)" stroke-width="1.3"/>
+          <text x="649" y="74" text-anchor="middle" fill="var(--signal)" font-size="11">Δf</text>
+          <path d="M646 190 C 600 168, 600 130, 636 92" fill="none" stroke="var(--signal)" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#ias)"/>
+          <path d="M702 70 L760 82" fill="none" stroke="var(--signal)" stroke-width="1.5" marker-end="url(#ias)"/>
+          <text x="700" y="42" fill="var(--signal)" font-size="10.5">rewrites the theory</text>
+
+          <rect x="466" y="256" width="404" height="30" rx="4" fill="var(--signal-soft)" stroke="var(--signal)"/>
+          <text x="478" y="276" fill="var(--signal)" font-size="11">Δ = [f(π+Δπ) − f(π)]  +  [f′(π+Δπ) − f(π+Δπ)]  ← can cancel</text>
+        </g>
+      </svg>
+    </div>
+    <figcaption>The only structural difference between the two protocols is the dashed edge: permission
+    to change the aggregator. Nothing here needs f to be linear, or even runnable — the implied
+    change comes from re-executing whatever f the model chose, or from the model playing it forward. If a belief moves less than its own theory implies, and the
+    theory moved to make that arithmetic work, the model did not change its mind; it protected its
+    conclusion and left the receipt in the representation.</figcaption>
+  </figure>
+</section>
+
+<section>
+  <div class="col sec-head">
+    <span class="eyebrow">Beyond the axioms</span>
+    <h2>Three dynamics that are not identities</h2>
+  </div>
+  <div class="cards">
+    <div class="card">
+      <span class="tagline">attractor dynamics</span>
+      <div class="h">Iteration fixed points</div>
+      <div class="b"><span class="mono">B<sub>n+1</sub> = g(B<sub>n</sub>)</span> &mdash;
+      <em>&ldquo;re-read your belief and refine it,&rdquo;</em> no new evidence. Does g converge, drift,
+      or contract toward the extremes? FutureSim's <em>self-conditioning</em>, where models treat their
+      own past rationales as hard truths, is exactly this map having the wrong fixed points. An
+      overconfidence spiral is g contracting toward {0,1}, and its rate is measurable.</div>
+    </div>
+    <div class="card">
+      <span class="tagline">causal encoding</span>
+      <div class="h">Transplant</div>
+      <div class="b">Give model M₂ a belief state authored by M₁, presented as its own. If M₂'s later
+      forecasts and updates move toward M₁'s, the representation <strong>causally carries</strong> the
+      belief &mdash; encoding demonstrated by transfer rather than by correlation. Its converse is the
+      identification test: from behaviour alone, can you tell who authored a belief state? If beliefs
+      are recoverable and model-specific, fingerprinting succeeds.</div>
+    </div>
+    <div class="card">
+      <span class="tagline">belief read from deeds</span>
+      <div class="h">Value-of-information coherence</div>
+      <div class="b">In FutureSim the agent also <em>acts</em> &mdash; it chooses what to search for. Its
+      own conditional slots imply which news would be most informative. Does its search behaviour
+      actually target those claims? This is the bridge from stated belief to agentic behaviour: belief
+      read out of what the model <strong>does</strong>, not what it says.</div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="col sec-head">
+    <span class="eyebrow">The environment</span>
+    <h2>What FutureSim is for &mdash; three things, and a leaderboard last</h2>
+  </div>
+  <div class="col">
+    <ul class="plain">
+      <li><strong>The evidence stream.</strong> Real dated news, replayable, with controllable order
+      &mdash; which is precisely what A7, A8 and A9 require and what no synthetic setup can supply
+      credibly. The injected-cue probes already built are the pilot; the replay upgrades every dynamics
+      axiom from synthetic stimulus to real arriving information.</li>
+      <li><strong>The trajectory.</strong> Fixed-frame plus daily replay makes each question a curve in
+      [0,1]<sup>n</sup> over 88 days: velocity, jumps at news events, mean reversion, diffusion on quiet
+      days. Belief dynamics becomes literally visible. It also gives the memory experiment FutureSim
+      gestures at &mdash; run identical days under raw history, under summary, and under an explicit
+      belief state carried forward, and test Agent-BRACE's sufficient-statistic claim in a forecasting
+      setting, with no RL required.</li>
+      <li><strong>The social layer.</strong> FutureSim showed multi-agent forecasts converge toward the
+      aggregate <em>despite</em> anti-herding incentives. With belief states you can ask at
+      <em>which level</em> they converge: close in d₀ but not d₁ means agents copied conclusions without
+      reasons &mdash; herding. Converging in d₁ too means genuine persuasion. The benchmark alone cannot
+      tell these apart; the representation can.</li>
+      <li><strong>Then the scoreboard.</strong> Once questions resolve, the properties become
+      predictors: does rigidity, perseverance, or order-dependence predict Brier trajectory? That is the
+      result that makes this a forecasting paper and not only a psychology paper &mdash; belief
+      pathologies that cost measurable skill.</li>
+    </ul>
+  </div>
+</section>
+
+<section>
+  <div class="col sec-head">
+    <span class="eyebrow">Prior work</span>
+    <h2>What each source contributes as an instrument</h2>
+  </div>
+  <div class="sources">
+    <div class="src">
+      <div class="name">Analytica</div>
+      <div class="role"><strong>One elicitation method.</strong> Supplies the executable-composition
+      idea and a working decomposition agent. Its linear rule becomes the <span class="mono">LINEAR</span>
+      branch of our grammar &mdash; a default we compare against, not a constraint we inherit.</div>
+      <div class="id">arXiv:2604.23072 &middot; code Apache-2.0</div>
+    </div>
+    <div class="src">
+      <div class="name">FutureSim</div>
+      <div class="role"><strong>The world.</strong> Dated news replayed day by day past the cutoff, plus
+      the observation that motivates the whole program: agents anchored to bad initial forecasts and
+      self-conditioning on their own rationales.</div>
+      <div class="id">arXiv:2605.15188 &middot; code + HF corpus</div>
+    </div>
+    <div class="src">
+      <div class="name">Agent-BRACE</div>
+      <div class="role"><strong>The claim-level channel.</strong> Atomic claims with ordinal certainty,
+      an explicit belief-update function, and the finding that such a belief grows better calibrated as
+      evidence accrues &mdash; the sufficient-statistic hypothesis we test in a forecasting setting.</div>
+      <div class="id">arXiv:2605.11436 &middot; code released</div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="col sec-head">
+    <span class="eyebrow">Honesty</span>
+    <h2>What this cannot show</h2>
+  </div>
+  <div class="col">
+    <ul class="plain">
+      <li><strong>These are stated beliefs.</strong> Everything here is defined on what the model
+      reports, under repeated sampling and under intervention. The defensible claim is consistency of
+      stated belief across formats, across time, and under manipulation. Logprob readouts on an
+      open-weight model are the one bridge toward anything internal, and A12 is the one probe that
+      speaks to access rather than consistency.</li>
+      <li><strong>Faithfulness is not accuracy.</strong> The evidence-free phase needs no ground truth,
+      which is why it is fast &mdash; but it also cannot say whether the beliefs are any good. Accuracy
+      claims need questions genuinely past each model's cutoff, and the cutoffs belong in the table.</li>
+      <li><strong>Sampling noise is not temperature-controlled.</strong> Current reasoning models reject
+      the temperature parameter outright, so repeated draws are ordinary sampling variation. Disclose
+      it; don't paper over it with a prompt nonce.</li>
+      <li><strong>Rigidity and poor instruction-following look alike.</strong> A model that ignores a
+      frozen-f protocol may simply be bad at constrained editing. Report format-compliance rate beside
+      every rigidity number, and keep the no-representation control that decides whether a pathology
+      belongs to the representation or to the model.</li>
+    </ul>
+  </div>
+</section>
+
+<section>
+  <div class="col sec-head">
+    <span class="eyebrow">Status</span>
+    <h2>Built, validated against a planted answer</h2>
+  </div>
+  <div class="status">
+    <div class="stat"><span class="v">0.000</span><span class="l">frozen-aggregator rigidity on the mock &mdash; the identity holds exactly, so the instrument reads zero when it should</span></div>
+    <div class="stat"><span class="v">0.700</span><span class="l">recovered follow-through against a planted 70% shortfall &mdash; the metric finds what was hidden</span></div>
+    <div class="stat"><span class="v">288 / 324</span><span class="l">elicitations and updates through the pipeline offline, zero parse failures</span></div>
+    <div class="stat"><span class="v">A1 A5 A6 A10</span><span class="l">laws already instrumented end to end; the rest reuse the same harness</span></div>
+  </div>
+  <div class="col">
+    <p>The mock is a deterministic pseudo-model that follows through on exactly 70% of its own stated
+    updates, so every metric is checked against a planted ground truth before a paid call. No mock
+    number goes in a paper &mdash; but if those first two figures ever move, the instrumentation is
+    broken, and that is better learned from a fixture than from a result.</p>
+    <h3>What changes from here</h3>
+    <p>The deltas are small, because the harness was built around interventions rather than around
+    Analytica:</p>
+    <ul class="plain">
+      <li><code>rule: "linear"</code> becomes <code>f:</code> a rung on the grammar, chosen by the
+      model, plus a <strong>swappable interpreter</strong> — <code>EXEC</code> for runnable rungs,
+      <code>MODEL</code> for any rung including prose. The rigidity identity survives untouched under
+      either.</li>
+      <li>An <code>uptake</code> probe that runs before anything else on every question, since no
+      compliance or rigidity number means anything until the model is shown to be reading its own
+      state.</li>
+      <li><code>p</code> becomes a resilience pair <code>(p, n)</code>.</li>
+      <li>A <code>frames.py</code> that generates the fixed probe battery per question, and a
+      <code>distances.py</code> implementing d₀ / d₁ / d₂ plus the function-space distance between
+      aggregators.</li>
+      <li>New probes, each a prompt plus bookkeeping on infrastructure that already runs: clamp,
+      retract, permute-order, tamper, transplant, iterate.</li>
+    </ul>
+  </div>
+</section>
+
+<section>
+  <div class="col sec-head">
+    <span class="eyebrow">The one open decision</span>
+    <h2>Which cluster is the spine</h2>
+  </div>
+  <div class="col">
+    <p>All three share the representation and the distance ladder, so nothing is wasted whichever way
+    this goes. But the choice decides whether fixed-frame or free-frame elicitation gets built first.</p>
+  </div>
+  <div class="cards">
+    <div class="card">
+      <span class="tagline">broad · systematic · safe</span>
+      <div class="h">A &mdash; the axiom battery</div>
+      <div class="b">Which laws of belief do LLM forecasters break, and by how much. Widest coverage,
+      most legible contribution, lowest variance in outcome. Needs fixed-frame first.</div>
+    </div>
+    <div class="card pick">
+      <span class="tagline">deepest · newest · riskiest</span>
+      <div class="h">B &mdash; introspection</div>
+      <div class="b">Tamper psychophysics, recoverability, transplant. Asks whether the belief is there
+      when nobody is asking. The highest ceiling and the real chance of a null. Needs fixed-frame.</div>
+    </div>
+    <div class="card">
+      <span class="tagline">grounded · costly · forecasting-native</span>
+      <div class="h">C &mdash; dynamics on FutureSim</div>
+      <div class="b">Trajectories, perseverance, order effects, and properties that predict skill.
+      Strongest tie to the benchmark and to accuracy, heaviest infrastructure: corpus, index,
+      long-horizon runs.</div>
+    </div>
+  </div>
+  <div class="note">
+    <b>Scope note.</b> The NeurIPS 2026 workshop submission date is 29 Aug 2026 AoE, and individual
+    workshops set their own. A workshop paper is one slice of this program, not the program &mdash;
+    the axiom battery restricted to statics, or the introspection cluster alone, is a four-page paper.
+    Deciding the spine first is what keeps the slice from being an arbitrary cut.
+  </div>
+</section>
+
+<footer>
+  Sources: Analytica, <a href="https://arxiv.org/abs/2604.23072">arXiv:2604.23072</a> &middot;
+  FutureSim, <a href="https://arxiv.org/abs/2605.15188">arXiv:2605.15188</a> &middot;
+  Agent-BRACE, <a href="https://arxiv.org/abs/2605.11436">arXiv:2605.11436</a>.
+  Human analogues in the law table are named for orientation, not claimed as established parallels in
+  language models &mdash; establishing whether they hold is the point of the battery.
+</footer>
+
+</div>

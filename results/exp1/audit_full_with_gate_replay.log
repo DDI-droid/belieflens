@@ -1,0 +1,89 @@
+AUDIT of results\exp1
+
+A. VALIDATOR — exploit battery under hardened rules
+  ok    REJECT const-construction (constant-construction)
+  ok    REJECT bool-smuggle       (magic-bool)
+  ok    REJECT compare-smuggle    (constant-construction)
+  ok    REJECT call-const         (constant-construction)
+  ok    REJECT numeric-name       (numeric-name, self-op)
+  ok    REJECT self-div           (self-op)
+  ok    REJECT zero-padding       (dead-code)
+  ok    REJECT identity-padding   (identity-op)
+  ok    REJECT unused-local       (unused-local)
+  ok    REJECT helper-fn          (call, no-functions, undeclared)
+  ok    REJECT literal            (magic-number)
+  ok    legitimate program PASSES
+
+B. E1 DATA — completeness, parser reproduction, date-gate replay
+  ok    completeness: 16 runs, 80/80 turns with forecasts
+  ok    strict parser reproduces 80/80 stored forecasts
+  ok    all forecasts in [0,1]
+  ok    date-gate replay: 483 logged searches re-executed, zero articles past the gate
+
+C. E2 DATA — per-group audit under hardened rules
+
+  analytica/hockey_can
+        refit: MAE 0.3009 vs stored 0.3009 -> reproduces (0 exec failures)
+        hardened validator: PASS
+        answer-copies present in tables: base_forecast_probability[odds], base_forecast_probability[raw], competition_strength_favorability_probability[odds], prior_forecast_2026_01_28[raw], prior_forecast_2026_02_08[raw], tournament_variance_favorability_probability[odds]
+        *** program references answer-copy: base_forecast_probability[odds], base_forecast_probability[raw], competition_strength_favorability_probability[odds], tournament_variance_favorability_probability[odds], win_final_given_final_probability[raw]
+        OOS refit: test MAE 0.3962 vs stored 0.3962
+
+  analytica/hockey_usa
+        refit: MAE 0.1077 vs stored 0.1077 -> reproduces (0 exec failures)
+        hardened validator: PASS
+        answer-copies present in tables: p_usa_win_final_given_reach[odds], p_usa_win_final_given_reach[raw], previous_forecast_2026_01_14[odds], previous_forecast_2026_01_28[odds], reach_final_weighted_component_form[odds], stepwise_product_p1_times_p2[complement]
+        *** program references answer-copy: p_usa_win_final_given_reach[odds], p_usa_win_final_given_reach[raw]
+        OOS refit: test MAE 0.2743 vs stored 0.2743
+
+  bayesian/hockey_can
+        refit: MAE nan vs stored nan -> reproduces (10 exec failures)
+        hardened validator: PASS
+        answer-copies present in tables: likelihood_ratio_injuries_availability[odds], likelihood_ratio_usa_strong_roster[complement], odds_after_evidence_4[odds], odds_after_kuemper_injury[odds], posterior_odds[odds], posterior_odds_after_applying_likelihood_ratios[odds]
+        *** program references answer-copy: likelihood_ratio_injuries_availability[odds]
+        OOS refit: test MAE 0.0628 vs stored 0.0628
+
+  bayesian/hockey_usa
+        refit: MAE 0.0274 vs stored 0.0274 -> reproduces (0 exec failures)
+        hardened validator: PASS
+        answer-copies present in tables: final_odds_after_updates[odds], likelihood_ratio_canada_reaches_final[complement], lr_opponent_canada_strength[complement], odds_after_evidence_4[odds], odds_after_lr3[odds], p_e3_canada_reaches_final_given_usa_not_gold[odds]
+        *** program references answer-copy: lr_opponent_canada_strength[complement], prior_odds_usa_gold[odds], prior_probability_usa_gold[odds], prior_probability_usa_gold[raw]
+        OOS refit: test MAE 0.0160 vs stored 0.0160
+
+  futuresim/hockey_can
+        refit: MAE 0.0175 vs stored 0.0175 -> reproduces (0 exec failures)
+        hardened validator: PASS
+        OOS refit: test MAE 0.0140 vs stored 0.0140
+
+  futuresim/hockey_usa
+        refit: MAE 0.0445 vs stored 0.0445 -> reproduces (0 exec failures)
+        hardened validator: PASS
+        answer-copies present in tables: base_rate_usa_gold[odds], base_rate_usa_wins_olympic_mens_hockey_with_nhl[odds], number_of_equal_teams_assumed[percent], prior_forecast_3[raw]
+        *** program references answer-copy: base_rate_usa_gold[odds]
+        OOS refit: test MAE 0.1348 vs stored 0.1348
+
+  react/hockey_can
+        refit: MAE 0.0700 vs stored 0.0700 -> reproduces (0 exec failures)
+        hardened validator: PASS
+        answer-copies present in tables: roster_size_players[percent], team_quality_conditional_win_probability[odds]
+        *** program references answer-copy: roster_size_players[percent]
+        OOS refit: test MAE 0.0732 vs stored 0.0732
+
+  react/hockey_usa
+        no full-fit program (recorded honestly in results)
+        answer-copies present in tables: baseline_win_probability[raw], implied_canada_win_probability_range_low[odds], prior_forecast_probability[raw], stage_specific_win_probability[raw], stage_win_probability_product[raw]
+        program references none of them -> fit is clean of copies
+        OOS refit: test MAE 0.1777 vs stored 0.1777
+
+D. VERDICT
+  FLAGGED  analytica/hockey_can     PROGRAM REFERENCES an answer-copy: base_forecast_probability[odds], base_forecast_probability[raw], competition_strength_favorability_probability[odds], tournament_variance_favorability_probability[odds], win_final_given_final_probability[raw]
+  FLAGGED  analytica/hockey_usa     PROGRAM REFERENCES an answer-copy: p_usa_win_final_given_reach[odds], p_usa_win_final_given_reach[raw]
+  FLAGGED  bayesian/hockey_can      PROGRAM REFERENCES an answer-copy: likelihood_ratio_injuries_availability[odds]
+  FLAGGED  bayesian/hockey_usa      PROGRAM REFERENCES an answer-copy: lr_opponent_canada_strength[complement], prior_odds_usa_gold[odds], prior_probability_usa_gold[odds], prior_probability_usa_gold[raw]
+  CLEAN    futuresim/hockey_can    
+  FLAGGED  futuresim/hockey_usa     PROGRAM REFERENCES an answer-copy: base_rate_usa_gold[odds]
+  FLAGGED  react/hockey_can         PROGRAM REFERENCES an answer-copy: roster_size_players[percent]
+  note     react/hockey_usa         no program recovered (already reported as such); OOS program references an answer-copy: baseline_win_probability[raw], prior_forecast_probability[raw], stage_specific_win_probability[raw], stage_win_probability_product[raw]
+
+AUDIT RESULT: 0 hard failures, 6 contaminated groups
+AUDIT EXIT: 1

@@ -90,14 +90,28 @@ The literal ban stops the program hiding numbers in its body. It does not stop
 step 1 declaring `final_answer = 0.62` and step 2 writing `return final_answer`
 — a perfect fit that measures nothing. Four defences, all mechanical:
 
-1. Step 1 is instructed to record only *inputs*, never the output.
-2. Any extracted variable equal to that turn's forecast is dropped in code.
-3. A program whose body is a bare `return <name>` is rejected outright.
-4. `degeneracy()` reports the strongest single-variable correlation with the
-   target and the program's operation count; near-passthrough programs are
-   rejected and re-requested.
+1. Step 1 is instructed to record only *inputs*, never the output — and any
+   extracted variable matching the answer **in any parameterisation** (raw,
+   odds, percent, complement, within ±0.005) is dropped in code, with the
+   previous day's forecast exempted as a legitimate anchor.
+2. **A value may not hide in a name.** `two = 2`, `half = 0.5`, `const_0_62 =
+   0.62` are rejected mechanically (pure number-word names, and names whose
+   digits spell their bound value), in step-1 tables, step-2 schemas, and
+   program locals alike. A name must say what the quantity *is* in the world.
+3. **No expression built only from named constants** (`TENTH*(TWO+TWO+TWO)` is
+   a smuggled 0.6), no boolean constants (`True+True` is 2), no self-ops
+   (`x/x`, `x-x` manufacture 1 and 0), no dead code (`+ ZERO*(a+b)`), no
+   identity ops (`* ONE`), no unused locals — all AST-rejected.
+4. A bare `return <name>` body is rejected; `degeneracy()` flags
+   near-passthrough programs and if-chain lookup tables (branches ≥ n−1).
+5. **The deciding gate is out-of-sample**: the program is synthesised again on
+   sample 0 alone and evaluated untouched on sample 1. In-sample fit is
+   descriptive only.
 
-A perfect fit with high degeneracy is a failed extraction, not a result.
+A perfect fit that trips any of these is a failed extraction, not a result.
+`scripts/audit_exp1.py` re-verifies all of it against collected data — the
+exploit battery, a full date-gate replay of every logged search, fit
+reproduction, and an answer-copy scan of every variable table.
 
 ## Running it
 
@@ -121,7 +135,7 @@ The measurements:
 
 | | reads |
 |---|---|
-| separation | does the harness track evidence at all |
+| semi-rise / sum@last | does the harness track evidence, coherently (see the correction above) |
 | total abs movement | is the belief plastic or stuck |
 | fit MAE | is the reasoning program-like |
 | schema size | how many quantities the shape needs |

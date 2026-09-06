@@ -1,0 +1,79 @@
+AUDIT of results\exp1
+
+A. VALIDATOR — exploit battery under hardened rules
+  ok    REJECT const-construction (constant-construction)
+  ok    REJECT bool-smuggle       (magic-bool)
+  ok    REJECT compare-smuggle    (constant-construction)
+  ok    REJECT call-const         (constant-construction)
+  ok    REJECT numeric-name       (numeric-name, self-op)
+  ok    REJECT self-div           (self-op)
+  ok    REJECT zero-padding       (dead-code)
+  ok    REJECT identity-padding   (identity-op)
+  ok    REJECT unused-local       (unused-local)
+  ok    REJECT helper-fn          (call, no-functions, undeclared)
+  ok    REJECT literal            (magic-number)
+  ok    legitimate program PASSES
+
+B. E1 DATA -- skipped on this re-run (passed in full previously)
+
+C. E2 DATA — per-group audit under hardened rules
+
+  analytica/hockey_can
+        refit: MAE 0.3009 vs stored 0.3009 -> reproduces (0 exec failures)
+        hardened validator: PASS
+        coincidental single/low-rate collisions: 4 vars (not copies)
+        OOS refit: test MAE 0.3962 vs stored 0.3962
+
+  analytica/hockey_usa
+        refit: MAE 0.1077 vs stored 0.1077 -> reproduces (0 exec failures)
+        hardened validator: PASS
+        coincidental single/low-rate collisions: 6 vars (not copies)
+        OOS refit: test MAE 0.2743 vs stored 0.2743
+
+  bayesian/hockey_can
+        refit: MAE nan vs stored nan -> reproduces (10 exec failures)
+        hardened validator: PASS
+        coincidental single/low-rate collisions: 8 vars (not copies)
+        OOS refit: test MAE 0.0628 vs stored 0.0628
+
+  bayesian/hockey_usa
+        refit: MAE 0.0274 vs stored 0.0274 -> reproduces (0 exec failures)
+        hardened validator: PASS
+        SYSTEMATIC answer-copies: posterior_odds_usa_gold (odds on 10/10 instances)
+        coincidental single/low-rate collisions: 14 vars (not copies)
+        program references none of them -> fit is clean of copies
+        OOS refit: test MAE 0.0160 vs stored 0.0160
+
+  futuresim/hockey_can
+        refit: MAE 0.0175 vs stored 0.0175 -> reproduces (0 exec failures)
+        hardened validator: PASS
+        OOS refit: test MAE 0.0140 vs stored 0.0140
+
+  futuresim/hockey_usa
+        refit: MAE 0.0445 vs stored 0.0445 -> reproduces (0 exec failures)
+        hardened validator: PASS
+        coincidental single/low-rate collisions: 3 vars (not copies)
+        OOS refit: test MAE 0.1348 vs stored 0.1348
+
+  react/hockey_can
+        refit: MAE 0.0700 vs stored 0.0700 -> reproduces (0 exec failures)
+        hardened validator: PASS
+        coincidental single/low-rate collisions: 2 vars (not copies)
+        OOS refit: test MAE 0.0732 vs stored 0.0732
+
+  react/hockey_usa
+        no full-fit program (recorded honestly in results)
+        coincidental single/low-rate collisions: 5 vars (not copies)
+        OOS refit: test MAE 0.1777 vs stored 0.1777
+
+D. VERDICT
+  CLEAN    analytica/hockey_can    
+  CLEAN    analytica/hockey_usa    
+  CLEAN    bayesian/hockey_can     
+  CLEAN    bayesian/hockey_usa     
+  CLEAN    futuresim/hockey_can    
+  CLEAN    futuresim/hockey_usa    
+  CLEAN    react/hockey_can        
+  note     react/hockey_usa         no program recovered (already reported as such)
+
+AUDIT RESULT: pipeline checks pass; no group's fit is contaminated.

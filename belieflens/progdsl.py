@@ -111,6 +111,42 @@ _CONST_NAMES = frozenset({"ZERO", "ONE", "TWO", "HALF", "TENTH", "HUNDREDTH",
                           "EPS", "E", "PI"})
 
 
+# ---- name rules: a value may not hide in a NAME any more than in a literal.
+# `two = 2`, `half = 0.5`, `const_0_62 = 0.62` are literals with extra steps.
+# A name must say what the quantity IS in the world (roster_size, base_rate_cut),
+# never what its value is.
+_NUM_WORDS = frozenset("""zero one two three four five six seven eight nine ten
+eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen
+twenty thirty forty fifty sixty seventy eighty ninety hundred thousand million
+half halves quarter quarters third thirds tenth tenths hundredth hundredths
+point dot decimal minus neg negative num number const constant value val
+literal fixed magic""".split())
+
+
+def numeric_name(name: str) -> bool:
+    """True if the name carries no semantic content beyond a value spelling."""
+    toks = [t for t in str(name).lower().split("_") if t]
+    if not toks:
+        return True
+    return all(t.isdigit() or t in _NUM_WORDS for t in toks)
+
+
+def encodes_value(name: str, value: float) -> bool:
+    """True if the name's digits spell the bound value (p_62 = 0.62)."""
+    digits_in_name = "".join(c for c in str(name) if c.isdigit())
+    if len(digits_in_name) < 2:
+        return False
+    try:
+        sig = ("%g" % abs(float(value))).replace(".", "").lstrip("0")
+    except (TypeError, ValueError):
+        return False
+    return len(sig) >= 2 and sig in digits_in_name
+
+
+def _name_is(node, ident: str) -> bool:
+    return isinstance(node, ast.Name) and node.id == ident
+
+
 def _const_only(node) -> bool:
     """True if the expression's only Name leaves are named constants."""
     has_const_name = False
@@ -198,6 +234,34 @@ def check(source: str, declared: set | None = None) -> CheckResult:
             vs.append(Violation(node.lineno, "constant-construction",
                                 "call whose every argument is a named constant"))
 
+        # dead code and op-count inflation (review F2 residual, now closed):
+        # multiplying by ZERO, identity operations, and self-ops that
+        # manufacture 0 or 1 from any variable (x-x, x/x) do no work and exist
+        # only to pad the operation count or launder a constant.
+        if isinstance(node, ast.BinOp):
+            L, R, op = node.left, node.right, node.op
+            if isinstance(op, ast.Mult) and (_name_is(L, "ZERO") or _name_is(R, "ZERO")):
+                vs.append(Violation(node.lineno, "dead-code", "multiplication by ZERO"))
+            elif isinstance(op, (ast.Div, ast.FloorDiv, ast.Mod)) and _name_is(L, "ZERO"):
+                vs.append(Violation(node.lineno, "dead-code", "ZERO divided by anything"))
+            elif ((isinstance(op, ast.Mult) and (_name_is(L, "ONE") or _name_is(R, "ONE")))
+                  or (isinstance(op, ast.Add) and (_name_is(L, "ZERO") or _name_is(R, "ZERO")))
+                  or (isinstance(op, ast.Sub) and _name_is(R, "ZERO"))
+                  or (isinstance(op, (ast.Div, ast.Pow)) and _name_is(R, "ONE"))):
+                vs.append(Violation(node.lineno, "identity-op",
+                                    "operation with no effect -- inflates the op count"))
+            elif (isinstance(op, (ast.Sub, ast.Div)) and not _name_is(L, "ZERO")
+                  and ast.dump(L) == ast.dump(R)):
+                vs.append(Violation(node.lineno, "self-op",
+                                    "x-x / x/x manufactures a constant from a variable"))
+
+        # number-named locals: `two = ...` is a literal wearing a name
+        if (isinstance(node, ast.Name) and isinstance(node.ctx, ast.Store)
+                and numeric_name(node.id)):
+            vs.append(Violation(node.lineno, "numeric-name",
+                                "%r spells a value, not a quantity -- name what it IS"
+                                % node.id))
+
         if isinstance(node, _BANNED_NODES):
             vs.append(Violation(getattr(node, "lineno", 0), "banned-construct",
                                 type(node).__name__ + " is not in the program space"))
@@ -248,6 +312,11 @@ def check(source: str, declared: set | None = None) -> CheckResult:
 
     if not any(isinstance(n, ast.Return) for n in ast.walk(fn)):
         vs.append(Violation(fn.lineno, "shape", "no return statement"))
+
+    # a local that is assigned and never read is padding, not reasoning
+    for n in sorted(assigned - used):
+        vs.append(Violation(fn.lineno, "unused-local",
+                            "%r is assigned but never used -- dead padding" % n))
 
     return CheckResult(not vs, vs, free)
 
@@ -348,6 +417,13 @@ violation is rejected outright.
    Named constants also available (use these instead of numerals):
      ZERO ONE TWO HALF TENTH HUNDREDTH EPS E PI
 6. Return a single number: the forecast probability.
+7. NO VALUE MAY HIDE IN A NAME. Locals like two, half, const_val are rejected;
+   every name must say what the quantity IS (blended_prior, evidence_pull).
+8. NO DEAD CODE. Multiplying by ZERO, adding ZERO, dividing by ONE, x-x, x/x,
+   and assigned-but-unused locals are all rejected mechanically.
+9. NO EXPRESSION MAY BE BUILT ONLY FROM NAMED CONSTANTS. TENTH*(TWO+TWO+TWO)
+   is a smuggled literal and is rejected. A value either arrives as a declared
+   variable or is genuinely computed from declared variables.
 
 Intermediate local variables are encouraged — name the quantities your
 reasoning actually used."""

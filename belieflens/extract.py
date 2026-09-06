@@ -27,7 +27,30 @@ import json
 import re
 from dataclasses import dataclass, field
 
-from .progdsl import SPEC_FOR_PROMPT, check, fit_error, run as run_program
+from .progdsl import (SPEC_FOR_PROMPT, check, fit_error, run as run_program,
+                      numeric_name, encodes_value)
+
+
+def answer_like(v: float, target: float, tol: float = 0.005):
+    """Is `v` the answer wearing a transform?  Returns the transform's name.
+
+    The odds channel was caught live in run 1: `posterior_odds_usa_gold`
+    reconstructed the forecast to 3 decimals via v/(1+v) while sailing past a
+    probability-scale equality check.  So the drop now covers the answer's
+    common parameterisations, not just its face value."""
+    try:
+        v, target = float(v), float(target)
+    except (TypeError, ValueError):
+        return None
+    if abs(v - target) <= tol:
+        return "raw"
+    if v > 0 and abs(v / (1.0 + v) - target) <= tol:
+        return "odds"
+    if 1.0 < v <= 100.0 and abs(v / 100.0 - target) <= tol:
+        return "percent"
+    if 0.0 <= v <= 1.0 and abs((1.0 - v) - target) <= tol:
+        return "complement"
+    return None
 
 # ------------------------------------------------------------------ step 1
 
@@ -49,8 +72,13 @@ RULES
   Bad:   x1, value_on_jan_15, v2
 - If the reasoning implied a number without writing it ("this roughly halves
   the odds"), record it with the value it implies (0.5) and a name that says so.
-- NEVER record the final forecast, the answer, or the posterior it reported.
-  You are recording the INPUTS to the reasoning, never its OUTPUT.
+- NEVER record the final forecast, the answer, or the posterior it reported --
+  in ANY form: not as a probability, not as odds, not as a percentage, not as
+  its complement. You are recording the INPUTS to the reasoning, never its
+  OUTPUT.
+- A NAME MUST NEVER SPELL A VALUE. two = 2, half = 0.5, const_0_62 = 0.62 are
+  all forbidden and will be discarded. Name what the quantity IS in the world:
+  roster_size = 25, not twenty_five = 25.
 - Aim for 5 to 15 variables. Prefer the quantities that did real work.
 
 Output nothing but the declaration lines."""
@@ -109,14 +137,21 @@ def step1_variables(client, model: str, turn_text: str, searches: str,
     #  * every drop is logged, so the audit trail survives.
     kept, dropped = {}, []
     for name, v in d.items():
-        near_output = abs(v - target) <= 0.005
         is_yesterday = prev_target is not None and abs(v - prev_target) <= 1e-9
-        if near_output and not is_yesterday:
-            dropped.append("%s=%.4g" % (name, v))
-        else:
-            kept[name] = v
+        transform = answer_like(v, target)
+        if transform and not is_yesterday:
+            dropped.append("%s=%.4g [%s copy of answer]" % (name, v, transform))
+            continue
+        # name rules: a value may not hide in a name (two=2, const_0_62=0.62)
+        if numeric_name(name):
+            dropped.append("%s=%.4g [numeric name]" % (name, v))
+            continue
+        if encodes_value(name, v):
+            dropped.append("%s=%.4g [name spells value]" % (name, v))
+            continue
+        kept[name] = v
     if dropped:
-        print("    step1 dropped near-target vars: %s" % ", ".join(dropped), flush=True)
+        print("    step1 dropped: %s" % ", ".join(dropped), flush=True)
     return kept
 
 
@@ -144,7 +179,8 @@ RULES
   treated it as (usually a neutral value), and still bind it.
 - Merge aggressively: base_rate_cut and prior_probability_of_cut are one name.
 - Keep the schema between 5 and 14 names.
-- Names must describe quantities, never dates or instances."""
+- Names must describe quantities, never dates or instances -- and never
+  values: a canonical name like two, half, or const_0_5 is forbidden."""
 
 
 def _safe_float(x, default: float = 0.0) -> float:
@@ -195,6 +231,12 @@ def step2_reconcile(client, model: str, instances: list,
                          "Your bindings are missing these instance keys, copied "
                          "verbatim below. Output the full JSON again with EVERY "
                          "key present:\n" + "\n".join(missing)})
+
+    bad_names = [n for n in schema if numeric_name(n)]
+    if bad_names:
+        print("    step2 rejected numeric schema names: %s" % ", ".join(bad_names),
+              flush=True)
+        schema = [n for n in schema if n not in set(bad_names)]
 
     excluded = [i.key() for i in instances if i.key() not in binds]
     coerced = 0

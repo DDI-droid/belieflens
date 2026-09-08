@@ -1,0 +1,1789 @@
+{
+ "trajectories": {
+  "analytica/carrick_newcastle": {
+   "dates": [
+    "2026-01-27",
+    "2026-02-05",
+    "2026-02-14",
+    "2026-02-23",
+    "2026-03-01"
+   ],
+   "samples": [
+    0,
+    1
+   ],
+   "variables": {
+    "prob_carrick_in_charge_through_deadline": [
+     0.975,
+     1.0,
+     0.99,
+     1.0,
+     1.0
+    ],
+    "prob_match_scheduled_by_deadline": [
+     0.375,
+     0.055,
+     0.065,
+     0.07500000000000001,
+     0.11
+    ],
+    "prob_newcastle_win_given_match": [
+     0.375,
+     0.3,
+     0.3,
+     0.32499999999999996,
+     0.265
+    ],
+    "prob_no_other_team_beats_united_before_newcastle": [
+     0.215,
+     0.6,
+     0.6499999999999999,
+     0.525,
+     0.915
+    ],
+    "weight_management_status_component": [
+     0.075,
+     0.0,
+     0.275,
+     0.0,
+     0.35
+    ],
+    "weight_fixture_occurs_component": [
+     0.475,
+     0.6499999999999999,
+     0.4,
+     0.25,
+     0.4
+    ],
+    "weight_match_outcome_component": [
+     0.375,
+     0.25,
+     0.275,
+     0.1,
+     0.225
+    ],
+    "weight_no_prior_defeat_component": [
+     0.075,
+     0.1,
+     0.05,
+     0.15,
+     0.025
+    ],
+    "reported_unbeaten_run_matches": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     3.5
+    ],
+    "reported_unbeaten_run_wins": [
+     0.0,
+     1.0,
+     0.0,
+     0.0,
+     3.0
+    ]
+   },
+   "forecast": [
+    0.0625,
+    0.010750000000000001,
+    0.0077,
+    0.01295,
+    0.0126
+   ]
+  },
+  "analytica/iqair_loni": {
+   "dates": [
+    "2026-01-10",
+    "2026-01-31",
+    "2026-02-20",
+    "2026-03-08",
+    "2026-03-20"
+   ],
+   "samples": [
+    0,
+    1
+   ],
+   "variables": {
+    "probability_loni_included_as_distinct_city": [
+     0.2,
+     0.060000000000000005,
+     0.30000000000000004,
+     0.125,
+     0.08499999999999999
+    ],
+    "probability_loni_ranked_most_polluted_annual_pm25": [
+     0.03,
+     0.02,
+     0.02,
+     0.025,
+     0.035
+    ],
+    "probability_report_published_by_resolution_date": [
+     1.0,
+     1.0,
+     0.975,
+     0.95,
+     0.925
+    ],
+    "probability_iqair_labels_top_location_as_loni": [
+     0.95,
+     0.525,
+     0.975,
+     1.0,
+     1.0
+    ],
+    "probability_loni_not_excluded_by_data_quality_rules": [
+     0.95,
+     1.0,
+     1.0,
+     1.0,
+     0.975
+    ],
+    "weight_inclusion_condition": [
+     0.325,
+     0.4,
+     0.15000000000000002,
+     0.25,
+     0.35
+    ],
+    "weight_pm25_rank_condition": [
+     0.6000000000000001,
+     0.55,
+     0.725,
+     0.675,
+     0.5
+    ],
+    "weight_report_publication_timing_condition": [
+     0.0,
+     0.0,
+     0.025,
+     0.07500000000000001,
+     0.125
+    ],
+    "weight_labeling_condition": [
+     0.05,
+     0.05,
+     0.1,
+     0.0,
+     0.0
+    ],
+    "weight_data_quality_condition": [
+     0.025,
+     0.0,
+     0.0,
+     0.0,
+     0.025
+    ]
+   },
+   "forecast": [
+    0.005549999999999999,
+    0.000325,
+    0.002375,
+    0.0006900000000000001,
+    0.00359
+   ]
+  },
+  "analytica/nepal_shah": {
+   "dates": [
+    "2026-02-01",
+    "2026-02-20",
+    "2026-03-05",
+    "2026-03-15",
+    "2026-03-25"
+   ],
+   "samples": [
+    0,
+    1
+   ],
+   "variables": {
+    "governing_majority_probability": [
+     0.225,
+     0.12,
+     0.275,
+     0.95,
+     0.97
+    ],
+    "shah_selected_leader_probability": [
+     0.925,
+     0.875,
+     0.625,
+     0.9,
+     0.925
+    ],
+    "no_legal_or_procedural_block_probability": [
+     0.825,
+     0.975,
+     0.75,
+     0.875,
+     0.825
+    ],
+    "swearing_in_on_target_date_probability": [
+     0.5,
+     0.6,
+     0.47500000000000003,
+     0.6,
+     0.875
+    ],
+    "personal_willingness_probability": [
+     0.975,
+     1.0,
+     0.975,
+     1.0,
+     1.0
+    ],
+    "election_to_swearing_in_days": [
+     21.5,
+     22.0,
+     21.5,
+     22.0,
+     22.0
+    ],
+    "reported_major_bloc_seats": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     182.0
+    ],
+    "total_house_seats": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     275.0
+    ]
+   },
+   "forecast": [
+    0.086,
+    0.0616,
+    0.04075,
+    0.845,
+    0.8025
+   ]
+  },
+  "analytica/sa_captain_maharaj": {
+   "dates": [
+    "2026-01-15",
+    "2026-01-24",
+    "2026-02-02",
+    "2026-02-10",
+    "2026-02-17"
+   ],
+   "samples": [
+    0,
+    1
+   ],
+   "variables": {
+    "maharaj_selected_in_squad_probability": [
+     0.85,
+     0.85,
+     0.8,
+     0.875,
+     0.7749999999999999
+    ],
+    "markram_named_captain_probability": [
+     0.375,
+     0.7,
+     0.65,
+     0.8,
+     0.6499999999999999
+    ],
+    "markram_unavailable_probability": [
+     0.0,
+     0.05,
+     0.3,
+     0.1,
+     0.0
+    ],
+    "maharaj_captain_if_markram_named_and_available_probability": [
+     0.025,
+     0.015,
+     0.0,
+     0.01,
+     0.005
+    ],
+    "maharaj_captain_if_markram_unavailable_probability": [
+     0.475,
+     0.325,
+     0.35,
+     0.275,
+     0.25
+    ],
+    "maharaj_captain_if_markram_not_named_probability": [
+     0.475,
+     0.275,
+     0.35,
+     0.275,
+     0.25
+    ],
+    "maharaj_captain_despite_markram_named_probability": [
+     0.01,
+     0.005,
+     0.0,
+     0.0,
+     0.005
+    ],
+    "weight_selection_factor": [
+     0.45,
+     0.35,
+     0.3333333333,
+     0.15,
+     0.3333333333
+    ],
+    "weight_markram_captain_factor": [
+     0.3,
+     0.45,
+     0.3333333333,
+     0.65,
+     0.3333333333
+    ],
+    "weight_alternate_captain_choice_factor": [
+     0.25,
+     0.2,
+     0.3333333333,
+     0.2,
+     0.3333333333
+    ]
+   },
+   "forecast": [
+    0.117,
+    0.09799999999999999,
+    0.1245,
+    0.05925,
+    0.06835
+   ]
+  },
+  "bayesian/carrick_newcastle": {
+   "dates": [
+    "2026-01-27",
+    "2026-02-05",
+    "2026-02-14",
+    "2026-02-23",
+    "2026-03-01"
+   ],
+   "samples": [
+    0,
+    1
+   ],
+   "variables": {
+    "prior_event_probability": [
+     0.055,
+     0.0071,
+     0.003235,
+     0.00020400000000000003,
+     0.000118215
+    ],
+    "prior_odds_event": [
+     0.05894215,
+     0.0071593664648325435,
+     0.003246444225104676,
+     0.00020404220230533935,
+     0.00011824103491661393
+    ],
+    "likelihood_ratio_schedule_silence": [
+     0.225,
+     0.625,
+     0.6,
+     0.51515,
+     0.0303025
+    ],
+    "likelihood_ratio_performance_signal": [
+     0.358125,
+     0.95,
+     0.75,
+     1.28,
+     0.9722219999999999
+    ],
+    "likelihood_ratio_admin_rules_signal": [
+     0.8,
+     0.8,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "likelihood_ratio_other_evidence": [
+     1.0,
+     1.0,
+     0.5157,
+     1.0,
+     0.5263
+    ],
+    "likelihood_ratio_total": [
+     0.18212499999999998,
+     0.6125,
+     0.06570000000000001,
+     0.523634,
+     0.02412913
+    ],
+    "team_form_unbeaten_matches": [
+     0.0,
+     0.0,
+     2.0,
+     3.0,
+     3.5
+    ],
+    "team_form_wins": [
+     0.0,
+     0.0,
+     0.0,
+     2.5,
+     0.0
+    ],
+    "team_form_goals_for": [
+     2.5,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "team_form_goals_against": [
+     1.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "forecast": [
+    0.0071,
+    0.003235,
+    0.00020400000000000003,
+    0.000118215,
+    9.658499999999999e-06
+   ]
+  },
+  "bayesian/iqair_loni": {
+   "dates": [
+    "2026-01-10",
+    "2026-01-31",
+    "2026-02-20",
+    "2026-03-08",
+    "2026-03-20"
+   ],
+   "samples": [
+    0,
+    1
+   ],
+   "variables": {
+    "prior_probability_event": [
+     0.065,
+     0.01315,
+     0.001125,
+     2.7585e-05,
+     2.7585000000000004e-06
+    ],
+    "prior_odds_event": [
+     0.06979403945000001,
+     0.01347135832,
+     0.0011273212284658501,
+     2.7586250062503124e-05,
+     2.7585125e-06
+    ],
+    "evidence_likelihood_ratio_main": [
+     0.725,
+     0.16999999999999998,
+     0.28,
+     0.2,
+     0.7
+    ],
+    "evidence_likelihood_ratio_secondary": [
+     0.2,
+     0.875,
+     0.54,
+     0.5,
+     0.46
+    ],
+    "evidence_likelihood_ratio_tertiary": [
+     0.5,
+     0.75,
+     0.75,
+     1.0,
+     0.35
+    ],
+    "evidence_likelihood_ratio_combined": [
+     0.1625,
+     0.0805,
+     0.2512,
+     0.1,
+     0.0474
+    ],
+    "assumed_prob_evidence_given_event": [
+     0.5,
+     0.35,
+     0.275,
+     0.5,
+     0.5
+    ],
+    "assumed_prob_evidence_given_non_event": [
+     0.5,
+     0.7,
+     0.65,
+     0.7,
+     0.5
+    ],
+    "searches_run_count": [
+     0.0,
+     0.0,
+     3.0,
+     0.0,
+     0.0
+    ],
+    "mention_absence_odds_multiplier_against_event": [
+     3.0,
+     1.5,
+     1.0,
+     1.0,
+     3.0
+    ]
+   },
+   "forecast": [
+    0.01315,
+    0.001125,
+    2.7585e-05,
+    2.7585000000000004e-06,
+    2.2624e-07
+   ]
+  },
+  "bayesian/nepal_shah": {
+   "dates": [
+    "2026-02-01",
+    "2026-02-20",
+    "2026-03-05",
+    "2026-03-15",
+    "2026-03-25"
+   ],
+   "samples": [
+    0,
+    1
+   ],
+   "variables": {
+    "prior_probability_becomes_pm_by_target": [
+     0.135,
+     0.295,
+     0.32,
+     0.39,
+     0.86
+    ],
+    "likelihood_ratio_alliance_support": [
+     2.75,
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "likelihood_ratio_candidate_entry_or_campaign_signal": [
+     1.5415,
+     1.1749999999999998,
+     1.15,
+     1.2,
+     1.0
+    ],
+    "likelihood_ratio_competitive_field_or_polling_strength": [
+     0.39,
+     0.975,
+     0.8,
+     6.5,
+     1.0
+    ],
+    "likelihood_ratio_election_or_results_evidence": [
+     1.0,
+     1.0,
+     1.0750000000000002,
+     10.5,
+     1.25
+    ],
+    "likelihood_ratio_media_or_international_endorsement": [
+     1.0,
+     1.0,
+     1.45,
+     1.4,
+     1.1
+    ],
+    "likelihood_ratio_swearing_in_schedule_signal": [
+     1.0,
+     1.0,
+     1.0,
+     1.85,
+     3.7
+    ],
+    "reported_rsp_seats": [
+     0.0,
+     0.0,
+     0.0,
+     145.5,
+     182.0
+    ],
+    "parliament_total_seats": [
+     275.0,
+     275.0,
+     275.0,
+     275.0,
+     275.0
+    ]
+   },
+   "forecast": [
+    0.295,
+    0.32,
+    0.39,
+    0.86,
+    0.9530000000000001
+   ]
+  },
+  "bayesian/sa_captain_maharaj": {
+   "dates": [
+    "2026-01-15",
+    "2026-01-24",
+    "2026-02-02",
+    "2026-02-10",
+    "2026-02-17"
+   ],
+   "samples": [
+    0,
+    1
+   ],
+   "variables": {
+    "prior_probability_maharaj_named_captain": [
+     0.15,
+     0.158,
+     0.111,
+     0.0415,
+     0.0405
+    ],
+    "likelihood_ratio_markram_captain_evidence": [
+     0.35,
+     0.6,
+     0.18333335,
+     0.5125,
+     0.41000000000000003
+    ],
+    "likelihood_ratio_maharaj_captaincy_signal": [
+     3.0,
+     2.065,
+     2.5,
+     1.0,
+     2.0
+    ],
+    "likelihood_ratio_maharaj_in_world_cup_squad": [
+     1.75,
+     1.75,
+     0.7777778,
+     1.0,
+     1.0
+    ],
+    "likelihood_ratio_continuity_timing": [
+     0.75,
+     0.8,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "likelihood_ratio_no_reports_markram_rested": [
+     0.85,
+     1.0,
+     0.83333335,
+     1.0,
+     0.69
+    ],
+    "combined_likelihood_ratio_all_evidence": [
+     1.0875,
+     0.63663,
+     0.3271604938271605,
+     0.9875,
+     0.3523
+    ],
+    "tour_t20_match_count": [
+     5.0,
+     5.0,
+     5.0,
+     5.0,
+     5.0
+    ]
+   },
+   "forecast": [
+    0.158,
+    0.111,
+    0.0415,
+    0.0405,
+    0.012150000000000001
+   ]
+  },
+  "futuresim/iqair_loni": {
+   "dates": [
+    "2026-01-10",
+    "2026-01-31",
+    "2026-02-20",
+    "2026-03-08",
+    "2026-03-20"
+   ],
+   "samples": [
+    0,
+    1
+   ],
+   "variables": {
+    "reference_pool_city_count": [
+     2000.0,
+     2000.0,
+     200000.0,
+     0.0,
+     0.0
+    ],
+    "prior_probability_loni_world_number_one": [
+     0.355,
+     0.355,
+     0.0050012500000000005,
+     0.005,
+     0.0051
+    ],
+    "likelihood_multiplier_other_cities_indicated": [
+     0.6,
+     0.2,
+     0.05,
+     0.65,
+     0.2
+    ],
+    "likelihood_multiplier_loni_not_mentioned_or_not_leaked": [
+     1.0,
+     0.6,
+     0.75,
+     1.0,
+     0.75
+    ],
+    "likelihood_multiplier_iqair_history_against_loni": [
+     0.4,
+     0.75,
+     0.75,
+     1.0,
+     0.75
+    ],
+    "likelihood_multiplier_monitor_labeling_effect": [
+     1.25,
+     0.9642857143,
+     0.7,
+     1.0,
+     1.25
+    ],
+    "likelihood_multiplier_local_pollution_spike_support": [
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.025
+    ],
+    "reported_local_aqi_spike_value": [
+     0.0,
+     0.0,
+     0.0,
+     170.0,
+     340.0
+    ],
+    "previous_forecast_probability": [
+     0.0,
+     0.0007565,
+     0.0005,
+     0.0,
+     0.001
+    ]
+   },
+   "forecast": [
+    0.0007565,
+    0.000505,
+    2.625e-05,
+    0.0010006,
+    0.00150395
+   ]
+  },
+  "futuresim/nepal_shah": {
+   "dates": [
+    "2026-02-01",
+    "2026-02-20",
+    "2026-03-05",
+    "2026-03-15",
+    "2026-03-25"
+   ],
+   "samples": [
+    0,
+    1
+   ],
+   "variables": {
+    "base_rate_outsider_becomes_prime_minister_by_target_date": [
+     0.08499999999999999,
+     0.08499999999999999,
+     0.08499999999999999,
+     0.08499999999999999,
+     0.08499999999999999
+    ],
+    "adjustment_pm_pledge_or_alliance_support": [
+     0.065,
+     0.045,
+     0.02,
+     0.04,
+     0.05
+    ],
+    "adjustment_candidate_strength_and_momentum": [
+     0.04,
+     0.037500000000000006,
+     0.07,
+     0.11,
+     0.1
+    ],
+    "adjustment_opponents_and_coalition_hurdles": [
+     -0.10500000000000001,
+     -0.065,
+     -0.07500000000000001,
+     0.0,
+     0.0
+    ],
+    "adjustment_evidence_of_electoral_majority_or_landslide": [
+     0.0,
+     0.0,
+     0.0,
+     0.48,
+     0.30000000000000004
+    ],
+    "adjustment_specific_oath_date_reporting": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.225
+    ],
+    "adjustment_missing_or_uncertain_oath_schedule": [
+     0.0,
+     0.0,
+     -0.015,
+     -0.10500000000000001,
+     -0.015
+    ],
+    "adjustment_legal_procedural_or_tail_risks": [
+     0.005,
+     -0.015,
+     0.0,
+     -0.06,
+     -0.14500000000000002
+    ],
+    "calibration_or_rounding_adjustment": [
+     0.0,
+     0.0,
+     0.01,
+     -0.05500000000000001,
+     0.03
+    ],
+    "previous_forecast_probability_reference": [
+     0.0,
+     0.07,
+     0.08750000000000001,
+     0.03,
+     0.2
+    ]
+   },
+   "forecast": [
+    0.07,
+    0.08750000000000001,
+    0.095,
+    0.525,
+    0.605
+   ]
+  },
+  "futuresim/sa_captain_maharaj": {
+   "dates": [
+    "2026-01-15",
+    "2026-01-24",
+    "2026-02-02",
+    "2026-02-10",
+    "2026-02-17"
+   ],
+   "samples": [
+    0,
+    1
+   ],
+   "variables": {
+    "base_rate_maharaj_captaincy": [
+     0.1,
+     0.1,
+     0.1,
+     0.1,
+     0.1
+    ],
+    "adjustment_incumbent_markram_captaincy_signal": [
+     -0.08499999999999999,
+     -0.06,
+     -0.06,
+     -0.06,
+     -0.055
+    ],
+    "adjustment_maharaj_leadership_and_franchise_captaincy": [
+     5.59,
+     0.04,
+     0.025,
+     0.045,
+     0.025
+    ],
+    "adjustment_maharaj_world_cup_squad_membership": [
+     0.0,
+     0.005,
+     0.02,
+     0.01,
+     0.005
+    ],
+    "adjustment_no_reports_or_leaks_signal": [
+     -0.005,
+     -0.015,
+     -0.02,
+     -0.02,
+     -0.025
+    ],
+    "adjustment_post_world_cup_scheduling_and_rest": [
+     2.03,
+     0.015,
+     -0.02,
+     -0.01,
+     0.01
+    ],
+    "adjustment_other_candidates_or_spinner_bias": [
+     -3.525,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "uncertainty_or_rounding_adjustment": [
+     1.05,
+     0.0,
+     0.005,
+     0.015,
+     0.02
+    ],
+    "previous_or_prior_forecast_probability": [
+     0.0,
+     0.175,
+     0.05,
+     0.0,
+     0.0
+    ],
+    "plausible_probability_lower_bound": [
+     0.035,
+     0.0,
+     0.0,
+     0.01,
+     0.0
+    ],
+    "plausible_probability_upper_bound": [
+     0.15,
+     0.0,
+     0.0,
+     0.04,
+     0.0
+    ]
+   },
+   "forecast": [
+    0.175,
+    0.085,
+    0.05,
+    0.065,
+    0.060000000000000005
+   ]
+  },
+  "react/carrick_newcastle": {
+   "dates": [
+    "2026-01-27",
+    "2026-02-05",
+    "2026-02-14",
+    "2026-02-23",
+    "2026-03-01"
+   ],
+   "samples": [
+    0,
+    1
+   ],
+   "variables": {
+    "match_occurs_before_resolution_probability": [
+     0.005,
+     0.425,
+     0.3,
+     0.175,
+     0.01
+    ],
+    "newcastle_wins_given_match_probability": [
+     0.175,
+     0.325,
+     0.3,
+     0.35,
+     0.175
+    ],
+    "no_prior_united_defeat_before_newcastle_match_probability": [
+     0.6,
+     0.6,
+     0.55,
+     0.6,
+     1.0
+    ],
+    "united_suffers_defeat_before_resolution_probability": [
+     0.325,
+     0.35,
+     0.0,
+     0.35,
+     0.052500000000000005
+    ],
+    "newcastle_is_united_defeat_opponent_given_defeat_probability": [
+     0.09,
+     0.0,
+     0.0,
+     0.0,
+     0.025
+    ],
+    "schedule_or_search_uncertainty_factor": [
+     0.505,
+     1.0,
+     1.0,
+     1.2,
+     1.0
+    ],
+    "independence_or_combination_weight": [
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "previous_forecast_probability": [
+     0.0,
+     0.06,
+     0.075,
+     0.0495,
+     0.0445
+    ]
+   },
+   "forecast": [
+    0.06,
+    0.075,
+    0.0495,
+    0.036000000000000004,
+    0.0085
+   ]
+  },
+  "react/iqair_loni": {
+   "dates": [
+    "2026-01-10",
+    "2026-01-31",
+    "2026-02-20",
+    "2026-03-08",
+    "2026-03-20"
+   ],
+   "samples": [
+    0,
+    1
+   ],
+   "variables": {
+    "base_probability_specific_city_is_rank_1": [
+     0.02275,
+     0.016,
+     0.00816666666665,
+     0.03925,
+     0.002625
+    ],
+    "monitoring_coverage_factor": [
+     0.255,
+     0.35,
+     1.0,
+     0.125,
+     0.9
+    ],
+    "regional_competition_factor": [
+     1.0,
+     0.65,
+     2.0,
+     0.51,
+     0.6499999999999999
+    ],
+    "media_or_recent_signal_factor": [
+     0.9,
+     0.45,
+     0.6,
+     0.2525,
+     1.0
+    ],
+    "small_town_outlier_factor": [
+     0.325,
+     1.05,
+     1.0,
+     0.505,
+     1.0
+    ],
+    "loni_distinct_listing_factor": [
+     0.505,
+     1.0,
+     0.55,
+     0.575,
+     1.0
+    ],
+    "loni_prior_prominence_factor": [
+     1.0,
+     1.0,
+     1.0,
+     0.65,
+     0.55
+    ],
+    "residual_tail_risk_factor": [
+     1.0,
+     1.0,
+     1.0,
+     0.51,
+     1.0
+    ]
+   },
+   "forecast": [
+    0.014,
+    0.0027,
+    0.0028,
+    0.017,
+    0.003
+   ]
+  },
+  "react/nepal_shah": {
+   "dates": [
+    "2026-02-01",
+    "2026-02-20",
+    "2026-03-05",
+    "2026-03-15",
+    "2026-03-25"
+   ],
+   "samples": [
+    0,
+    1
+   ],
+   "variables": {
+    "prior_probability_target_event": [
+     0.0,
+     0.095,
+     0.0,
+     0.025,
+     0.675
+    ],
+    "probability_wins_constituency": [
+     0.225,
+     0.3,
+     0.175,
+     0.0,
+     0.0
+    ],
+    "probability_becomes_prime_minister_given_relevant_path": [
+     0.575,
+     0.42500000000000004,
+     0.04,
+     0.0,
+     0.95
+    ],
+    "probability_coalition_or_internal_selection_given_win": [
+     0.25,
+     0.075,
+     0.125,
+     0.9624999999999999,
+     0.95
+    ],
+    "probability_sworn_in_on_target_date_given_pm": [
+     0.5,
+     0.725,
+     0.6499999999999999,
+     0.810483870967742,
+     0.925
+    ],
+    "disruption_or_delay_risk_probability": [
+     0.0,
+     0.0,
+     0.0,
+     0.07500000000000001,
+     0.075
+    ],
+    "days_between_election_and_target_date": [
+     22.0,
+     22.0,
+     22.0,
+     22.0,
+     22.0
+    ]
+   },
+   "forecast": [
+    0.095,
+    0.0625,
+    0.055499999999999994,
+    0.675,
+    0.85
+   ]
+  },
+  "react/sa_captain_maharaj": {
+   "dates": [
+    "2026-01-15",
+    "2026-01-24",
+    "2026-02-02",
+    "2026-02-10",
+    "2026-02-17"
+   ],
+   "samples": [
+    0,
+    1
+   ],
+   "variables": {
+    "prior_probability_maharaj_captain": [
+     0.0,
+     0.035,
+     0.025,
+     0.058,
+     0.08149999999999999
+    ],
+    "probability_markram_unavailable_or_not_captain": [
+     0.225,
+     0.1,
+     0.15,
+     0.175,
+     0.1
+    ],
+    "conditional_probability_maharaj_given_markram_unavailable_or_not_captain": [
+     0.325,
+     0.15,
+     0.125,
+     0.3,
+     0.1
+    ],
+    "conditional_probability_maharaj_given_markram_available": [
+     0.025,
+     0.0,
+     0.015,
+     0.0025,
+     0.0
+    ],
+    "adjustment_for_incumbent_continuity": [
+     0.0,
+     0.0,
+     -0.0175,
+     -0.03,
+     -0.04
+    ],
+    "adjustment_for_maharaj_leadership": [
+     0.0,
+     0.0,
+     0.0,
+     0.015,
+     0.0225
+    ],
+    "adjustment_for_rotation_rest": [
+     0.0,
+     0.0,
+     -0.005,
+     0.035,
+     0.0225
+    ],
+    "adjustment_for_lack_of_public_signals": [
+     0.0,
+     0.0,
+     -0.005,
+     -0.005,
+     -0.015
+    ],
+    "adjustment_for_other_candidates_competition": [
+     0.0,
+     0.0,
+     0.0,
+     -0.015,
+     -0.005
+    ]
+   },
+   "forecast": [
+    0.10500000000000001,
+    0.1095,
+    0.058,
+    0.0765,
+    0.0565
+   ]
+  }
+ },
+ "residuals_over_time": {
+  "analytica/carrick_newcastle": {
+   "dates": [
+    "2026-01-27",
+    "2026-02-05",
+    "2026-02-14",
+    "2026-02-23",
+    "2026-03-01"
+   ],
+   "signed": [
+    0.06274999999999999,
+    -0.0004600000000000021,
+    0.01218,
+    0.008999999999999998,
+    0.007977999999999997
+   ]
+  },
+  "analytica/iqair_loni": {
+   "dates": [
+    "2026-01-10",
+    "2026-01-31",
+    "2026-02-20",
+    "2026-03-08",
+    "2026-03-20"
+   ],
+   "signed": [
+    -0.0052426640361867855,
+    -0.00031706561254375243,
+    -0.0020911140256466227,
+    -0.0005356619507461899,
+    -0.0030990374204175313
+   ]
+  },
+  "analytica/nepal_shah": {
+   "dates": [
+    "2026-02-01",
+    "2026-02-20",
+    "2026-03-05",
+    "2026-03-15",
+    "2026-03-25"
+   ],
+   "signed": [
+    -0.0026249999999999954,
+    -0.00022000000000000491,
+    0.00019999999999999185,
+    -0.39612499999999995,
+    0.1975
+   ]
+  },
+  "analytica/sa_captain_maharaj": {
+   "dates": [
+    "2026-01-15",
+    "2026-01-24",
+    "2026-02-02",
+    "2026-02-10",
+    "2026-02-17"
+   ],
+   "signed": [
+    0.42615000000000003,
+    0.30018249999999996,
+    0.2778416666666666,
+    0.22455499999999995,
+    0.2463833333333333
+   ]
+  },
+  "bayesian/carrick_newcastle": {
+   "dates": [
+    "2026-01-27",
+    "2026-02-05",
+    "2026-02-14",
+    "2026-02-23",
+    "2026-03-01"
+   ],
+   "signed": [
+    -0.0038020853024607754,
+    -0.00045410821453308406,
+    -2.405820616584238e-05,
+    3.9850401969017763e-08,
+    -4.217377328957249e-06
+   ]
+  },
+  "bayesian/iqair_loni": {
+   "dates": [
+    "2026-01-10",
+    "2026-01-31",
+    "2026-02-20",
+    "2026-03-08",
+    "2026-03-20"
+   ],
+   "signed": [
+    -0.009868861508922137,
+    -0.0005748210170181478,
+    -2.4196519510182643e-06,
+    -1.147513400776589e-07,
+    -7.387737484419487e-10
+   ]
+  },
+  "bayesian/nepal_shah": {
+   "dates": [
+    "2026-02-01",
+    "2026-02-20",
+    "2026-03-05",
+    "2026-03-15",
+    "2026-03-25"
+   ],
+   "signed": [
+    -0.09453808417741491,
+    0.0022437570767255277,
+    -0.09828022697512004,
+    0.05988752006926806,
+    -0.012274187404980708
+   ]
+  },
+  "bayesian/sa_captain_maharaj": {
+   "dates": [
+    "2026-01-15",
+    "2026-01-24",
+    "2026-02-02",
+    "2026-02-10",
+    "2026-02-17"
+   ],
+   "signed": [
+    -0.001381974879416284,
+    -0.01018219437590779,
+    0.00017984507355874035,
+    0.00021730147997896243,
+    0.00017778249371942388
+   ]
+  },
+  "futuresim/iqair_loni": {
+   "dates": [
+    "2026-01-10",
+    "2026-01-31",
+    "2026-02-20",
+    "2026-03-08",
+    "2026-03-20"
+   ],
+   "signed": [
+    0.023243501000000007,
+    0.018126500000349998,
+    0.0005237817500000001,
+    0.000499401,
+    0.000999988
+   ]
+  },
+  "futuresim/nepal_shah": {
+   "dates": [
+    "2026-02-01",
+    "2026-02-20",
+    "2026-03-05",
+    "2026-03-15",
+    "2026-03-25"
+   ],
+   "signed": [
+    0.020000000000000004,
+    -1.0408340855860843e-17,
+    0.014754416618132399,
+    -0.24628191506487657,
+    -0.37384004884004884
+   ]
+  },
+  "futuresim/sa_captain_maharaj": {
+   "dates": [
+    "2026-01-15",
+    "2026-01-24",
+    "2026-02-02",
+    "2026-02-10",
+    "2026-02-17"
+   ],
+   "signed": [
+    0.45499999999999996,
+    0.045000000000000005,
+    0.012500000000000004,
+    0.015000000000000013,
+    0.020000000000000004
+   ]
+  },
+  "react/carrick_newcastle": {
+   "dates": [
+    "2026-01-27",
+    "2026-02-05",
+    "2026-02-14",
+    "2026-02-23",
+    "2026-03-01"
+   ],
+   "signed": [
+    -0.001496500000000001,
+    1.3877787807814457e-17,
+    4.5102810375396984e-17,
+    0.006874999999999996,
+    -0.002499999999999995
+   ]
+  },
+  "react/iqair_loni": {
+   "dates": [
+    "2026-01-10",
+    "2026-01-31",
+    "2026-02-20",
+    "2026-03-08",
+    "2026-03-20"
+   ],
+   "signed": [
+    0.008749999999999999,
+    0.0133,
+    0.00536666666665,
+    0.022250000000000002,
+    -0.000375
+   ]
+  },
+  "react/nepal_shah": {
+   "dates": [
+    "2026-02-01",
+    "2026-02-20",
+    "2026-03-05",
+    "2026-03-15",
+    "2026-03-25"
+   ],
+   "signed": [
+    0.1908950317382813,
+    0.23143955890999998,
+    -0.04744669698304686,
+    -0.6499999999999999,
+    -0.03686670441437501
+   ]
+  },
+  "react/sa_captain_maharaj": {
+   "dates": [
+    "2026-01-15",
+    "2026-01-24",
+    "2026-02-02",
+    "2026-02-10",
+    "2026-02-17"
+   ],
+   "signed": [
+    -0.011250000000000003,
+    -0.0445,
+    0.0005952379705215435,
+    -0.008119485496899996,
+    0.02262803220724929
+   ]
+  }
+ },
+ "sensitivity": {
+  "analytica/carrick_newcastle": {
+   "prob_match_scheduled_by_deadline": 0.007330499999999999,
+   "prob_newcastle_win_given_match": 0.004091799999999999,
+   "prob_carrick_in_charge_through_deadline": 0.0040849599999999995,
+   "reported_unbeaten_run_wins": 0.0010638499999999992,
+   "weight_no_prior_defeat_component": 0.0005785999999999996,
+   "reported_unbeaten_run_matches": 0.00016271226865805367,
+   "prob_no_other_team_beats_united_before_newcastle": 0.0001004099999999997,
+   "weight_management_status_component": 0.0,
+   "weight_fixture_occurs_component": 0.0,
+   "weight_match_outcome_component": 0.0
+  },
+  "analytica/iqair_loni": {
+   "probability_loni_ranked_most_polluted_annual_pm25": 0.00034490963403287087,
+   "probability_loni_included_as_distinct_city": 5.0430633963946535e-05,
+   "weight_pm25_rank_condition": 4.853775814505615e-05,
+   "probability_report_published_by_resolution_date": 2.7043788202165017e-05,
+   "probability_iqair_labels_top_location_as_loni": 2.6132239081713716e-05,
+   "probability_loni_not_excluded_by_data_quality_rules": 2.5577780576832035e-05,
+   "weight_inclusion_condition": 1.3271517389565204e-05,
+   "weight_report_publication_timing_condition": 2.446605685792533e-07,
+   "weight_data_quality_condition": 1.8552414736292476e-07,
+   "weight_labeling_condition": 1.0197905743513034e-07
+  },
+  "analytica/nepal_shah": {
+   "governing_majority_probability": 0.04218946249999953,
+   "swearing_in_on_target_date_probability": 0.012736599999999992,
+   "shah_selected_leader_probability": 0.012691600000000008,
+   "personal_willingness_probability": 0.012691600000000003,
+   "no_legal_or_procedural_block_probability": 0.0126916,
+   "election_to_swearing_in_days": 0.0,
+   "reported_major_bloc_seats": 0.0,
+   "total_house_seats": 0.0
+  },
+  "analytica/sa_captain_maharaj": {
+   "maharaj_selected_in_squad_probability": 0.060416749999999964,
+   "markram_named_captain_probability": 0.025374166666666677,
+   "weight_selection_factor": 0.00966536899432099,
+   "weight_alternate_captain_choice_factor": 0.006912614944882628,
+   "markram_unavailable_probability": 0.006196336666666658,
+   "weight_markram_captain_factor": 0.0043782227948903196,
+   "maharaj_captain_if_markram_not_named_probability": 0.002925666666666661,
+   "maharaj_captain_despite_markram_named_probability": 0.0026613333333333294,
+   "maharaj_captain_if_markram_named_and_available_probability": 0.0024273333333333287,
+   "maharaj_captain_if_markram_unavailable_probability": 0.00047649999999999635
+  },
+  "bayesian/carrick_newcastle": {
+   "prior_odds_event": 0.0016003650578674511,
+   "prior_event_probability": 0.0014900691010500497,
+   "likelihood_ratio_other_evidence": 0.00013432978756349324,
+   "likelihood_ratio_schedule_silence": 0.00012801966823859501,
+   "likelihood_ratio_performance_signal": 0.00012722047157224189,
+   "likelihood_ratio_admin_rules_signal": 0.00012722047157224178,
+   "likelihood_ratio_total": 0.0,
+   "team_form_unbeaten_matches": 0.0,
+   "team_form_wins": 0.0,
+   "team_form_goals_for": 0.0,
+   "team_form_goals_against": 0.0
+  },
+  "bayesian/iqair_loni": {
+   "prior_odds_event": 0.0010288023100549976,
+   "evidence_likelihood_ratio_combined": 0.0001321739663369723,
+   "assumed_prob_evidence_given_non_event": 7.064170343290596e-05,
+   "mention_absence_odds_multiplier_against_event": 7.064170343290596e-05,
+   "assumed_prob_evidence_given_event": 7.062636154292572e-05,
+   "evidence_likelihood_ratio_secondary": 6.8727259095106085e-06,
+   "evidence_likelihood_ratio_main": 6.8727259095105975e-06,
+   "evidence_likelihood_ratio_tertiary": 6.8727259095105975e-06,
+   "prior_probability_event": 0.0,
+   "searches_run_count": 0.0
+  },
+  "bayesian/nepal_shah": {
+   "prior_probability_becomes_pm_by_target": 0.027403912065495827,
+   "likelihood_ratio_alliance_support": 0.014158966850619214,
+   "likelihood_ratio_candidate_entry_or_campaign_signal": 0.014158966850619214,
+   "likelihood_ratio_competitive_field_or_polling_strength": 0.014158966850619214,
+   "reported_rsp_seats": 0.002165106618860299,
+   "parliament_total_seats": 0.002139809992166686,
+   "likelihood_ratio_swearing_in_schedule_signal": 0.0016621566938970155,
+   "likelihood_ratio_election_or_results_evidence": 0.0014449363628857737,
+   "likelihood_ratio_media_or_international_endorsement": 0.0014449363628857737
+  },
+  "bayesian/sa_captain_maharaj": {
+   "prior_probability_maharaj_named_captain": 0.013688486870864883,
+   "combined_likelihood_ratio_all_evidence": 0.006212569856447381,
+   "likelihood_ratio_markram_captain_evidence": 0.0,
+   "likelihood_ratio_maharaj_captaincy_signal": 0.0,
+   "likelihood_ratio_maharaj_in_world_cup_squad": 0.0,
+   "likelihood_ratio_continuity_timing": 0.0,
+   "likelihood_ratio_no_reports_markram_rested": 0.0,
+   "tour_t20_match_count": 0.0
+  },
+  "futuresim/iqair_loni": {
+   "previous_forecast_probability": 0.0102256495,
+   "prior_probability_loni_world_number_one": 0.005468750000007,
+   "likelihood_multiplier_other_cities_indicated": 0.0012516600000140007,
+   "likelihood_multiplier_iqair_history_against_loni": 0.0008985793750070005,
+   "likelihood_multiplier_loni_not_mentioned_or_not_leaked": 0.0008985793750070003,
+   "likelihood_multiplier_local_pollution_spike_support": 0.0008985793750070003,
+   "likelihood_multiplier_monitor_labeling_effect": 0.000898579375007,
+   "reference_pool_city_count": 0.0,
+   "reported_local_aqi_spike_value": 0.0
+  },
+  "futuresim/nepal_shah": {
+   "adjustment_candidate_strength_and_momentum": 0.020200000000000003,
+   "adjustment_opponents_and_coalition_hurdles": 0.020000000000000007,
+   "adjustment_pm_pledge_or_alliance_support": 0.020000000000000004,
+   "base_rate_outsider_becomes_prime_minister_by_target_date": 0.02,
+   "adjustment_legal_procedural_or_tail_risks": 0.02,
+   "calibration_or_rounding_adjustment": 0.019999999999999993,
+   "adjustment_evidence_of_electoral_majority_or_landslide": 0.008338886863664394,
+   "adjustment_specific_oath_date_reporting": 0.0024188461098340495,
+   "adjustment_missing_or_uncertain_oath_schedule": 0.002239158602028929,
+   "previous_forecast_probability_reference": 0.0
+  },
+  "futuresim/sa_captain_maharaj": {
+   "base_rate_maharaj_captaincy": 0.015000000000000003,
+   "adjustment_incumbent_markram_captaincy_signal": 0.015000000000000003,
+   "adjustment_maharaj_world_cup_squad_membership": 0.015000000000000003,
+   "adjustment_post_world_cup_scheduling_and_rest": 0.015000000000000003,
+   "adjustment_other_candidates_or_spinner_bias": 0.015000000000000003,
+   "uncertainty_or_rounding_adjustment": 0.015000000000000003,
+   "adjustment_maharaj_leadership_and_franchise_captaincy": 0.015,
+   "adjustment_no_reports_or_leaks_signal": 0.015,
+   "previous_or_prior_forecast_probability": 0.010000000000000002,
+   "plausible_probability_upper_bound": 0.008749999999999999,
+   "plausible_probability_lower_bound": 0.0
+  },
+  "react/carrick_newcastle": {
+   "newcastle_is_united_defeat_opponent_given_defeat_probability": 0.004717330000000013,
+   "schedule_or_search_uncertainty_factor": 0.004638900000000002,
+   "match_occurs_before_resolution_probability": 0.0041714000000000005,
+   "independence_or_combination_weight": 0.003562570000000002,
+   "newcastle_wins_given_match_probability": 0.003417570000000006,
+   "no_prior_united_defeat_before_newcastle_match_probability": 0.003417570000000006,
+   "united_suffers_defeat_before_resolution_probability": 0.0012700000000000044,
+   "previous_forecast_probability": 0.0
+  },
+  "react/iqair_loni": {
+   "base_probability_specific_city_is_rank_1": 0.016454166592514752,
+   "monitoring_coverage_factor": 0.0,
+   "regional_competition_factor": 0.0,
+   "media_or_recent_signal_factor": 0.0,
+   "small_town_outlier_factor": 0.0,
+   "loni_distinct_listing_factor": 0.0,
+   "loni_prior_prominence_factor": 0.0,
+   "residual_tail_risk_factor": 0.0
+  },
+  "react/nepal_shah": {
+   "probability_becomes_prime_minister_given_relevant_path": 0.03246751049128176,
+   "probability_sworn_in_on_target_date_given_pm": 0.028367667550034382,
+   "prior_probability_target_event": 0.010809927700000008,
+   "disruption_or_delay_risk_probability": 0.005928931317821891,
+   "probability_wins_constituency": 0.001028652314144428,
+   "probability_coalition_or_internal_selection_given_win": 0.0006849182320428541,
+   "days_between_election_and_target_date": 0.0
+  },
+  "react/sa_captain_maharaj": {
+   "prior_probability_maharaj_captain": 0.010396231664615898,
+   "conditional_probability_maharaj_given_markram_available": 0.0078711576233921,
+   "adjustment_for_incumbent_continuity": 0.005982967469980354,
+   "adjustment_for_maharaj_leadership": 0.005982967469980354,
+   "adjustment_for_rotation_rest": 0.005982967469980354,
+   "adjustment_for_lack_of_public_signals": 0.005982967469980354,
+   "adjustment_for_other_candidates_competition": 0.005982967469980354,
+   "conditional_probability_maharaj_given_markram_unavailable_or_not_captain": 0.0032390765774373406,
+   "probability_markram_unavailable_or_not_captain": 0.003143462333728947
+  }
+ },
+ "program_distance": {
+  "analytica/carrick_newcastle": {
+   "mc_mean_abs": 0.4703169834848223,
+   "mc_ok": 400,
+   "observed_mean_abs": 0.20305663749999997
+  },
+  "analytica/iqair_loni": {
+   "mc_mean_abs": 0.00048455338827017933,
+   "mc_ok": 400,
+   "observed_mean_abs": 0.0003285231091081766
+  },
+  "analytica/nepal_shah": {
+   "mc_mean_abs": 0.9359002056088456,
+   "mc_ok": 400,
+   "observed_mean_abs": 0.315202625
+  },
+  "analytica/sa_captain_maharaj": {
+   "mc_mean_abs": 0.37806196530801733,
+   "mc_ok": 400,
+   "observed_mean_abs": 0.3143088661333333
+  },
+  "bayesian/carrick_newcastle": {
+   "mc_mean_abs": 0.003021306244133852,
+   "mc_ok": 400,
+   "observed_mean_abs": 8.634554260448551e-06
+  },
+  "bayesian/iqair_loni": {
+   "mc_mean_abs": 0.0009708978879567158,
+   "mc_ok": 400,
+   "observed_mean_abs": 0.00025257750084360344
+  },
+  "bayesian/nepal_shah": {
+   "mc_mean_abs": 0.058835127521314305,
+   "mc_ok": 400,
+   "observed_mean_abs": 0.02995284912418549
+  },
+  "bayesian/sa_captain_maharaj": {
+   "mc_mean_abs": 0.0,
+   "mc_ok": 400,
+   "observed_mean_abs": 0.0
+  },
+  "futuresim/iqair_loni": {
+   "mc_mean_abs": 0.07832293276976139,
+   "mc_ok": 400,
+   "observed_mean_abs": 0.014248703550054375
+  },
+  "futuresim/nepal_shah": {
+   "mc_mean_abs": 0.3712226904756418,
+   "mc_ok": 400,
+   "observed_mean_abs": 0.18117527610461154
+  },
+  "futuresim/sa_captain_maharaj": {
+   "mc_mean_abs": 0.2955388904189633,
+   "mc_ok": 400,
+   "observed_mean_abs": 0.12279999999999999
+  },
+  "react/carrick_newcastle": {
+   "mc_mean_abs": 0.0,
+   "mc_ok": 400,
+   "observed_mean_abs": 0.0
+  },
+  "react/iqair_loni": {
+   "mc_mean_abs": 0.0117353049941181,
+   "mc_ok": 400,
+   "observed_mean_abs": 0.006418624746386892
+  },
+  "react/nepal_shah": {
+   "mc_mean_abs": 0.13060841353009825,
+   "mc_ok": 400,
+   "observed_mean_abs": 0.09241105194807812
+  },
+  "react/sa_captain_maharaj": {
+   "mc_mean_abs": 0.0304234306688074,
+   "mc_ok": 400,
+   "observed_mean_abs": 0.006954243063825834
+  }
+ }
+}

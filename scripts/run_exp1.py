@@ -62,6 +62,40 @@ QUESTIONS = [
                   "NHL players are participating."),
       resolution_date="2026-02-22", truth=0,
       dates=["2026-01-14", "2026-01-28", "2026-02-08", "2026-02-15", "2026-02-20"]),
+    # Scale-up set (experiment 8): four more OpenForesight aljazeera2026Q1
+    # questions with >=5-week spans inside the corpus window, binarised on the
+    # dataset's recorded answers. All four resolve YES -- disclosed: the hockey
+    # pair above remains the only directional control; these power the
+    # program-recovery statistics, not directional claims.
+    Q(id="iqair_loni",
+      text=("Will IQAir's annual world air quality report covering 2025 name "
+            "Loni as the world's most polluted city?"),
+      background=("IQAir publishes an annual World Air Quality Report ranking "
+                  "cities by PM2.5 concentration; the report covering calendar "
+                  "2025 is expected by late March 2026."),
+      resolution_date="2026-03-23", truth=1,
+      dates=["2026-01-10", "2026-01-31", "2026-02-20", "2026-03-08", "2026-03-20"]),
+    Q(id="carrick_newcastle",
+      text=("Will Newcastle United be the first club to defeat Manchester "
+            "United under interim boss Michael Carrick?"),
+      background=("Manchester United are playing under interim boss Michael "
+                  "Carrick. The question resolves on the first competitive "
+                  "defeat of his tenure, expected by mid-March 2026."),
+      resolution_date="2026-03-03", truth=1,
+      dates=["2026-01-27", "2026-02-05", "2026-02-14", "2026-02-23", "2026-03-01"]),
+    Q(id="nepal_shah",
+      text="Will Balendra Shah be sworn in as Nepal's prime minister on 27 March 2026?",
+      background=("Nepal's political process is expected to produce a "
+                  "prime-ministerial swearing-in in late March 2026."),
+      resolution_date="2026-03-27", truth=1,
+      dates=["2026-02-01", "2026-02-20", "2026-03-05", "2026-03-15", "2026-03-25"]),
+    Q(id="sa_captain_maharaj",
+      text=("Will Keshav Maharaj be named captain of South Africa's squad for "
+            "the five-match men's T20 tour of New Zealand in March 2026?"),
+      background=("Cricket South Africa is due to announce its squad for a "
+                  "five-match T20 tour of New Zealand in March 2026."),
+      resolution_date="2026-02-19", truth=1,
+      dates=["2026-01-15", "2026-01-24", "2026-02-02", "2026-02-10", "2026-02-17"]),
 ]
 
 

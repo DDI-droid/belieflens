@@ -1,0 +1,30 @@
+24 probe turns (search disabled, single injected item each)
+
+group                  s cond      target variable                 implied   actual    ratio  rigidity
+------------------------------------------------------------------------------------------------------------
+analytica/hockey_usa   0 against   p_usa_win_final_given_reach      -0.150   -0.083     0.55      0.45
+analytica/hockey_usa   0 placebo   -                                +0.000   -0.004      --   placebo floor
+analytica/hockey_usa   0 toward    p_usa_win_final_given_reach      +0.150   +0.122     0.81      0.19
+analytica/hockey_usa   1 against   p_usa_win_final_given_reach      -0.150   -0.160     1.07     -0.07
+analytica/hockey_usa   1 placebo   -                                +0.000   -0.005      --   placebo floor
+analytica/hockey_usa   1 toward    p_usa_win_final_given_reach      +0.000   +0.064      --   rule says immovable (implied~0)
+bayesian/hockey_usa    0 against   lr_injury_and_replacements       -0.078   -0.112     1.43     -0.43
+bayesian/hockey_usa    0 placebo   -                                +0.000   +0.000      --   placebo floor
+bayesian/hockey_usa    0 toward    lr_opponent_canada_strength      +0.079   +0.120     1.53     -0.53
+bayesian/hockey_usa    1 against   lr_injury_and_replacements       -0.065   -0.120     1.85     -0.85
+bayesian/hockey_usa    1 placebo   -                                +0.000   +0.000      --   placebo floor
+bayesian/hockey_usa    1 toward    lr_opponent_canada_strength      +0.084   +0.169     2.02     -1.02
+futuresim/hockey_can   0 against   adjustment_goaltending_net       -0.050   -0.150     3.00     -2.00
+futuresim/hockey_can   0 placebo   -                                +0.000   +0.020      --   placebo floor
+futuresim/hockey_can   0 toward    adjustment_usa_rival_strength    +0.030   +0.040     1.33     -0.33
+futuresim/hockey_can   1 against   adjustment_goaltending_net       -0.050   -0.110     2.20     -1.20
+futuresim/hockey_can   1 placebo   -                                +0.000   -0.020      --   placebo floor
+futuresim/hockey_can   1 toward    adjustment_usa_rival_strength    +0.030   +0.050     1.67     -0.67
+react/hockey_can       0 against   adj_injuries_availability        +0.000   -0.108      --   rule says immovable (implied~0)
+react/hockey_can       0 placebo   -                                +0.000   +0.000      --   placebo floor
+react/hockey_can       0 toward    adj_rivals_strength              +0.000   +0.125      --   rule says immovable (implied~0)
+react/hockey_can       1 against   adj_injuries_availability        +0.000   -0.120      --   rule says immovable (implied~0)
+react/hockey_can       1 placebo   -                                +0.000   +0.000      --   placebo floor
+react/hockey_can       1 toward    adj_rivals_strength              +0.000   +0.090      --   rule says immovable (implied~0)
+
+wrote results\exp1\probe_results.json

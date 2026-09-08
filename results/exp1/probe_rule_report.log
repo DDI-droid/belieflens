@@ -1,0 +1,33 @@
+group                  s cond         Δrule  Δactual   p_rule      gap
+------------------------------------------------------------------------------
+analytica/hockey_usa   0 against     -0.303   -0.083    0.132   +0.220
+analytica/hockey_usa   0 placebo     -0.110   -0.004    0.325   +0.106
+analytica/hockey_usa   0 toward      -0.018   +0.122    0.417   +0.140
+analytica/hockey_usa   1 against     -0.256   -0.160    0.224   +0.096
+analytica/hockey_usa   1 placebo     -0.122   -0.005    0.358   +0.117
+analytica/hockey_usa   1 toward      -0.072   +0.064    0.408   +0.136
+bayesian/hockey_usa    0 against     +0.025   -0.112    0.497   -0.137
+bayesian/hockey_usa    0 placebo     +0.086   +0.000    0.558   -0.086
+bayesian/hockey_usa    0 toward      +0.126   +0.120    0.598   -0.006
+bayesian/hockey_usa    1 against     +0.013   -0.120    0.365   -0.133
+bayesian/hockey_usa    1 placebo     +0.089   +0.000    0.441   -0.089
+bayesian/hockey_usa    1 toward      +0.151   +0.169    0.503   +0.018
+futuresim/hockey_can   0 against     -0.110   -0.150    0.500   -0.040
+futuresim/hockey_can   0 placebo     +0.020   +0.020    0.630   +0.000
+futuresim/hockey_can   0 toward      +0.035   +0.040    0.645   +0.005
+futuresim/hockey_can   1 against     -0.120   -0.110    0.530   +0.010
+futuresim/hockey_can   1 placebo     -0.020   -0.020    0.630   +0.000
+futuresim/hockey_can   1 toward      +0.050   +0.050    0.700   +0.000
+react/hockey_can       0 against     +0.000   -0.108    0.323   -0.108
+react/hockey_can       0 placebo     +0.000   +0.000    0.323   +0.000
+react/hockey_can       0 toward      +0.000   +0.125    0.323   +0.125
+react/hockey_can       1 against     +0.000   -0.120    0.480   -0.120
+react/hockey_can       1 placebo     +0.000   +0.000    0.480   -0.000
+react/hockey_can       1 toward      +0.000   +0.090    0.480   +0.090
+
+  mean |gap| against   = 0.108  (n=8)
+  mean |gap| placebo   = 0.050  (n=8)
+  mean |gap| toward    = 0.065  (n=8)
+
+wrote results\exp1\probe_rule_check.json
+EXIT 0

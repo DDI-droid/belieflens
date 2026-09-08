@@ -1,0 +1,5 @@
+  ok    strict parser reproduces 160/160 stored forecasts
+  ok    all forecasts in [0,1]
+  ok    date-gate replay: 949 logged searches re-executed, zero articles past the gate
+
+C. E2 DATA — per-group audit under hardened rules

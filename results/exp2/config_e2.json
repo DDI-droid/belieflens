@@ -1,0 +1,14 @@
+{
+ "stage": "e2",
+ "model": "gpt-5-mini",
+ "extractor": "gpt-5.2",
+ "effort": "",
+ "samples": 2,
+ "questions": "",
+ "tool_rounds": 6,
+ "workers": 8,
+ "tol": 0.02,
+ "attempts": 4,
+ "out": "results/exp2",
+ "timestamp": "2026-09-08 17:03:22"
+}

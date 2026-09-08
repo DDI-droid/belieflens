@@ -84,13 +84,37 @@ EXPERIMENT1.md       experiment writeup   ·   EXPERIMENTS.md  earlier protocol
 e1.log, e2.log       run logs quoted in the ledger
 ```
 
+## Second wave (2026-09-08): belief-dynamics analyses + rigidity probe + scale-up
+
+All run and on disk; scripts are `beliefdyn.py`, `run_probe.py`,
+`probe_rule_check.py`, results under `results/exp1/` (+ `results/exp2/` for the
+four-question scale-up).
+
+- **Trajectories / residual-drift / sensitivity / program-distance**
+  (`beliefdyn.json`): analytica's fitted structure decays over the window
+  (+0.34 |resid| drift) while futuresim's holds; futuresim/CAN's full-fit and
+  sample-0-only programs are byte-equivalent (d=0.0000).
+- **Temporal holdout**: bayesian's early theory (first 3 dates, copies
+  excluded) predicts the last 2 days at MAE ~0.003 -- the strongest
+  "program = structure, bindings = belief" evidence in the project.
+- **Rigidity probe** (`probe_results.json`, `probe_rule_check.json`): injected
+  role-based evidence on a search-disabled probe day, scored against each
+  harness's own recovered program. Placebos ~0, all 8 directional moves
+  correct-signed. Verdicts: futuresim is RULE-FAITHFUL (its E1 rigidity is
+  evidence-acquisition, not belief-revision); bayesian is asymmetric
+  (over-drops on contradicting news vs its own rule); react's belief moves
+  through channels its recoverable structure does not contain; analytica too
+  unstable for a verdict.
+- **Scale-up (exp2)**: four more OpenForesight questions (all YES-truth,
+  disclosed) x 4 harnesses x 2 samples x 5 dates, E2 under hardened rules,
+  audited. Hockey pair remains the only directional control.
+
 ## Queued next steps, in priority order
 
-1. **Extend the near-target drop to transforms** (`extract.py`,
-   `step1_variables`): drop odds/logit/percent forms of the forecast too —
-   the `posterior_odds` variable reconstructed the answer to 3 decimals this
-   run (program didn't use it, but close the channel).
-2. **More questions, longer date grids.** n=1 pair is a pilot. The question
+1. ~~Extend the near-target drop to transforms~~ DONE (plus name rules,
+   dead-code bans, constant-construction detector; see audit).
+2. ~~More questions~~ partially DONE (exp2, four questions, all YES-truth);
+   still wanted: NO-truth distractor pairs and longer grids. n=1 pair is a pilot. The question
    loader is `QUESTIONS` in `scripts/run_exp1.py`; candidates with ≥35-day
    spans are in the OpenForesight `aljazeera2026Q1` split (bootstrap downloads
    it). Keep pairs/controls where possible.

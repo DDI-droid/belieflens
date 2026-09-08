@@ -1,0 +1,726 @@
+=== E1 exp2 ===
+corpus span 2025-12-01 .. 2026-03-31 (339801 articles)
+32 runs = 4 questions x 4 harnesses x 2 samples, 5 dates each
+  [ 1/32] react      iqair_loni  s1  0.02 0.01 0.01 0.01 0.01  (264s)
+  [ 2/32] bayesian   iqair_loni  s1  0.00 0.00 0.00 0.00 0.00  (268s)
+  [ 3/32] futuresim  iqair_loni  s1  0.00 0.00 0.00 0.00 0.00  (280s)
+  [ 4/32] react      iqair_loni  s0  0.01 0.00 0.00 0.03 0.00  (280s)
+  [ 5/32] bayesian   iqair_loni  s0  0.03 0.00 0.00 0.00 0.00  (289s)
+  [ 6/32] futuresim  iqair_loni  s0  0.00 0.00 0.00 0.00 0.00  (315s)
+  [ 7/32] analytica  iqair_loni  s1  0.01 0.00 0.00 0.00 0.01  (362s)
+  [ 8/32] analytica  iqair_loni  s0  0.00 0.00 0.00 0.00 0.00  (369s)
+  [ 9/32] react      carrick_newcastle s0  0.00 0.06 0.04 0.04 0.01  (548s)
+  [10/32] react      carrick_newcastle s1  0.12 0.09 0.05 0.04 0.01  (556s)
+  [11/32] futuresim  carrick_newcastle s1  0.08 0.04 0.03 0.03 0.03  (572s)
+  [12/32] futuresim  carrick_newcastle s0  0.01 0.01 0.00 0.00 0.00  (584s)
+  [13/32] analytica  carrick_newcastle s0  0.12 0.00 0.01 0.01 0.02  (699s)
+  [14/32] bayesian   carrick_newcastle s0  0.00 0.00 0.00 0.00 0.00  (707s)
+  [15/32] bayesian   carrick_newcastle s1  0.01 0.00 0.00 0.00 0.00  (724s)
+  [16/32] analytica  carrick_newcastle s1  0.01 0.02 0.01 0.02 0.00  (786s)
+  [17/32] futuresim  nepal_shah  s1  0.11 0.14 0.13 0.40 0.55  (930s)
+  [18/32] react      nepal_shah  s1  0.14 0.08 0.04 0.51 0.82  (934s)
+  [19/32] react      nepal_shah  s0  0.05 0.04 0.07 0.84 0.88  (935s)
+  [20/32] futuresim  nepal_shah  s0  0.03 0.04 0.06 0.65 0.66  (943s)
+  [21/32] bayesian   nepal_shah  s0  0.36 0.38 0.44 0.83 0.92  (1106s)
+  [22/32] bayesian   nepal_shah  s1  0.23 0.26 0.34 0.89 0.99  (1129s)
+  [23/32] analytica  nepal_shah  s0  0.08 0.06 0.01 0.86 0.89  (1229s)
+  [24/32] analytica  nepal_shah  s1  0.10 0.06 0.07 0.83 0.72  (1274s)
+  [25/32] futuresim  sa_captain_maharaj s0  0.15 0.07 0.05 0.05 0.05  (1310s)
+  [26/32] react      sa_captain_maharaj s0  0.14 0.18 0.10 0.11 0.08  (1316s)
+  [27/32] react      sa_captain_maharaj s1  0.07 0.04 0.02 0.04 0.03  (1322s)
+  [28/32] futuresim  sa_captain_maharaj s1  0.20 0.10 0.05 0.08 0.07  (1351s)
+  [29/32] bayesian   sa_captain_maharaj s0  0.10 0.10 0.02 0.02 0.01  (1592s)
+  [30/32] bayesian   sa_captain_maharaj s1  0.22 0.13 0.07 0.07 0.02  (1596s)
+  [31/32] analytica  sa_captain_maharaj s0  0.14 0.06 0.02 0.02 0.08  (1603s)
+  [32/32] analytica  sa_captain_maharaj s1  0.09 0.14 0.23 0.10 0.06  (1628s)
+
+wrote results\exp2\e1_runs.jsonl (32 runs, 1628s total)
+=== E2 exp2 ===
+loaded 32 runs
+
+=== analytica / carrick_newcastle ===
+    step1 dropped: intermediate_product_p1_times_p2=0.0075 [raw copy of answer]
+    step1 dropped: premier_league_meetings_per_season=2 [percent copy of answer]
+    step1 dropped: dec_2025_meeting_count=1 [complement copy of answer]
+    step1 dropped: p1_times_p2_times_p3_unrounded_product=0.1197 [raw copy of answer]
+    step1 dropped: p1_united_unbeaten_under_carrick_as_of_mar_1=0.98 [complement copy of answer], time_window_days_mar_1_to_mar_3=2 [percent copy of answer]
+    step1 dropped: search_cutoff_day_of_month=1 [complement copy of answer]
+  step 1: 10 instances, 8.1 variables each (min 6, max 10)
+  step 2: schema of 10 -- prob_carrick_in_charge_through_deadline, prob_match_scheduled_by_deadline, prob_newcastle_win_given_match, prob_no_other_team_beats_united_before_newcastle, weight_management_status_component, weight_fixture_occurs_component, weight_match_outcome_component, weight_no_prior_defeat_component
+  step 3: attempts=4  MAE=0.0234  within_tol=80%  ops=11  branches=0  max|corr|=0.99 (prob_match_scheduled_by_deadline)
+  OOS: train s0 (n=5) -> test (n=5)  test MAE=0.3034  within_tol=0%
+
+=== analytica / iqair_loni ===
+    step1 dropped: assumed_independence_for_and_combination=1 [complement copy of answer]
+    step1 dropped: conjunctive_combination_factor=1 [complement copy of answer]
+    step1 dropped: rounding_increment_for_reported_forecast=0.001 [raw copy of answer]
+    step1 dropped: probability_loni_highest_annual_pm25_global=0.002 [raw copy of answer], assumed_independence_for_conjunction=1 [complement copy of answer]
+    step1 dropped: assumed_conditional_independence_factor=1 [complement copy of answer]
+    step1 dropped: p2_loni_highest_annual_pm25_among_all_ranked_cities=0.005 [raw copy of answer], independence_assumption_for_conjunction=1 [complement copy of answer], conjunction_requires_all_three_propositions=1 [complement copy of answer], prior_forecast_reference_1=0.003 [raw copy of answer], prior_forecast_reference_2=0.001 [raw copy of answer]
+  step 1: 10 instances, 6.4 variables each (min 4, max 9)
+  step 2: schema of 10 -- probability_loni_included_as_distinct_city, probability_loni_ranked_most_polluted_annual_pm25, probability_report_published_by_resolution_date, probability_iqair_labels_top_location_as_loni, probability_loni_not_excluded_by_data_quality_rules, weight_inclusion_condition, weight_pm25_rank_condition, weight_report_publication_timing_condition
+  step 3: attempts=4  MAE=0.0023  within_tol=100%  ops=21  branches=0  max|corr|=0.90 (weight_data_quality_condition)
+  OOS: train s0 (n=5) -> test (n=5)  test MAE=0.0033  within_tol=100%
+
+=== analytica / nepal_shah ===
+    step1 dropped: weight_p1_relative_importance=0.1 [odds copy of answer], weight_p4_relative_importance=0.1 [odds copy of answer]
+    step1 dropped: product_step_previous_times_timing=0.015 [raw copy of answer]
+  step 1: 10 instances, 10.4 variables each (min 7, max 16)
+  step 2: schema of 8 -- governing_majority_probability, shah_selected_leader_probability, no_legal_or_procedural_block_probability, swearing_in_on_target_date_probability, personal_willingness_probability, election_to_swearing_in_days, reported_major_bloc_seats, total_house_seats
+  step 3: attempts=4  MAE=0.1193  within_tol=60%  ops=13  branches=0  max|corr|=0.96 (governing_majority_probability)
+  OOS: train s0 (n=5) -> test (n=5)  test MAE=0.3420  within_tol=0%
+
+=== analytica / sa_captain_maharaj ===
+    step1 dropped: board_prefers_other_stand_in_if_markram_absent_weight=0.1 [odds copy of answer]
+    step1 dropped: selectors_replace_available_incumbent_probability=0.05 [raw copy of answer]
+    step1 dropped: path_a_probability_contribution=0.056 [raw copy of answer]
+  step 1: 10 instances, 8.8 variables each (min 6, max 14)
+  step 2: schema of 10 -- maharaj_selected_in_squad_probability, markram_named_captain_probability, markram_unavailable_probability, maharaj_captain_if_markram_named_and_available_probability, maharaj_captain_if_markram_unavailable_probability, maharaj_captain_if_markram_not_named_probability, maharaj_captain_despite_markram_named_probability, weight_selection_factor
+  step 3: attempts=4  MAE=0.2950  within_tol=0%  ops=23  branches=0  max|corr|=0.77 (maharaj_captain_if_markram_unavailable_probability)
+  OOS: train s0 (n=5) -> test (n=5)  test MAE=0.0549  within_tol=20%
+
+=== bayesian / carrick_newcastle ===
+    step1 dropped: effective_new_evidence_multiplier=1 [complement copy of answer]
+    step1 dropped: prior_odds_approx=0.002277 [raw copy of answer], posterior_odds=0.0002277 [raw copy of answer]
+    step1 dropped: fa_cup_fourth_round_lr=1 [complement copy of answer], premier_league_no_match_before_resolution_lr=1 [complement copy of answer], carrick_appointment_and_early_results_lr=1 [complement copy of answer], lr_product=1 [complement copy of answer], prior_odds=0.004218 [raw copy of answer], prior_probability_complement=0.9958 [complement copy of answer], o1_multiplier=1 [complement copy of answer]
+    step1 dropped: likelihood_ratio_carrick_appointment=1 [complement copy of answer], odds_after_no_fixture_update=0.004174 [raw copy of answer]
+    step1 dropped: weight_item_1_as_primary_schedule_signal=1 [complement copy of answer], weight_item_2_to_avoid_double_counting=0 [raw copy of answer]
+    step1 dropped: prior_odds=0.004218 [raw copy of answer], posterior_odds_before_tail_adjustment=0.0001324 [raw copy of answer]
+    step1 dropped: likelihood_ratio_carrick_win_vs_manchester_city=1.15 [percent copy of answer], likelihood_ratio_carrick_win_vs_arsenal=1.1 [percent copy of answer], posterior_odds=0.009778 [raw copy of answer]
+    step1 dropped: carrick_draws_count=1 [complement copy of answer]
+    step1 dropped: prob_match_scheduled_and_played_by_deadline=0.002 [raw copy of answer], likelihood_ratio_no_new_evidence=1 [complement copy of answer], generative_product_check=0.00063 [raw copy of answer]
+    step1 dropped: prior_probability_complement=0.9998 [complement copy of answer], prior_odds_yes=0.0002281 [raw copy of answer]
+  step 1: 10 instances, 7.9 variables each (min 4, max 14)
+  step 2: schema of 11 -- prior_event_probability, prior_odds_event, likelihood_ratio_schedule_silence, likelihood_ratio_performance_signal, likelihood_ratio_admin_rules_signal, likelihood_ratio_other_evidence, likelihood_ratio_total, team_form_unbeaten_matches
+  step 3: attempts=1  MAE=0.0009  within_tol=100%  ops=9  branches=0  max|corr|=0.85 (team_form_goals_against)
+  OOS: train s0 (n=5) -> test (n=5)  test MAE=0.0017  within_tol=100%
+
+=== bayesian / iqair_loni ===
+    step1 dropped: prior_odds=0.002156 [raw copy of answer], likelihood_ratio_e4_used=1 [complement copy of answer]
+    step1 dropped: prior_odds=0.001302 [raw copy of answer], posterior_odds_before_probability_conversion=0.0001002 [raw copy of answer]
+    step1 dropped: prior_complement_probability=0.9999 [complement copy of answer], prior_odds=0.0001 [raw copy of answer], odds_after_evidence=5e-05 [raw copy of answer], publication_date_new_item_count=1 [complement copy of answer]
+    step1 dropped: posterior_odds=0.001316 [raw copy of answer], overlap_double_counting_concern_factor=1 [complement copy of answer]
+    step1 dropped: odds_after_crea_ndtv_evidence=0.003077 [raw copy of answer], odds_after_local_reporting_evidence=0.004308 [raw copy of answer], odds_after_absence_preview_evidence=0.002154 [raw copy of answer]
+    step1 dropped: approximation_threshold_prior_much_less_than_one=1 [complement copy of answer], likelihood_ratio_product_total=0.0048 [raw copy of answer], odds_multiplication_intermediate=2.482e-09 [raw copy of answer]
+    step1 dropped: likelihood_ratio_loni_kalbhor_dump_fire_reports=1 [complement copy of answer], posterior_odds_after_update=5.17e-07 [raw copy of answer], date_range_winter_analysis_start_day=1 [complement copy of answer]
+    step1 dropped: likelihood_ratio_ghaziabad_in_top_3_polluted_2025_assessments=2.5 [percent copy of answer]
+    step1 dropped: prior_odds=5e-05 [raw copy of answer], likelihood_ratio_dump_site_fire=1 [complement copy of answer], posterior_odds=5e-06 [raw copy of answer], winter_analysis_start_day=1 [complement copy of answer]
+    step1 dropped: likelihood_ratio_local_loni_reporting_dumping_protests=1 [complement copy of answer], posterior_odds=4.5e-07 [raw copy of answer], tiny_probability_odds_approximation_factor=1 [complement copy of answer]
+  step 1: 10 instances, 8.1 variables each (min 6, max 10)
+  step 2: schema of 10 -- prior_probability_event, prior_odds_event, evidence_likelihood_ratio_main, evidence_likelihood_ratio_secondary, evidence_likelihood_ratio_tertiary, evidence_likelihood_ratio_combined, assumed_prob_evidence_given_event, assumed_prob_evidence_given_non_event
+  step 3: attempts=1  MAE=0.0021  within_tol=100%  ops=8  branches=0  max|corr|=0.86 (prior_odds_event)
+  OOS: train s0 (n=5) -> test (n=5)  test MAE=0.0000  within_tol=100%
+
+=== bayesian / nepal_shah ===
+    step1 dropped: odds_after_absence_official_update=11.72 [odds copy of answer]
+    step1 dropped: posterior_odds=0.614 [odds copy of answer]
+    step1 dropped: posterior_odds_after_update=0.5165 [odds copy of answer]
+    step1 dropped: odds_after_absence_update=0.7888 [odds copy of answer]    step1 dropped: updated_odds_after_new_evidence=0.3584 [odds copy of answer]
+
+    step1 dropped: posterior_odds_after_update=0.296 [odds copy of answer]
+  step 1: 10 instances, 9.9 variables each (min 7, max 16)
+  step 2: schema of 9 -- prior_probability_becomes_pm_by_target, likelihood_ratio_alliance_support, likelihood_ratio_candidate_entry_or_campaign_signal, likelihood_ratio_competitive_field_or_polling_strength, likelihood_ratio_election_or_results_evidence, likelihood_ratio_media_or_international_endorsement, likelihood_ratio_swearing_in_schedule_signal, reported_rsp_seats
+  step 3: attempts=4  MAE=0.0534  within_tol=50%  ops=12  branches=0  max|corr|=0.95 (reported_rsp_seats)
+  OOS: train s0 (n=5) -> test (n=5)  test MAE=0.0190  within_tol=80%
+
+=== bayesian / sa_captain_maharaj ===
+    step1 dropped: posterior_odds=0.007317 [raw copy of answer]
+    step1 dropped: odds_after_e2_update=0.1441 [odds copy of answer]
+    step1 dropped: likelihood_ratio_maharaj_franchise_captaincy_signal=2 [percent copy of answer], prior_odds_computed=0.01626 [raw copy of answer]
+    step1 dropped: posterior_odds_yes=0.2776 [odds copy of answer]
+    step1 dropped: final_updated_odds=0.0721 [odds copy of answer]
+    step1 dropped: prior_odds=0.1062 [odds copy of answer], prior_probability_complement=0.904 [complement copy of answer]
+    step1 dropped: maharaj_world_cup_squad_evidence_more_likely_under_no_factor=1.8 [percent copy of answer], no_rest_reporting_evidence_more_likely_under_no_factor=1.5 [percent copy of answer], posterior_odds_event=0.01638 [raw copy of answer]
+    step1 dropped: prior_complement_probability=0.933 [complement copy of answer], prior_odds=0.0718 [odds copy of answer]
+    step1 dropped: posterior_odds=0.0177 [raw copy of answer]
+  step 1: 10 instances, 8.7 variables each (min 6, max 11)
+  step 2: schema of 8 -- prior_probability_maharaj_named_captain, likelihood_ratio_markram_captain_evidence, likelihood_ratio_maharaj_captaincy_signal, likelihood_ratio_maharaj_in_world_cup_squad, likelihood_ratio_continuity_timing, likelihood_ratio_no_reports_markram_rested, combined_likelihood_ratio_all_evidence, tour_t20_match_count
+  step 3: attempts=1  MAE=0.0027  within_tol=90%  ops=3  branches=0  max|corr|=0.72 (prior_probability_maharaj_named_captain)
+  OOS: train s0 (n=5) -> test (n=5)  test MAE=0.0010  within_tol=100%
+
+=== futuresim / carrick_newcastle ===
+    step1 dropped: adjustment_strong_early_results=0.008 [raw copy of answer], adjustment_newcastle_cup_commitments=0.002 [raw copy of answer]
+    step1 dropped: round_up_buffer_for_unobserved_contingencies=0.000456 [raw copy of answer]
+    step1 dropped: carrick_wins_in_first_matches=3 [percent copy of answer]
+    step1 dropped: carrick_unbeaten_start_matches_count=3 [percent copy of answer]
+  step 1: 10 instances, 7.9 variables each (min 5, max 10)
+  step 2: schema of 9 -- base_rate_named_opponent_first_defeat, base_rate_specific_opponent_first_defeat, matches_in_reference_window, opponents_in_reference_class, carrick_early_form_adjustment, no_scheduled_fixture_adjustment, newcastle_strength_upset_adjustment, schedule_uncertainty_adjustment
+  step 3: no valid program after 4 attempts
+  OOS: train s0 (n=5) -> test (n=5)  test MAE=0.0420  within_tol=0%
+
+=== futuresim / iqair_loni ===
+    step1 dropped: prob_specific_indian_city_is_top=0.00025 [raw copy of answer], rounded_base_rate_loni_top=0.0002 [raw copy of answer], absolute_tail_risk_addition=1e-06 [raw copy of answer]
+    step1 dropped: adjustment_for_crea_2025_satellite_leaders_not_loni=-0.0025 [raw copy of answer], adjustment_for_regional_reporting_not_singling_out_loni=-0.002 [raw copy of answer], adjustment_for_loni_monitoring_or_aggregation_uncertainty=-0.001 [raw copy of answer], adjustment_for_loni_in_high_pollution_corridor=0.001 [raw copy of answer]
+    step1 dropped: base_rate_specific_indian_city_is_iqair_global_pm25_rank_1_any_year=0.0002 [raw copy of answer]
+    step1 dropped: base_rate_specific_indian_city_iqair_rank1=0.0002 [raw copy of answer], adjustment_national_analyses_disconfirm_loni=0.00018 [raw copy of answer], adjustment_iqair_2024_byrnihat_pattern_disconfirm=1.5e-05 [raw copy of answer], adjustment_no_prerelease_by_search_date_disconfirm=4e-06 [raw copy of answer], adjustment_loni_only_local_news_disconfirm=5e-07 [raw copy of answer], adjustment_residual_upside_measurement_or_late_revision=7e-07 [raw copy of answer]
+    step1 dropped: base_rate_specified_indian_city_is_iqair_world_number_one=0.0002 [raw copy of answer], initial_odds_from_base_rate=0.0002 [raw copy of answer]
+    step1 dropped: evidence_multiplier_product=0.0025 [raw copy of answer]
+    step1 dropped: absolute_adjustment_for_evidence_d_naming_mismatch_or_sensor_artifact=0.00025 [raw copy of answer], previous_forecast_probability=0.002 [raw copy of answer], previous_set_probability_level=0.002 [raw copy of answer]
+    step1 dropped: prior_probability_specific_indian_city_iqair_number_one=0.0002 [raw copy of answer]
+    step1 dropped: adjustment_no_public_iqair_monitor_or_leak_naming_loni=-0.002 [raw copy of answer], adjustment_local_episodic_pollution_events_support=0.0005 [raw copy of answer], adjustment_small_town_precedent_support=0.001 [raw copy of answer], adjustment_no_credible_leak_near_report_release=-0.0005 [raw copy of answer], previous_forecast_probability=0.001 [raw copy of answer]
+    step1 dropped: adjustment_down_for_absence_of_iqair_monitor_or_credible_leak_naming_city=-0.002 [raw copy of answer], adjustment_up_for_local_high_aqi_episode_evidence=0.001 [raw copy of answer], adjustment_up_for_precedent_small_town_topping_list=0.001 [raw copy of answer], recent_forecast_range_min_cited=0 [raw copy of answer]
+  step 1: 10 instances, 5.7 variables each (min 3, max 8)
+  step 2: schema of 9 -- reference_pool_city_count, prior_probability_loni_world_number_one, likelihood_multiplier_other_cities_indicated, likelihood_multiplier_loni_not_mentioned_or_not_leaked, likelihood_multiplier_iqair_history_against_loni, likelihood_multiplier_monitor_labeling_effect, likelihood_multiplier_local_pollution_spike_support, reported_local_aqi_spike_value
+  step 3: attempts=4  MAE=0.0087  within_tol=80%  ops=3  branches=1  max|corr|=0.58 (reported_local_aqi_spike_value)
+  OOS: train s0 (n=5) -> test (n=5)  test MAE=0.0111  within_tol=100%
+
+=== futuresim / nepal_shah ===
+    step1 dropped: rsp_seats_2022_total=20 [name spells value]
+    step1 dropped: election_day_month=3 [percent copy of answer], swearing_in_deadline_month=3 [percent copy of answer]
+    step1 dropped: base_rate_outsider_becomes_pm_post_election=0.12 [odds copy of answer]
+  step 1: 10 instances, 10.7 variables each (min 8, max 12)
+  step 2: schema of 10 -- base_rate_outsider_becomes_prime_minister_by_target_date, adjustment_pm_pledge_or_alliance_support, adjustment_candidate_strength_and_momentum, adjustment_opponents_and_coalition_hurdles, adjustment_evidence_of_electoral_majority_or_landslide, adjustment_specific_oath_date_reporting, adjustment_missing_or_uncertain_oath_schedule, adjustment_legal_procedural_or_tail_risks
+  step 3: attempts=4  MAE=0.1310  within_tol=40%  ops=18  branches=0  max|corr|=0.90 (adjustment_evidence_of_electoral_majority_or_landslide)
+  OOS: train s0 (n=5) -> test (n=5)  test MAE=0.0535  within_tol=40%
+
+=== futuresim / sa_captain_maharaj ===
+    step1 dropped: base_rate_non_regular_captain_short_post_world_cup_t20_tour=0.1 [raw copy of answer]
+    step1 dropped: searches_run_count=5 [percent copy of answer], t20_matches_in_new_zealand_tour=5 [percent copy of answer]
+    step1 dropped: five_match_t20_tour_match_count=5 [percent copy of answer]
+  step 1: 10 instances, 10.7 variables each (min 6, max 14)
+  step 2: schema of 11 -- base_rate_maharaj_captaincy, adjustment_incumbent_markram_captaincy_signal, adjustment_maharaj_leadership_and_franchise_captaincy, adjustment_maharaj_world_cup_squad_membership, adjustment_no_reports_or_leaks_signal, adjustment_post_world_cup_scheduling_and_rest, adjustment_other_candidates_or_spinner_bias, uncertainty_or_rounding_adjustment
+  step 3: attempts=4  MAE=0.1095  within_tol=30%  ops=25  branches=4  max|corr|=0.69 (adjustment_incumbent_markram_captaincy_signal)
+  OOS: train s0 (n=5) -> test (n=5)  test MAE=0.0264  within_tol=80%
+
+=== react / carrick_newcastle ===
+    step1 dropped: computed_multiplicative_probability=0.0007 [raw copy of answer], rounded_representation_probability=0.0007 [raw copy of answer]
+    step1 dropped: multiplication_combination_factor=0.117 [raw copy of answer]
+    step1 dropped: multiplication_factor_defeat_and_opponent=1 [complement copy of answer], prior_forecast_2026_01_27=0.12 [name spells value]
+  step 1: 10 instances, 7.7 variables each (min 4, max 12)
+  step 2: schema of 8 -- match_occurs_before_resolution_probability, newcastle_wins_given_match_probability, no_prior_united_defeat_before_newcastle_match_probability, united_suffers_defeat_before_resolution_probability, newcastle_is_united_defeat_opponent_given_defeat_probability, schedule_or_search_uncertainty_factor, independence_or_combination_weight, previous_forecast_probability
+  step 3: attempts=1  MAE=0.0022  within_tol=100%  ops=9  branches=0  max|corr|=0.58 (newcastle_is_united_defeat_opponent_given_defeat_probability)
+  OOS: train s0 (n=5) -> test (n=5)  test MAE=0.0007  within_tol=100%
+
+=== react / iqair_loni ===
+    step1 dropped: naive_baseline_probability=0.00033 [raw copy of answer], top20_cities_count=20 [name spells value]
+    step1 dropped: baseline_probability_specific_place_ranked_number_one=0.00025 [raw copy of answer]
+    step1 dropped: conditional_prob_given_data_anomaly_chance=0.02 [raw copy of answer]
+    step1 dropped: additive_tail_risk_bump_for_extreme_local_pollution_spike=0.002 [raw copy of answer]
+    step1 dropped: adjustment_regional_pollution_trends_delhi_ncr_2025=1.5 [percent copy of answer], adjustment_measurement_aggregation_change_or_extreme_local_2025=1.1 [percent copy of answer]
+    step1 dropped: naive_uniform_prior_city_is_top=0.00025 [raw copy of answer], conditional_prob_loni_given_top_in_india=0.001 [raw copy of answer], india_dominant_joint_estimate=0.0007 [raw copy of answer], post_penalty_estimate=7e-05 [raw copy of answer], small_bump_for_monitoring_labeling_quirks=0.00058 [raw copy of answer]
+    step1 dropped: base_rate_city_is_world_most_polluted_in_iqair_report=0.0005 [raw copy of answer]
+    step1 dropped: multiplier_loni_exceptionally_high_annual_pm25_evidence=1 [complement copy of answer], multiplicative_calculation_intermediate_result=0.0024 [raw copy of answer]
+  step 1: 10 instances, 7.0 variables each (min 4, max 13)
+  step 2: schema of 8 -- base_probability_specific_city_is_rank_1, monitoring_coverage_factor, regional_competition_factor, media_or_recent_signal_factor, small_town_outlier_factor, loni_distinct_listing_factor, loni_prior_prominence_factor, residual_tail_risk_factor
+  step 3: attempts=2  MAE=0.0103  within_tol=90%  ops=10  branches=0  max|corr|=0.93 (small_town_outlier_factor)
+  OOS: train s0 (n=5) -> test (n=5)  test MAE=0.0076  within_tol=100%
+
+=== react / nepal_shah ===
+    step1 dropped: disruption_adjusted_chain_probability=0.876 [raw copy of answer]
+  step 1: 10 instances, 8.2 variables each (min 6, max 12)
+  step 2: schema of 7 -- prior_probability_target_event, probability_wins_constituency, probability_becomes_prime_minister_given_relevant_path, probability_coalition_or_internal_selection_given_win, probability_sworn_in_on_target_date_given_pm, disruption_or_delay_risk_probability, days_between_election_and_target_date
+  step 3: attempts=4  MAE=0.2340  within_tol=30%  ops=10  branches=0  max|corr|=0.95 (probability_coalition_or_internal_selection_given_win)
+  OOS: train s0 (n=5) -> test (n=5)  test MAE=0.1468  within_tol=20%
+
+=== react / sa_captain_maharaj ===
+    step1 dropped: effect_maharaj_leadership_credentials=0.02 [raw copy of answer]
+    step1 dropped: previous_forecast_mid=0.039 [raw copy of answer]
+  step 1: 10 instances, 9.1 variables each (min 6, max 13)
+  step 2: schema of 9 -- prior_probability_maharaj_captain, probability_markram_unavailable_or_not_captain, conditional_probability_maharaj_given_markram_unavailable_or_not_captain, conditional_probability_maharaj_given_markram_available, adjustment_for_incumbent_continuity, adjustment_for_maharaj_leadership, adjustment_for_rotation_rest, adjustment_for_lack_of_public_signals
+  step 3: attempts=4  MAE=0.0236  within_tol=60%  ops=15  branches=0  max|corr|=0.79 (conditional_probability_maharaj_given_markram_unavailable_or_not_captain)
+  OOS: train s0 (n=5) -> test (n=5)  test MAE=0.0210  within_tol=40%
+
+wrote results\exp2\e2_programs.json (16 groups)
+=== AUDIT exp2 ===
+AUDIT of results\exp2
+
+A. VALIDATOR — exploit battery under hardened rules
+  ok    REJECT const-construction (constant-construction)
+  ok    REJECT bool-smuggle       (magic-bool)
+  ok    REJECT compare-smuggle    (constant-construction)
+  ok    REJECT call-const         (constant-construction)
+  ok    REJECT numeric-name       (numeric-name, self-op)
+  ok    REJECT self-div           (self-op)
+  ok    REJECT zero-padding       (dead-code)
+  ok    REJECT identity-padding   (identity-op)
+  ok    REJECT unused-local       (unused-local)
+  ok    REJECT helper-fn          (call, no-functions, undeclared)
+  ok    REJECT literal            (magic-number)
+  ok    legitimate program PASSES
+
+B. E1 DATA — completeness, parser reproduction, date-gate replay
+  ok    completeness: 32 runs, 160/160 turns with forecasts
+  ok    strict parser reproduces 160/160 stored forecasts
+  ok    all forecasts in [0,1]
+  ok    date-gate replay: 949 logged searches re-executed, zero articles past the gate
+
+C. E2 DATA — per-group audit under hardened rules
+
+  analytica/carrick_newcastle
+        refit: MAE 0.0234 vs stored 0.0234 -> reproduces (0 exec failures)
+        hardened validator: PASS
+        coincidental single/low-rate collisions: 5 vars (not copies)
+        OOS refit: test MAE 0.3034 vs stored 0.3034
+
+  analytica/iqair_loni
+        refit: MAE 0.0023 vs stored 0.0023 -> reproduces (0 exec failures)
+        hardened validator: PASS
+        SYSTEMATIC answer-copies: probability_loni_not_excluded_by_data_quality_rules (complement on 8/10 instances)
+        coincidental single/low-rate collisions: 4 vars (not copies)
+        *** program references systematic copy: probability_loni_not_excluded_by_data_quality_rules
+        OOS refit: test MAE 0.0033 vs stored 0.0033
+
+  analytica/nepal_shah
+        refit: MAE 0.1193 vs stored 0.1193 -> reproduces (0 exec failures)
+        hardened validator: PASS
+        OOS refit: test MAE 0.3420 vs stored 0.3420
+
+  analytica/sa_captain_maharaj
+        refit: MAE 0.2950 vs stored 0.2950 -> reproduces (0 exec failures)
+        hardened validator: PASS
+        OOS refit: test MAE 0.0549 vs stored 0.0549
+
+  bayesian/carrick_newcastle
+        refit: MAE 0.0009 vs stored 0.0009 -> reproduces (0 exec failures)
+        hardened validator: PASS
+        coincidental single/low-rate collisions: 9 vars (not copies)
+        OOS refit: test MAE 0.0017 vs stored 0.0017
+
+  bayesian/iqair_loni
+        refit: MAE 0.0021 vs stored 0.0021 -> reproduces (0 exec failures)
+        hardened validator: PASS
+        coincidental single/low-rate collisions: 4 vars (not copies)
+        OOS refit: test MAE 0.0000 vs stored 0.0000
+
+  bayesian/nepal_shah
+        refit: MAE 0.0534 vs stored 0.0534 -> reproduces (0 exec failures)
+        hardened validator: PASS
+        OOS refit: test MAE 0.0190 vs stored 0.0190
+
+  bayesian/sa_captain_maharaj
+        refit: MAE 0.0027 vs stored 0.0027 -> reproduces (0 exec failures)
+        hardened validator: PASS
+        OOS refit: test MAE 0.0010 vs stored 0.0010
+
+  futuresim/carrick_newcastle
+        no full-fit program (recorded honestly in results)
+        coincidental single/low-rate collisions: 4 vars (not copies)
+        OOS refit: test MAE 0.0420 vs stored 0.0420
+
+  futuresim/iqair_loni
+        refit: MAE 0.0087 vs stored 0.0087 -> reproduces (0 exec failures)
+        hardened validator: PASS
+        SYSTEMATIC answer-copies: likelihood_multiplier_local_pollution_spike_support (complement on 9/10 instances)
+        coincidental single/low-rate collisions: 7 vars (not copies)
+        *** program references systematic copy: likelihood_multiplier_local_pollution_spike_support
+        OOS refit: test MAE 0.0111 vs stored 0.0111
+
+  futuresim/nepal_shah
+        refit: MAE 0.1310 vs stored 0.1310 -> reproduces (0 exec failures)
+        hardened validator: PASS
+        coincidental single/low-rate collisions: 1 vars (not copies)
+        OOS refit: test MAE 0.0535 vs stored 0.0535
+
+  futuresim/sa_captain_maharaj
+        refit: MAE 0.1095 vs stored 0.1095 -> reproduces (0 exec failures)
+        hardened validator: PASS
+        coincidental single/low-rate collisions: 2 vars (not copies)
+        OOS refit: test MAE 0.0264 vs stored 0.0264
+
+  react/carrick_newcastle
+        refit: MAE 0.0022 vs stored 0.0022 -> reproduces (0 exec failures)
+        hardened validator: PASS
+        coincidental single/low-rate collisions: 8 vars (not copies)
+        OOS refit: test MAE 0.0007 vs stored 0.0007
+
+  react/iqair_loni
+        refit: MAE 0.0103 vs stored 0.0103 -> reproduces (0 exec failures)
+        hardened validator: PASS
+        coincidental single/low-rate collisions: 8 vars (not copies)
+        OOS refit: test MAE 0.0076 vs stored 0.0076
+
+  react/nepal_shah
+        refit: MAE 0.2340 vs stored 0.2340 -> reproduces (0 exec failures)
+        hardened validator: PASS
+        coincidental single/low-rate collisions: 3 vars (not copies)
+        OOS refit: test MAE 0.1468 vs stored 0.1468
+
+  react/sa_captain_maharaj
+        refit: MAE 0.0236 vs stored 0.0236 -> reproduces (0 exec failures)
+        hardened validator: PASS
+        OOS refit: test MAE 0.0210 vs stored 0.0210
+
+D. VERDICT
+  CLEAN    analytica/carrick_newcastle
+  FLAGGED  analytica/iqair_loni     PROGRAM REFERENCES an answer-copy: probability_loni_not_excluded_by_data_quality_rules (complement on 8/10 instances)
+  CLEAN    analytica/nepal_shah    
+  CLEAN    analytica/sa_captain_maharaj
+  CLEAN    bayesian/carrick_newcastle
+  CLEAN    bayesian/iqair_loni     
+  CLEAN    bayesian/nepal_shah     
+  CLEAN    bayesian/sa_captain_maharaj
+  note     futuresim/carrick_newcastle no program recovered (already reported as such)
+  FLAGGED  futuresim/iqair_loni     PROGRAM REFERENCES an answer-copy: likelihood_multiplier_local_pollution_spike_support (complement on 9/10 instances)
+  CLEAN    futuresim/nepal_shah    
+  CLEAN    futuresim/sa_captain_maharaj
+  CLEAN    react/carrick_newcastle 
+  CLEAN    react/iqair_loni        
+  CLEAN    react/nepal_shah        
+  CLEAN    react/sa_captain_maharaj
+
+AUDIT RESULT: 0 hard failures, 2 contaminated groups
+=== BELIEFDYN exp2 ===
+==============================================================================
+1. VARIABLE TRAJECTORIES -- the belief in its discovered coordinates
+==============================================================================
+
+  analytica/carrick_newcastle
+    variable                                       01-27  02-05  02-14  02-23  03-01   (per date: mean over samples)
+    prob_carrick_in_charge_through_deadline         0.97   1.00   0.99   1.00   1.00
+    prob_match_scheduled_by_deadline                0.38   0.06   0.07   0.08   0.11  <- moved 0.32
+    prob_newcastle_win_given_match                  0.38   0.30   0.30   0.32   0.27
+    prob_no_other_team_beats_united_before_newcast  0.21   0.60   0.65   0.53   0.92  <- moved 0.70
+    weight_management_status_component              0.07   0.00   0.28   0.00   0.35  <- moved 0.35
+    weight_fixture_occurs_component                 0.47   0.65   0.40   0.25   0.40  <- moved 0.40
+    weight_match_outcome_component                  0.38   0.25   0.28   0.10   0.23  <- moved 0.28
+    weight_no_prior_defeat_component                0.07   0.10   0.05   0.15   0.03
+    reported_unbeaten_run_matches                   0.00   0.00   0.00   0.00   3.50  <- moved 3.50
+    reported_unbeaten_run_wins                      0.00   1.00   0.00   0.00   3.00  <- moved 3.00
+    (actual forecast)                               0.06   0.01   0.01   0.01   0.01   <- the forecast itself
+
+  analytica/iqair_loni
+    variable                                       01-10  01-31  02-20  03-08  03-20   (per date: mean over samples)
+    probability_loni_included_as_distinct_city      0.20   0.06   0.30   0.12   0.08  <- moved 0.24
+    probability_loni_ranked_most_polluted_annual_p  0.03   0.02   0.02   0.03   0.04
+    probability_report_published_by_resolution_dat  1.00   1.00   0.97   0.95   0.93
+    probability_iqair_labels_top_location_as_loni   0.95   0.53   0.97   1.00   1.00  <- moved 0.47
+    probability_loni_not_excluded_by_data_quality_  0.95   1.00   1.00   1.00   0.97
+    weight_inclusion_condition                      0.33   0.40   0.15   0.25   0.35  <- moved 0.25
+    weight_pm25_rank_condition                      0.60   0.55   0.72   0.68   0.50  <- moved 0.22
+    weight_report_publication_timing_condition      0.00   0.00   0.03   0.08   0.12
+    weight_labeling_condition                       0.05   0.05   0.10   0.00   0.00
+    weight_data_quality_condition                   0.03   0.00   0.00   0.00   0.03
+    (actual forecast)                               0.01   0.00   0.00   0.00   0.00   <- the forecast itself
+
+  analytica/nepal_shah
+    variable                                       02-01  02-20  03-05  03-15  03-25   (per date: mean over samples)
+    governing_majority_probability                  0.23   0.12   0.28   0.95   0.97  <- moved 0.85
+    shah_selected_leader_probability                0.93   0.88   0.62   0.90   0.93  <- moved 0.30
+    no_legal_or_procedural_block_probability        0.82   0.97   0.75   0.88   0.82  <- moved 0.22
+    swearing_in_on_target_date_probability          0.50   0.60   0.48   0.60   0.88  <- moved 0.40
+    personal_willingness_probability                0.97   1.00   0.97   1.00   1.00
+    election_to_swearing_in_days                   21.50  22.00  21.50  22.00  22.00  <- moved 0.50
+    reported_major_bloc_seats                       0.00   0.00   0.00   0.00  182.00  <- moved 182.00
+    total_house_seats                               0.00   0.00   0.00   0.00  275.00  <- moved 275.00
+    (actual forecast)                               0.09   0.06   0.04   0.84   0.80   <- the forecast itself
+
+  analytica/sa_captain_maharaj
+    variable                                       01-15  01-24  02-02  02-10  02-17   (per date: mean over samples)
+    maharaj_selected_in_squad_probability           0.85   0.85   0.80   0.88   0.77
+    markram_named_captain_probability               0.38   0.70   0.65   0.80   0.65  <- moved 0.43
+    markram_unavailable_probability                 0.00   0.05   0.30   0.10   0.00  <- moved 0.30
+    maharaj_captain_if_markram_named_and_available  0.03   0.01   0.00   0.01   0.01
+    maharaj_captain_if_markram_unavailable_probabi  0.47   0.33   0.35   0.28   0.25  <- moved 0.22
+    maharaj_captain_if_markram_not_named_probabili  0.47   0.28   0.35   0.28   0.25  <- moved 0.22
+    maharaj_captain_despite_markram_named_probabil  0.01   0.01   0.00   0.00   0.01
+    weight_selection_factor                         0.45   0.35   0.33   0.15   0.33  <- moved 0.30
+    weight_markram_captain_factor                   0.30   0.45   0.33   0.65   0.33  <- moved 0.35
+    weight_alternate_captain_choice_factor          0.25   0.20   0.33   0.20   0.33
+    (actual forecast)                               0.12   0.10   0.12   0.06   0.07   <- the forecast itself
+
+  bayesian/carrick_newcastle
+    variable                                       01-27  02-05  02-14  02-23  03-01   (per date: mean over samples)
+    prior_event_probability                         0.06   0.01   0.00   0.00   0.00
+    prior_odds_event                                0.06   0.01   0.00   0.00   0.00
+    likelihood_ratio_schedule_silence               0.23   0.62   0.60   0.52   0.03  <- moved 0.59
+    likelihood_ratio_performance_signal             0.36   0.95   0.75   1.28   0.97  <- moved 0.92
+    likelihood_ratio_admin_rules_signal             0.80   0.80   1.00   1.00   1.00  <- moved 0.20
+    likelihood_ratio_other_evidence                 1.00   1.00   0.52   1.00   0.53  <- moved 0.48
+    likelihood_ratio_total                          0.18   0.61   0.07   0.52   0.02  <- moved 0.59
+    team_form_unbeaten_matches                      0.00   0.00   2.00   3.00   3.50  <- moved 3.50
+    team_form_wins                                  0.00   0.00   0.00   2.50   0.00  <- moved 2.50
+    team_form_goals_for                             2.50   0.00   0.00   0.00   0.00  <- moved 2.50
+    team_form_goals_against                         1.00   0.00   0.00   0.00   0.00  <- moved 1.00
+    (actual forecast)                               0.01   0.00   0.00   0.00   0.00   <- the forecast itself
+
+  bayesian/iqair_loni
+    variable                                       01-10  01-31  02-20  03-08  03-20   (per date: mean over samples)
+    prior_probability_event                         0.07   0.01   0.00   0.00   0.00
+    prior_odds_event                                0.07   0.01   0.00   0.00   0.00
+    evidence_likelihood_ratio_main                  0.72   0.17   0.28   0.20   0.70  <- moved 0.55
+    evidence_likelihood_ratio_secondary             0.20   0.88   0.54   0.50   0.46  <- moved 0.68
+    evidence_likelihood_ratio_tertiary              0.50   0.75   0.75   1.00   0.35  <- moved 0.65
+    evidence_likelihood_ratio_combined              0.16   0.08   0.25   0.10   0.05  <- moved 0.20
+    assumed_prob_evidence_given_event               0.50   0.35   0.28   0.50   0.50  <- moved 0.22
+    assumed_prob_evidence_given_non_event           0.50   0.70   0.65   0.70   0.50  <- moved 0.20
+    searches_run_count                              0.00   0.00   3.00   0.00   0.00  <- moved 3.00
+    mention_absence_odds_multiplier_against_event   3.00   1.50   1.00   1.00   3.00  <- moved 2.00
+    (actual forecast)                               0.01   0.00   0.00   0.00   0.00   <- the forecast itself
+
+  bayesian/nepal_shah
+    variable                                       02-01  02-20  03-05  03-15  03-25   (per date: mean over samples)
+    prior_probability_becomes_pm_by_target          0.14   0.29   0.32   0.39   0.86  <- moved 0.72
+    likelihood_ratio_alliance_support               2.75   1.00   1.00   1.00   1.00  <- moved 1.75
+    likelihood_ratio_candidate_entry_or_campaign_s  1.54   1.17   1.15   1.20   1.00  <- moved 0.54
+    likelihood_ratio_competitive_field_or_polling_  0.39   0.97   0.80   6.50   1.00  <- moved 6.11
+    likelihood_ratio_election_or_results_evidence   1.00   1.00   1.08  10.50   1.25  <- moved 9.50
+    likelihood_ratio_media_or_international_endors  1.00   1.00   1.45   1.40   1.10  <- moved 0.45
+    likelihood_ratio_swearing_in_schedule_signal    1.00   1.00   1.00   1.85   3.70  <- moved 2.70
+    reported_rsp_seats                              0.00   0.00   0.00  145.50  182.00  <- moved 182.00
+    parliament_total_seats                         275.00  275.00  275.00  275.00  275.00  <- FIXED
+    (actual forecast)                               0.29   0.32   0.39   0.86   0.95   <- the forecast itself
+
+  bayesian/sa_captain_maharaj
+    variable                                       01-15  01-24  02-02  02-10  02-17   (per date: mean over samples)
+    prior_probability_maharaj_named_captain         0.15   0.16   0.11   0.04   0.04
+    likelihood_ratio_markram_captain_evidence       0.35   0.60   0.18   0.51   0.41  <- moved 0.42
+    likelihood_ratio_maharaj_captaincy_signal       3.00   2.06   2.50   1.00   2.00  <- moved 2.00
+    likelihood_ratio_maharaj_in_world_cup_squad     1.75   1.75   0.78   1.00   1.00  <- moved 0.97
+    likelihood_ratio_continuity_timing              0.75   0.80   1.00   1.00   1.00  <- moved 0.25
+    likelihood_ratio_no_reports_markram_rested      0.85   1.00   0.83   1.00   0.69  <- moved 0.31
+    combined_likelihood_ratio_all_evidence          1.09   0.64   0.33   0.99   0.35  <- moved 0.76
+    tour_t20_match_count                            5.00   5.00   5.00   5.00   5.00  <- FIXED
+    (actual forecast)                               0.16   0.11   0.04   0.04   0.01   <- the forecast itself
+
+  futuresim/iqair_loni
+    variable                                       01-10  01-31  02-20  03-08  03-20   (per date: mean over samples)
+    reference_pool_city_count                      2000.00  2000.00  200000.00   0.00   0.00  <- moved 200000.00
+    prior_probability_loni_world_number_one         0.35   0.35   0.01   0.01   0.01  <- moved 0.35
+    likelihood_multiplier_other_cities_indicated    0.60   0.20   0.05   0.65   0.20  <- moved 0.60
+    likelihood_multiplier_loni_not_mentioned_or_no  1.00   0.60   0.75   1.00   0.75  <- moved 0.40
+    likelihood_multiplier_iqair_history_against_lo  0.40   0.75   0.75   1.00   0.75  <- moved 0.60
+    likelihood_multiplier_monitor_labeling_effect   1.25   0.96   0.70   1.00   1.25  <- moved 0.55
+    likelihood_multiplier_local_pollution_spike_su  1.00   1.00   1.00   1.00   1.02
+    reported_local_aqi_spike_value                  0.00   0.00   0.00  170.00  340.00  <- moved 340.00
+    previous_forecast_probability                   0.00   0.00   0.00   0.00   0.00
+    (actual forecast)                               0.00   0.00   0.00   0.00   0.00   <- the forecast itself
+
+  futuresim/nepal_shah
+    variable                                       02-01  02-20  03-05  03-15  03-25   (per date: mean over samples)
+    base_rate_outsider_becomes_prime_minister_by_t  0.08   0.08   0.08   0.08   0.08  <- FIXED
+    adjustment_pm_pledge_or_alliance_support        0.07   0.04   0.02   0.04   0.05
+    adjustment_candidate_strength_and_momentum      0.04   0.04   0.07   0.11   0.10
+    adjustment_opponents_and_coalition_hurdles     -0.11  -0.07  -0.08   0.00   0.00
+    adjustment_evidence_of_electoral_majority_or_l  0.00   0.00   0.00   0.48   0.30  <- moved 0.48
+    adjustment_specific_oath_date_reporting         0.00   0.00   0.00   0.00   0.23  <- moved 0.23
+    adjustment_missing_or_uncertain_oath_schedule   0.00   0.00  -0.01  -0.11  -0.01
+    adjustment_legal_procedural_or_tail_risks       0.01  -0.01   0.00  -0.06  -0.15  <- moved 0.15
+    calibration_or_rounding_adjustment              0.00   0.00   0.01  -0.06   0.03
+    previous_forecast_probability_reference         0.00   0.07   0.09   0.03   0.20  <- moved 0.20
+    (actual forecast)                               0.07   0.09   0.10   0.53   0.60   <- the forecast itself
+
+  futuresim/sa_captain_maharaj
+    variable                                       01-15  01-24  02-02  02-10  02-17   (per date: mean over samples)
+    base_rate_maharaj_captaincy                     0.10   0.10   0.10   0.10   0.10  <- FIXED
+    adjustment_incumbent_markram_captaincy_signal  -0.08  -0.06  -0.06  -0.06  -0.06
+    adjustment_maharaj_leadership_and_franchise_ca  5.59   0.04   0.03   0.04   0.03  <- moved 5.56
+    adjustment_maharaj_world_cup_squad_membership   0.00   0.01   0.02   0.01   0.01
+    adjustment_no_reports_or_leaks_signal          -0.01  -0.01  -0.02  -0.02  -0.03
+    adjustment_post_world_cup_scheduling_and_rest   2.03   0.01  -0.02  -0.01   0.01  <- moved 2.05
+    adjustment_other_candidates_or_spinner_bias    -3.52   0.00   0.00   0.00   0.00  <- moved 3.52
+    uncertainty_or_rounding_adjustment              1.05   0.00   0.01   0.01   0.02  <- moved 1.05
+    previous_or_prior_forecast_probability          0.00   0.17   0.05   0.00   0.00  <- moved 0.17
+    plausible_probability_lower_bound               0.04   0.00   0.00   0.01   0.00
+    plausible_probability_upper_bound               0.15   0.00   0.00   0.04   0.00  <- moved 0.15
+    (actual forecast)                               0.17   0.09   0.05   0.07   0.06   <- the forecast itself
+
+  react/carrick_newcastle
+    variable                                       01-27  02-05  02-14  02-23  03-01   (per date: mean over samples)
+    match_occurs_before_resolution_probability      0.01   0.42   0.30   0.17   0.01  <- moved 0.42
+    newcastle_wins_given_match_probability          0.17   0.33   0.30   0.35   0.17  <- moved 0.17
+    no_prior_united_defeat_before_newcastle_match_  0.60   0.60   0.55   0.60   1.00  <- moved 0.45
+    united_suffers_defeat_before_resolution_probab  0.33   0.35   0.00   0.35   0.05  <- moved 0.35
+    newcastle_is_united_defeat_opponent_given_defe  0.09   0.00   0.00   0.00   0.03
+    schedule_or_search_uncertainty_factor           0.51   1.00   1.00   1.20   1.00  <- moved 0.69
+    independence_or_combination_weight              1.00   1.00   1.00   1.00   1.00  <- FIXED
+    previous_forecast_probability                   0.00   0.06   0.07   0.05   0.04
+    (actual forecast)                               0.06   0.07   0.05   0.04   0.01   <- the forecast itself
+
+  react/iqair_loni
+    variable                                       01-10  01-31  02-20  03-08  03-20   (per date: mean over samples)
+    base_probability_specific_city_is_rank_1        0.02   0.02   0.01   0.04   0.00
+    monitoring_coverage_factor                      0.26   0.35   1.00   0.12   0.90  <- moved 0.88
+    regional_competition_factor                     1.00   0.65   2.00   0.51   0.65  <- moved 1.49
+    media_or_recent_signal_factor                   0.90   0.45   0.60   0.25   1.00  <- moved 0.75
+    small_town_outlier_factor                       0.33   1.05   1.00   0.51   1.00  <- moved 0.73
+    loni_distinct_listing_factor                    0.51   1.00   0.55   0.57   1.00  <- moved 0.49
+    loni_prior_prominence_factor                    1.00   1.00   1.00   0.65   0.55  <- moved 0.45
+    residual_tail_risk_factor                       1.00   1.00   1.00   0.51   1.00  <- moved 0.49
+    (actual forecast)                               0.01   0.00   0.00   0.02   0.00   <- the forecast itself
+
+  react/nepal_shah
+    variable                                       02-01  02-20  03-05  03-15  03-25   (per date: mean over samples)
+    prior_probability_target_event                  0.00   0.10   0.00   0.03   0.68  <- moved 0.68
+    probability_wins_constituency                   0.23   0.30   0.17   0.00   0.00  <- moved 0.30
+    probability_becomes_prime_minister_given_relev  0.57   0.43   0.04   0.00   0.95  <- moved 0.95
+    probability_coalition_or_internal_selection_gi  0.25   0.07   0.12   0.96   0.95  <- moved 0.89
+    probability_sworn_in_on_target_date_given_pm    0.50   0.72   0.65   0.81   0.93  <- moved 0.43
+    disruption_or_delay_risk_probability            0.00   0.00   0.00   0.08   0.07
+    days_between_election_and_target_date          22.00  22.00  22.00  22.00  22.00  <- FIXED
+    (actual forecast)                               0.10   0.06   0.06   0.68   0.85   <- the forecast itself
+
+  react/sa_captain_maharaj
+    variable                                       01-15  01-24  02-02  02-10  02-17   (per date: mean over samples)
+    prior_probability_maharaj_captain               0.00   0.04   0.03   0.06   0.08
+    probability_markram_unavailable_or_not_captain  0.23   0.10   0.15   0.17   0.10
+    conditional_probability_maharaj_given_markram_  0.33   0.15   0.12   0.30   0.10  <- moved 0.23
+    conditional_probability_maharaj_given_markram_  0.03   0.00   0.01   0.00   0.00
+    adjustment_for_incumbent_continuity             0.00   0.00  -0.02  -0.03  -0.04
+    adjustment_for_maharaj_leadership               0.00   0.00   0.00   0.01   0.02
+    adjustment_for_rotation_rest                    0.00   0.00  -0.01   0.04   0.02
+    adjustment_for_lack_of_public_signals           0.00   0.00  -0.01  -0.01  -0.01
+    adjustment_for_other_candidates_competition     0.00   0.00   0.00  -0.01  -0.01
+    (actual forecast)                               0.11   0.11   0.06   0.08   0.06   <- the forecast itself
+
+==============================================================================
+2a. RESIDUAL OVER TIME -- signed program-minus-actual per date
+==============================================================================
+  analytica/carrick_newcastle +0.06  -0.00  +0.01  +0.01  +0.01   |resid| drift first->last -0.055
+  analytica/iqair_loni     -0.01  -0.00  -0.00  -0.00  -0.00   |resid| drift first->last -0.002
+  analytica/nepal_shah     -0.00  -0.00  +0.00  -0.40  +0.20   |resid| drift first->last +0.195
+  analytica/sa_captain_maharaj +0.43  +0.30  +0.28  +0.22  +0.25   |resid| drift first->last -0.180
+  bayesian/carrick_newcastle -0.00  -0.00  -0.00  +0.00  -0.00   |resid| drift first->last -0.004
+  bayesian/iqair_loni      -0.01  -0.00  -0.00  -0.00  -0.00   |resid| drift first->last -0.010
+  bayesian/nepal_shah      -0.09  +0.00  -0.10  +0.06  -0.01   |resid| drift first->last -0.082
+  bayesian/sa_captain_maharaj -0.00  -0.01  +0.00  +0.00  +0.00   |resid| drift first->last -0.001
+  futuresim/iqair_loni     +0.02  +0.02  +0.00  +0.00  +0.00   |resid| drift first->last -0.022
+  futuresim/nepal_shah     +0.02  -0.00  +0.01  -0.25  -0.37   |resid| drift first->last +0.354
+  futuresim/sa_captain_maharaj +0.45  +0.05  +0.01  +0.02  +0.02   |resid| drift first->last -0.435
+  react/carrick_newcastle  -0.00  +0.00  +0.00  +0.01  -0.00   |resid| drift first->last +0.001
+  react/iqair_loni         +0.01  +0.01  +0.01  +0.02  -0.00   |resid| drift first->last -0.008
+  react/nepal_shah         +0.19  +0.23  -0.05  -0.65  -0.04   |resid| drift first->last -0.154
+  react/sa_captain_maharaj -0.01  -0.04  +0.00  -0.01  +0.02   |resid| drift first->last +0.011
+
+==============================================================================
+3. SENSITIVITY -- which coordinate the conclusion hinges on
+==============================================================================
+
+  analytica/carrick_newcastle
+    prob_match_scheduled_by_deadline               dF per nudge = 0.007
+    prob_newcastle_win_given_match                 dF per nudge = 0.004
+    prob_carrick_in_charge_through_deadline        dF per nudge = 0.004
+    reported_unbeaten_run_wins                     dF per nudge = 0.001
+    weight_no_prior_defeat_component               dF per nudge = 0.001
+    inert in the program: weight_fixture_occurs_component, weight_management_status_component, weight_match_outcome_component
+
+  analytica/iqair_loni
+    probability_loni_ranked_most_polluted_annual_p dF per nudge = 0.000
+    probability_loni_included_as_distinct_city     dF per nudge = 0.000
+    weight_pm25_rank_condition                     dF per nudge = 0.000
+    probability_report_published_by_resolution_dat dF per nudge = 0.000
+    probability_iqair_labels_top_location_as_loni  dF per nudge = 0.000
+    inert in the program: weight_data_quality_condition, weight_labeling_condition, weight_report_publication_timing_condition
+
+  analytica/nepal_shah
+    governing_majority_probability                 dF per nudge = 0.042
+    swearing_in_on_target_date_probability         dF per nudge = 0.013
+    shah_selected_leader_probability               dF per nudge = 0.013
+    personal_willingness_probability               dF per nudge = 0.013
+    no_legal_or_procedural_block_probability       dF per nudge = 0.013
+    inert in the program: election_to_swearing_in_days, reported_major_bloc_seats, total_house_seats
+
+  analytica/sa_captain_maharaj
+    maharaj_selected_in_squad_probability          dF per nudge = 0.060
+    markram_named_captain_probability              dF per nudge = 0.025
+    weight_selection_factor                        dF per nudge = 0.010
+    weight_alternate_captain_choice_factor         dF per nudge = 0.007
+    markram_unavailable_probability                dF per nudge = 0.006
+
+  bayesian/carrick_newcastle
+    prior_odds_event                               dF per nudge = 0.002
+    prior_event_probability                        dF per nudge = 0.001
+    likelihood_ratio_other_evidence                dF per nudge = 0.000
+    likelihood_ratio_schedule_silence              dF per nudge = 0.000
+    likelihood_ratio_performance_signal            dF per nudge = 0.000
+    inert in the program: likelihood_ratio_total, team_form_goals_against, team_form_goals_for, team_form_unbeaten_matches, team_form_wins
+
+  bayesian/iqair_loni
+    prior_odds_event                               dF per nudge = 0.001
+    evidence_likelihood_ratio_combined             dF per nudge = 0.000
+    assumed_prob_evidence_given_non_event          dF per nudge = 0.000
+    mention_absence_odds_multiplier_against_event  dF per nudge = 0.000
+    assumed_prob_evidence_given_event              dF per nudge = 0.000
+    inert in the program: prior_probability_event, searches_run_count
+
+  bayesian/nepal_shah
+    prior_probability_becomes_pm_by_target         dF per nudge = 0.027
+    likelihood_ratio_alliance_support              dF per nudge = 0.014
+    likelihood_ratio_candidate_entry_or_campaign_s dF per nudge = 0.014
+    likelihood_ratio_competitive_field_or_polling_ dF per nudge = 0.014
+    reported_rsp_seats                             dF per nudge = 0.002
+
+  bayesian/sa_captain_maharaj
+    prior_probability_maharaj_named_captain        dF per nudge = 0.014
+    combined_likelihood_ratio_all_evidence         dF per nudge = 0.006
+    likelihood_ratio_markram_captain_evidence      dF per nudge = 0.000
+    likelihood_ratio_maharaj_captaincy_signal      dF per nudge = 0.000
+    likelihood_ratio_maharaj_in_world_cup_squad    dF per nudge = 0.000
+    inert in the program: likelihood_ratio_continuity_timing, likelihood_ratio_maharaj_captaincy_signal, likelihood_ratio_maharaj_in_world_cup_squad, likelihood_ratio_markram_captain_evidence, likelihood_ratio_no_reports_markram_rested
+
+  futuresim/iqair_loni
+    previous_forecast_probability                  dF per nudge = 0.010
+    prior_probability_loni_world_number_one        dF per nudge = 0.005
+    likelihood_multiplier_other_cities_indicated   dF per nudge = 0.001
+    likelihood_multiplier_iqair_history_against_lo dF per nudge = 0.001
+    likelihood_multiplier_loni_not_mentioned_or_no dF per nudge = 0.001
+    inert in the program: reference_pool_city_count, reported_local_aqi_spike_value
+
+  futuresim/nepal_shah
+    adjustment_candidate_strength_and_momentum     dF per nudge = 0.020
+    adjustment_opponents_and_coalition_hurdles     dF per nudge = 0.020
+    adjustment_pm_pledge_or_alliance_support       dF per nudge = 0.020
+    base_rate_outsider_becomes_prime_minister_by_t dF per nudge = 0.020
+    adjustment_legal_procedural_or_tail_risks      dF per nudge = 0.020
+    inert in the program: previous_forecast_probability_reference
+
+  futuresim/sa_captain_maharaj
+    base_rate_maharaj_captaincy                    dF per nudge = 0.015
+    adjustment_incumbent_markram_captaincy_signal  dF per nudge = 0.015
+    adjustment_maharaj_world_cup_squad_membership  dF per nudge = 0.015
+    adjustment_post_world_cup_scheduling_and_rest  dF per nudge = 0.015
+    adjustment_other_candidates_or_spinner_bias    dF per nudge = 0.015
+    inert in the program: plausible_probability_lower_bound
+
+  react/carrick_newcastle
+    newcastle_is_united_defeat_opponent_given_defe dF per nudge = 0.005
+    schedule_or_search_uncertainty_factor          dF per nudge = 0.005
+    match_occurs_before_resolution_probability     dF per nudge = 0.004
+    independence_or_combination_weight             dF per nudge = 0.004
+    newcastle_wins_given_match_probability         dF per nudge = 0.003
+    inert in the program: previous_forecast_probability
+
+  react/iqair_loni
+    base_probability_specific_city_is_rank_1       dF per nudge = 0.016
+    monitoring_coverage_factor                     dF per nudge = 0.000
+    regional_competition_factor                    dF per nudge = 0.000
+    media_or_recent_signal_factor                  dF per nudge = 0.000
+    small_town_outlier_factor                      dF per nudge = 0.000
+    inert in the program: loni_distinct_listing_factor, loni_prior_prominence_factor, media_or_recent_signal_factor, monitoring_coverage_factor, regional_competition_factor
+
+  react/nepal_shah
+    probability_becomes_prime_minister_given_relev dF per nudge = 0.032
+    probability_sworn_in_on_target_date_given_pm   dF per nudge = 0.028
+    prior_probability_target_event                 dF per nudge = 0.011
+    disruption_or_delay_risk_probability           dF per nudge = 0.006
+    probability_wins_constituency                  dF per nudge = 0.001
+    inert in the program: days_between_election_and_target_date
+
+  react/sa_captain_maharaj
+    prior_probability_maharaj_captain              dF per nudge = 0.010
+    conditional_probability_maharaj_given_markram_ dF per nudge = 0.008
+    adjustment_for_incumbent_continuity            dF per nudge = 0.006
+    adjustment_for_maharaj_leadership              dF per nudge = 0.006
+    adjustment_for_rotation_rest                   dF per nudge = 0.006
+
+==============================================================================
+4. PROGRAM DISTANCE -- full-fit vs sample-0-trained theory
+   (cross-harness distance undefined: schemas differ; not computed)
+==============================================================================
+  analytica/carrick_newcastle d(full, oos-trained) = 0.4703 over binding box (400 ok/400), 0.2031 on observed bindings
+  analytica/iqair_loni     d(full, oos-trained) = 0.0005 over binding box (400 ok/400), 0.0003 on observed bindings
+  analytica/nepal_shah     d(full, oos-trained) = 0.9359 over binding box (400 ok/400), 0.3152 on observed bindings
+  analytica/sa_captain_maharaj d(full, oos-trained) = 0.3781 over binding box (400 ok/400), 0.3143 on observed bindings
+  bayesian/carrick_newcastle d(full, oos-trained) = 0.0030 over binding box (400 ok/400), 0.0000 on observed bindings
+  bayesian/iqair_loni      d(full, oos-trained) = 0.0010 over binding box (400 ok/400), 0.0003 on observed bindings
+  bayesian/nepal_shah      d(full, oos-trained) = 0.0588 over binding box (400 ok/400), 0.0300 on observed bindings
+  bayesian/sa_captain_maharaj d(full, oos-trained) = 0.0000 over binding box (400 ok/400), 0.0000 on observed bindings
+  futuresim/iqair_loni     d(full, oos-trained) = 0.0783 over binding box (400 ok/400), 0.0142 on observed bindings
+  futuresim/nepal_shah     d(full, oos-trained) = 0.3712 over binding box (400 ok/400), 0.1812 on observed bindings
+  futuresim/sa_captain_maharaj d(full, oos-trained) = 0.2955 over binding box (400 ok/400), 0.1228 on observed bindings
+  react/carrick_newcastle  d(full, oos-trained) = 0.0000 over binding box (400 ok/400), 0.0000 on observed bindings
+  react/iqair_loni         d(full, oos-trained) = 0.0117 over binding box (400 ok/400), 0.0064 on observed bindings
+  react/nepal_shah         d(full, oos-trained) = 0.1306 over binding box (400 ok/400), 0.0924 on observed bindings
+  react/sa_captain_maharaj d(full, oos-trained) = 0.0304 over binding box (400 ok/400), 0.0070 on observed bindings
+
+wrote results\exp2\beliefdyn.json
+=== CHAIN DONE ===

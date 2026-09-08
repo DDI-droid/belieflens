@@ -1,0 +1,129 @@
+AUDIT of results\exp2
+
+A. VALIDATOR — exploit battery under hardened rules
+  ok    REJECT const-construction (constant-construction)
+  ok    REJECT bool-smuggle       (magic-bool)
+  ok    REJECT compare-smuggle    (constant-construction)
+  ok    REJECT call-const         (constant-construction)
+  ok    REJECT numeric-name       (numeric-name, self-op)
+  ok    REJECT self-div           (self-op)
+  ok    REJECT zero-padding       (dead-code)
+  ok    REJECT identity-padding   (identity-op)
+  ok    REJECT unused-local       (unused-local)
+  ok    REJECT helper-fn          (call, no-functions, undeclared)
+  ok    REJECT literal            (magic-number)
+  ok    legitimate program PASSES
+
+B. E1 DATA -- skipped on this re-run (passed in full previously)
+
+C. E2 DATA — per-group audit under hardened rules
+
+  analytica/carrick_newcastle
+        refit: MAE 0.0234 vs stored 0.0234 -> reproduces (0 exec failures)
+        hardened validator: PASS
+        coincidental single/low-rate collisions: 5 vars (not copies)
+        OOS refit: test MAE 0.3034 vs stored 0.3034
+
+  analytica/iqair_loni
+        refit: MAE 0.0023 vs stored 0.0023 -> reproduces (0 exec failures)
+        hardened validator: PASS
+        constant-target group (std 0.0027): copy-detection ill-posed; recovery uninformative
+        OOS refit: test MAE 0.0033 vs stored 0.0033
+
+  analytica/nepal_shah
+        refit: MAE 0.1193 vs stored 0.1193 -> reproduces (0 exec failures)
+        hardened validator: PASS
+        OOS refit: test MAE 0.3420 vs stored 0.3420
+
+  analytica/sa_captain_maharaj
+        refit: MAE 0.2950 vs stored 0.2950 -> reproduces (0 exec failures)
+        hardened validator: PASS
+        OOS refit: test MAE 0.0549 vs stored 0.0549
+
+  bayesian/carrick_newcastle
+        refit: MAE 0.0009 vs stored 0.0009 -> reproduces (0 exec failures)
+        hardened validator: PASS
+        constant-target group (std 0.0031): copy-detection ill-posed; recovery uninformative
+        OOS refit: test MAE 0.0017 vs stored 0.0017
+
+  bayesian/iqair_loni
+        refit: MAE 0.0021 vs stored 0.0021 -> reproduces (0 exec failures)
+        hardened validator: PASS
+        constant-target group (std 0.0074): copy-detection ill-posed; recovery uninformative
+        OOS refit: test MAE 0.0000 vs stored 0.0000
+
+  bayesian/nepal_shah
+        refit: MAE 0.0534 vs stored 0.0534 -> reproduces (0 exec failures)
+        hardened validator: PASS
+        OOS refit: test MAE 0.0190 vs stored 0.0190
+
+  bayesian/sa_captain_maharaj
+        refit: MAE 0.0027 vs stored 0.0027 -> reproduces (0 exec failures)
+        hardened validator: PASS
+        OOS refit: test MAE 0.0010 vs stored 0.0010
+
+  futuresim/carrick_newcastle
+        no full-fit program (recorded honestly in results)
+        coincidental single/low-rate collisions: 4 vars (not copies)
+        OOS refit: test MAE 0.0420 vs stored 0.0420
+
+  futuresim/iqair_loni
+        refit: MAE 0.0087 vs stored 0.0087 -> reproduces (0 exec failures)
+        hardened validator: PASS
+        constant-target group (std 0.0010): copy-detection ill-posed; recovery uninformative
+        OOS refit: test MAE 0.0111 vs stored 0.0111
+
+  futuresim/nepal_shah
+        refit: MAE 0.1310 vs stored 0.1310 -> reproduces (0 exec failures)
+        hardened validator: PASS
+        coincidental single/low-rate collisions: 1 vars (not copies)
+        OOS refit: test MAE 0.0535 vs stored 0.0535
+
+  futuresim/sa_captain_maharaj
+        refit: MAE 0.1095 vs stored 0.1095 -> reproduces (0 exec failures)
+        hardened validator: PASS
+        coincidental single/low-rate collisions: 2 vars (not copies)
+        OOS refit: test MAE 0.0264 vs stored 0.0264
+
+  react/carrick_newcastle
+        refit: MAE 0.0022 vs stored 0.0022 -> reproduces (0 exec failures)
+        hardened validator: PASS
+        coincidental single/low-rate collisions: 8 vars (not copies)
+        OOS refit: test MAE 0.0007 vs stored 0.0007
+
+  react/iqair_loni
+        refit: MAE 0.0103 vs stored 0.0103 -> reproduces (0 exec failures)
+        hardened validator: PASS
+        constant-target group (std 0.0085): copy-detection ill-posed; recovery uninformative
+        OOS refit: test MAE 0.0076 vs stored 0.0076
+
+  react/nepal_shah
+        refit: MAE 0.2340 vs stored 0.2340 -> reproduces (0 exec failures)
+        hardened validator: PASS
+        coincidental single/low-rate collisions: 3 vars (not copies)
+        OOS refit: test MAE 0.1468 vs stored 0.1468
+
+  react/sa_captain_maharaj
+        refit: MAE 0.0236 vs stored 0.0236 -> reproduces (0 exec failures)
+        hardened validator: PASS
+        OOS refit: test MAE 0.0210 vs stored 0.0210
+
+D. VERDICT
+  CLEAN    analytica/carrick_newcastle
+  note     analytica/iqair_loni     constant-target: recovery uninformative (std 0.0027)
+  CLEAN    analytica/nepal_shah    
+  CLEAN    analytica/sa_captain_maharaj
+  note     bayesian/carrick_newcastle constant-target: recovery uninformative (std 0.0031)
+  note     bayesian/iqair_loni      constant-target: recovery uninformative (std 0.0074)
+  CLEAN    bayesian/nepal_shah     
+  CLEAN    bayesian/sa_captain_maharaj
+  note     futuresim/carrick_newcastle no program recovered (already reported as such)
+  note     futuresim/iqair_loni     constant-target: recovery uninformative (std 0.0010)
+  CLEAN    futuresim/nepal_shah    
+  CLEAN    futuresim/sa_captain_maharaj
+  CLEAN    react/carrick_newcastle 
+  note     react/iqair_loni         constant-target: recovery uninformative (std 0.0085)
+  CLEAN    react/nepal_shah        
+  CLEAN    react/sa_captain_maharaj
+
+AUDIT RESULT: pipeline checks pass; no group's fit is contaminated.

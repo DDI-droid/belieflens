@@ -1,0 +1,20 @@
+{
+ "stage": "e1",
+ "model": "gpt-5-mini",
+ "extractor": "gpt-5.2",
+ "effort": "medium",
+ "samples": 2,
+ "questions": "iqair_loni,carrick_newcastle,nepal_shah,sa_captain_maharaj",
+ "tool_rounds": 5,
+ "workers": 8,
+ "tol": 0.02,
+ "attempts": 4,
+ "out": "results/exp2",
+ "timestamp": "2026-09-08 16:36:12",
+ "corpus_span": [
+  "2025-12-01",
+  "2026-03-31",
+  339801
+ ],
+ "n_jobs": 32
+}

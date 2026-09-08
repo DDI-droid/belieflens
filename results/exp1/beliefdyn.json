@@ -1,0 +1,998 @@
+{
+ "trajectories": {
+  "analytica/hockey_can": {
+   "dates": [
+    "2026-01-14",
+    "2026-01-28",
+    "2026-02-08",
+    "2026-02-15",
+    "2026-02-20"
+   ],
+   "samples": [
+    0,
+    1
+   ],
+   "variables": {
+    "base_forecast_probability": [
+     0.5,
+     0.49,
+     0.5,
+     0.43,
+     0.43
+    ],
+    "canada_roster_quality_probability": [
+     0.785,
+     0.99,
+     0.915,
+     0.675,
+     0.365
+    ],
+    "nhl_participation_probability": [
+     0.725,
+     0.965,
+     0.745,
+     0.5,
+     0.5
+    ],
+    "competition_strength_favorability_probability": [
+     0.45,
+     0.22499999999999998,
+     0.55,
+     0.55,
+     0.5
+    ],
+    "health_availability_probability": [
+     0.91,
+     0.7,
+     0.925,
+     0.625,
+     0.5499999999999999
+    ],
+    "tournament_variance_favorability_probability": [
+     0.55,
+     0.425,
+     0.62,
+     0.5,
+     0.5
+    ],
+    "reach_final_probability": [
+     0.55,
+     0.5,
+     0.575,
+     0.53,
+     0.75
+    ],
+    "win_final_given_final_probability": [
+     0.525,
+     0.5,
+     0.525,
+     0.575,
+     0.46125
+    ]
+   },
+   "forecast": [
+    0.49,
+    0.495,
+    0.348,
+    0.427,
+    0.5325
+   ]
+  },
+  "analytica/hockey_usa": {
+   "dates": [
+    "2026-01-14",
+    "2026-01-28",
+    "2026-02-08",
+    "2026-02-15",
+    "2026-02-20"
+   ],
+   "samples": [
+    0,
+    1
+   ],
+   "variables": {
+    "p_nhl_participation": [
+     0.985,
+     0.99,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "p_usa_elite_roster_or_top_contender": [
+     0.89,
+     0.7749999999999999,
+     0.8999999999999999,
+     0.675,
+     1.0
+    ],
+    "p_no_major_disruption_or_good_health": [
+     0.925,
+     0.925,
+     0.75,
+     0.875,
+     1.0
+    ],
+    "p_usa_reach_final": [
+     0.725,
+     0.725,
+     0.725,
+     0.6775,
+     1.0
+    ],
+    "p_usa_win_final_given_reach": [
+     0.33999999999999997,
+     0.725,
+     0.335,
+     0.235,
+     0.7175
+    ],
+    "p_stronger_opponent_or_canada_favorite": [
+     0.5,
+     0.625,
+     0.6,
+     0.5,
+     1.0
+    ],
+    "tournament_variance_probability": [
+     0.5,
+     0.5,
+     0.65,
+     0.5,
+     0.5
+    ]
+   },
+   "forecast": [
+    0.176,
+    0.1785,
+    0.1565,
+    0.16599999999999998,
+    0.4575
+   ]
+  },
+  "bayesian/hockey_can": {
+   "dates": [
+    "2026-01-14",
+    "2026-01-28",
+    "2026-02-08",
+    "2026-02-15",
+    "2026-02-20"
+   ],
+   "samples": [
+    0,
+    1
+   ],
+   "variables": {
+    "prior_probability_canada_gold": [
+     0.32499999999999996,
+     0.46,
+     0.453,
+     0.39949999999999997,
+     0.6205
+    ],
+    "prior_odds_canada_gold": [
+     0.48351625,
+     0.875,
+     0.829187,
+     0.67712576925,
+     1.6811150000000001
+    ],
+    "likelihood_ratio_roster_strength": [
+     3.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "likelihood_ratio_injuries_availability": [
+     1.0,
+     0.7,
+     0.7012499999999999,
+     1.0150000000000001,
+     0.5
+    ],
+    "likelihood_ratio_opposition_strength": [
+     0.59,
+     1.075,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "likelihood_ratio_venue_logistics": [
+     1.05,
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "likelihood_ratio_tournament_variance": [
+     0.8500000000000001,
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "likelihood_ratio_recent_performance_signal": [
+     1.25,
+     1.3399999999999999,
+     1.0,
+     1.745,
+     1.0
+    ],
+    "likelihood_ratio_bracket_progress_signal": [
+     1.0,
+     1.0,
+     1.0,
+     1.4,
+     2.24
+    ],
+    "likelihood_ratio_other_news_signal": [
+     1.0,
+     1.0,
+     1.1525,
+     1.075,
+     0.85
+    ],
+    "likelihood_ratio_product": [
+     1.7856,
+     0.9904999999999999,
+     0.80845625,
+     2.71834375,
+     0.9714999999999999
+    ]
+   },
+   "forecast": [
+    0.46,
+    0.453,
+    0.39949999999999997,
+    0.6205,
+    0.6014999999999999
+   ]
+  },
+  "bayesian/hockey_usa": {
+   "dates": [
+    "2026-01-14",
+    "2026-01-28",
+    "2026-02-08",
+    "2026-02-15",
+    "2026-02-20"
+   ],
+   "samples": [
+    0,
+    1
+   ],
+   "variables": {
+    "prior_probability_usa_gold": [
+     0.19,
+     0.228,
+     0.1815,
+     0.2245,
+     0.271
+    ],
+    "prior_odds_usa_gold": [
+     0.23475600000000002,
+     0.3012405665,
+     0.2249095,
+     0.29198199999999996,
+     0.378884
+    ],
+    "lr_roster_strength_positive": [
+     1.5,
+     1.075,
+     1.15,
+     1.0,
+     1.0
+    ],
+    "lr_opponent_canada_strength": [
+     0.6499999999999999,
+     1.0,
+     1.29,
+     0.7,
+     0.6585000000000001
+    ],
+    "lr_injury_and_replacements": [
+     1.0,
+     0.685,
+     1.0,
+     1.01,
+     1.0
+    ],
+    "lr_recent_game_results": [
+     1.125,
+     1.0,
+     1.0,
+     1.769,
+     2.9
+    ],
+    "lr_nhl_participation_logistics": [
+     1.125,
+     1.05,
+     1.01,
+     1.0,
+     1.0
+    ],
+    "lr_venue_or_media_sentiment": [
+     1.0,
+     0.975,
+     0.9,
+     1.0,
+     1.0
+    ],
+    "lr_total_product": [
+     1.2579,
+     0.7515000000000001,
+     1.327,
+     1.27545,
+     1.9087999999999998
+    ],
+    "posterior_odds_usa_gold": [
+     0.2996853612,
+     0.22476084149999997,
+     0.2916408,
+     0.3778425,
+     0.7192915
+    ]
+   },
+   "forecast": [
+    0.228,
+    0.1815,
+    0.2245,
+    0.271,
+    0.412
+   ]
+  },
+  "futuresim/hockey_can": {
+   "dates": [
+    "2026-01-14",
+    "2026-01-28",
+    "2026-02-08",
+    "2026-02-15",
+    "2026-02-20"
+   ],
+   "samples": [
+    0,
+    1
+   ],
+   "variables": {
+    "base_rate_canada_gold_nhl_bestonbest": [
+     0.6,
+     0.6,
+     0.6,
+     0.6,
+     0.6
+    ],
+    "adjustment_canada_roster_star_power": [
+     0.13,
+     0.1,
+     0.075,
+     0.06,
+     0.04
+    ],
+    "adjustment_usa_rival_strength": [
+     -0.08,
+     -0.065,
+     -0.03,
+     -0.07500000000000001,
+     -0.04
+    ],
+    "adjustment_goaltending_net": [
+     0.005,
+     0.01,
+     -0.04,
+     0.03,
+     0.02
+    ],
+    "adjustment_venue_and_nhl_participation_risk": [
+     -0.009999999999999998,
+     0.005,
+     0.03,
+     0.005,
+     0.0
+    ],
+    "adjustment_opponent_field_depth": [
+     -0.015,
+     0.0,
+     -0.01,
+     0.0,
+     0.0
+    ],
+    "adjustment_single_elimination_variance": [
+     -0.055,
+     -0.06,
+     -0.015,
+     -0.025,
+     0.0
+    ],
+    "adjustment_recent_form_and_results": [
+     0.0,
+     0.0,
+     0.015,
+     0.055,
+     0.085
+    ],
+    "adjustment_injuries_and_roster_churn": [
+     0.0,
+     -0.005,
+     -0.01,
+     -0.01,
+     -0.024999999999999998
+    ],
+    "prior_forecast_probability": [
+     0.6,
+     0.5800000000000001,
+     0.59,
+     0.61,
+     0.63
+    ]
+   },
+   "forecast": [
+    0.555,
+    0.59,
+    0.62,
+    0.63,
+    0.63
+   ]
+  },
+  "futuresim/hockey_usa": {
+   "dates": [
+    "2026-01-14",
+    "2026-01-28",
+    "2026-02-08",
+    "2026-02-15",
+    "2026-02-20"
+   ],
+   "samples": [
+    0,
+    1
+   ],
+   "variables": {
+    "base_rate_usa_gold": [
+     0.15000000000000002,
+     0.15000000000000002,
+     0.2,
+     0.2,
+     0.2
+    ],
+    "adj_nhl_participation": [
+     0.1,
+     0.02,
+     0.01,
+     0.0,
+     0.0
+    ],
+    "adj_usa_roster_strength": [
+     0.11,
+     0.085,
+     0.075,
+     0.06,
+     0.08499999999999999
+    ],
+    "adj_usa_team_chemistry": [
+     0.065,
+     0.01,
+     0.02,
+     0.025,
+     0.0
+    ],
+    "adj_usa_goaltending": [
+     0.01,
+     0.035,
+     0.0,
+     -0.01,
+     0.0
+    ],
+    "adj_usa_injury_seth_jones": [
+     -0.005,
+     -0.025,
+     -0.03,
+     -0.025,
+     -0.03
+    ],
+    "adj_canada_strength": [
+     -0.08,
+     -0.09,
+     -0.05500000000000001,
+     -0.08,
+     -0.065
+    ],
+    "adj_tournament_format_variance": [
+     -0.025,
+     -0.01,
+     -0.015,
+     -0.005,
+     -0.005
+    ],
+    "adj_other_risks_and_field_strength": [
+     -0.02,
+     -0.02,
+     -0.02,
+     -0.015,
+     0.0
+    ],
+    "previous_forecast_probability": [
+     0.0,
+     0.125,
+     0.0,
+     0.125,
+     0.195
+    ],
+    "interval_lower_bound": [
+     0.06,
+     0.035,
+     0.0,
+     0.05,
+     0.12
+    ],
+    "interval_upper_bound": [
+     0.075,
+     0.1,
+     0.0,
+     0.06,
+     0.305
+    ]
+   },
+   "forecast": [
+    0.265,
+    0.16999999999999998,
+    0.2,
+    0.195,
+    0.195
+   ]
+  },
+  "react/hockey_can": {
+   "dates": [
+    "2026-01-14",
+    "2026-01-28",
+    "2026-02-08",
+    "2026-02-15",
+    "2026-02-20"
+   ],
+   "samples": [
+    0,
+    1
+   ],
+   "variables": {
+    "tournament_team_count": [
+     12.0,
+     0.0,
+     6.0,
+     12.0,
+     0.0
+    ],
+    "prior_win_probability": [
+     0.08315,
+     0.2515,
+     0.29000000000000004,
+     0.32499999999999996,
+     0.35
+    ],
+    "adj_roster_quality": [
+     0.275,
+     0.05500000000000001,
+     0.03,
+     0.055,
+     0.0
+    ],
+    "adj_rivals_strength": [
+     -0.09,
+     -0.025,
+     -0.015,
+     -0.02,
+     0.0
+    ],
+    "adj_tournament_variance_structure": [
+     -0.085,
+     -0.006,
+     -0.005,
+     -0.025,
+     0.0
+    ],
+    "adj_injuries_availability": [
+     -0.015,
+     -0.006500000000000001,
+     -0.01,
+     -0.025,
+     0.0
+    ],
+    "adj_momentum_leadership_form": [
+     0.095,
+     0.015,
+     0.005,
+     0.04,
+     0.0
+    ],
+    "adj_venue_logistics": [
+     -0.005,
+     0.001,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "adj_goaltending_uncertainty": [
+     -0.025,
+     0.0,
+     -0.005,
+     0.0,
+     0.0
+    ],
+    "adj_misc_other": [
+     -0.005,
+     0.005,
+     0.015,
+     0.0,
+     0.0
+    ],
+    "roster_size_players": [
+     0.0,
+     25.0,
+     25.0,
+     12.5,
+     0.0
+    ],
+    "roster_continuity_players": [
+     0.0,
+     19.0,
+     9.5,
+     0.0,
+     0.0
+    ],
+    "notable_injuries_or_replacements_count": [
+     0.0,
+     0.0,
+     2.0,
+     0.0,
+     0.0
+    ]
+   },
+   "forecast": [
+    0.2515,
+    0.29000000000000004,
+    0.32499999999999996,
+    0.35,
+    0.40149999999999997
+   ]
+  }
+ },
+ "residuals_over_time": {
+  "analytica/hockey_can": {
+   "dates": [
+    "2026-01-14",
+    "2026-01-28",
+    "2026-02-08",
+    "2026-02-15",
+    "2026-02-20"
+   ],
+   "signed": [
+    -0.08975610073302012,
+    -0.15144110702546235,
+    0.20249675576502507,
+    -0.28940463800118643,
+    -0.42778959827474294
+   ]
+  },
+  "analytica/hockey_usa": {
+   "dates": [
+    "2026-01-14",
+    "2026-01-28",
+    "2026-02-08",
+    "2026-02-15",
+    "2026-02-20"
+   ],
+   "signed": [
+    -0.0347855,
+    0.18936632812499998,
+    -0.023845825249999994,
+    -0.0709903515625,
+    0.080625
+   ]
+  },
+  "bayesian/hockey_can": {
+   "dates": [
+    "2026-01-14",
+    "2026-01-28",
+    "2026-02-08",
+    "2026-02-15",
+    "2026-02-20"
+   ],
+   "signed": [
+    null,
+    null,
+    null,
+    null,
+    null
+   ]
+  },
+  "bayesian/hockey_usa": {
+   "dates": [
+    "2026-01-14",
+    "2026-01-28",
+    "2026-02-08",
+    "2026-02-15",
+    "2026-02-20"
+   ],
+   "signed": [
+    -0.016079316322907947,
+    0.016831129682767967,
+    -0.015772452852531968,
+    -0.024841400537991595,
+    -0.06278668690317013
+   ]
+  },
+  "futuresim/hockey_can": {
+   "dates": [
+    "2026-01-14",
+    "2026-01-28",
+    "2026-02-08",
+    "2026-02-15",
+    "2026-02-20"
+   ],
+   "signed": [
+    0.03249999999999992,
+    -0.007499999999999951,
+    -0.017500000000000016,
+    -0.0050000000000000044,
+    0.025000000000000022
+   ]
+  },
+  "futuresim/hockey_usa": {
+   "dates": [
+    "2026-01-14",
+    "2026-01-28",
+    "2026-02-08",
+    "2026-02-15",
+    "2026-02-20"
+   ],
+   "signed": [
+    -0.07500000000000001,
+    0.020000000000000018,
+    -0.015,
+    -0.042499999999999996,
+    -0.0050000000000000044
+   ]
+  },
+  "react/hockey_can": {
+   "dates": [
+    "2026-01-14",
+    "2026-01-28",
+    "2026-02-08",
+    "2026-02-15",
+    "2026-02-20"
+   ],
+   "signed": [
+    -0.16835,
+    -0.032584434843803314,
+    -0.03357274739168467,
+    -0.022791366421295867,
+    -0.05149999999999996
+   ]
+  }
+ },
+ "sensitivity": {
+  "analytica/hockey_can": {
+   "nhl_participation_probability": 0.03791870982058698,
+   "base_forecast_probability": 0.03632806051772542,
+   "tournament_variance_favorability_probability": 0.02610159873863057,
+   "competition_strength_favorability_probability": 0.02263338925194383,
+   "win_final_given_final_probability": 0.021226168936644446,
+   "reach_final_probability": 0.02122616893664444,
+   "health_availability_probability": 0.020924835128570584,
+   "canada_roster_quality_probability": 0.01725838464538511
+  },
+  "analytica/hockey_usa": {
+   "p_usa_reach_final": 0.025497393026250002,
+   "p_usa_win_final_given_reach": 0.02549739302625,
+   "p_nhl_participation": 0.011498845526250004,
+   "p_no_major_disruption_or_good_health": 0.011498845526250004,
+   "p_usa_elite_roster_or_top_contender": 0.011498845526250003,
+   "tournament_variance_probability": 0.0017444112349999936,
+   "p_stronger_opponent_or_canada_favorite": 4.717943999999891e-05
+  },
+  "bayesian/hockey_can": {},
+  "bayesian/hockey_usa": {
+   "prior_probability_usa_gold": 0.010596598236847126,
+   "prior_odds_usa_gold": 0.010225920489994465,
+   "lr_venue_or_media_sentiment": 0.01004421495831619,
+   "lr_nhl_participation_logistics": 0.010044214958316188,
+   "lr_roster_strength_positive": 0.010044214958316184,
+   "lr_injury_and_replacements": 0.010044214958316184,
+   "lr_recent_game_results": 0.010044214958316184,
+   "lr_opponent_canada_strength": 0.010044214958316183,
+   "lr_total_product": 0.0,
+   "posterior_odds_usa_gold": 0.0
+  },
+  "futuresim/hockey_can": {
+   "prior_forecast_probability": 0.03009999999999996,
+   "base_rate_canada_gold_nhl_bestonbest": 0.029999999999999964,
+   "adjustment_canada_roster_star_power": 0.010000000000000009,
+   "adjustment_usa_rival_strength": 0.010000000000000009,
+   "adjustment_goaltending_net": 0.010000000000000009,
+   "adjustment_venue_and_nhl_participation_risk": 0.010000000000000009,
+   "adjustment_opponent_field_depth": 0.010000000000000009,
+   "adjustment_single_elimination_variance": 0.010000000000000009,
+   "adjustment_recent_form_and_results": 0.010000000000000009,
+   "adjustment_injuries_and_roster_churn": 0.010000000000000009
+  },
+  "futuresim/hockey_usa": {
+   "interval_upper_bound": 0.0425,
+   "previous_forecast_probability": 0.028449999999999996,
+   "base_rate_usa_gold": 0.012000000000000007,
+   "adj_nhl_participation": 0.012,
+   "adj_usa_roster_strength": 0.012,
+   "adj_usa_team_chemistry": 0.012,
+   "adj_usa_goaltending": 0.012,
+   "adj_usa_injury_seth_jones": 0.012,
+   "adj_tournament_format_variance": 0.012,
+   "adj_other_risks_and_field_strength": 0.012,
+   "adj_canada_strength": 0.011999999999999999,
+   "interval_lower_bound": 0.0
+  },
+  "react/hockey_can": {
+   "prior_win_probability": 0.028334653717405824,
+   "adj_roster_quality": 0.001403024695423083,
+   "adj_rivals_strength": 0.001403024695423083,
+   "adj_injuries_availability": 0.001403024695423083,
+   "adj_momentum_leadership_form": 0.001403024695423083,
+   "adj_venue_logistics": 0.001403024695423083,
+   "adj_goaltending_uncertainty": 0.001403024695423083,
+   "adj_misc_other": 0.001403024695423083,
+   "adj_tournament_variance_structure": 0.000982757878073326,
+   "roster_size_players": 0.0003307112678282112,
+   "roster_continuity_players": 0.00032757007799383704,
+   "notable_injuries_or_replacements_count": 3.480496246896364e-05,
+   "tournament_team_count": 5.363853786014006e-06
+  }
+ },
+ "program_distance": {
+  "analytica/hockey_can": {
+   "mc_mean_abs": 0.39061479393261805,
+   "mc_ok": 400,
+   "observed_mean_abs": 0.41668697203247074
+  },
+  "analytica/hockey_usa": {
+   "mc_mean_abs": 0.14430859154465422,
+   "mc_ok": 400,
+   "observed_mean_abs": 0.1196300128375
+  },
+  "bayesian/hockey_usa": {
+   "mc_mean_abs": 0.04390788784890141,
+   "mc_ok": 400,
+   "observed_mean_abs": 0.009533282785650321
+  },
+  "futuresim/hockey_can": {
+   "mc_mean_abs": 3.136380044566067e-17,
+   "mc_ok": 400,
+   "observed_mean_abs": 0.0
+  },
+  "futuresim/hockey_usa": {
+   "mc_mean_abs": 0.015177482424145364,
+   "mc_ok": 400,
+   "observed_mean_abs": 0.08203795966000473
+  },
+  "react/hockey_can": {
+   "mc_mean_abs": 0.17356821223039504,
+   "mc_ok": 400,
+   "observed_mean_abs": 0.0963129387497209
+  }
+ },
+ "temporal_holdout": {
+  "analytica/hockey_can": {
+   "train_dates": [
+    "2026-01-14",
+    "2026-01-28",
+    "2026-02-08"
+   ],
+   "test_dates": [
+    "2026-02-15",
+    "2026-02-20"
+   ],
+   "train_mae": 0.520381597768618,
+   "test_mae": 0.3349131913493016,
+   "test_within_tol": 0.0,
+   "program": "def forecast():\n    base_log_odds = odds(base_forecast_probability)\n\n    roster_log_odds = odds(canada_roster_quality_probability)\n    nhl_log_odds = odds(nhl_participation_probability)\n    competition_log_odds = odds(competition_strength_favorability_probability)\n    health_log_odds = odds(health_availability_probability)\n    variance_log_odds = odds(tournament_variance_favorability_probability)\n\n    reach_log_odds = odds(reach_final_probability)\n    win_log_odds = odds(win_final_given_final_probability)\n\n    title_log_odds = reach_log_odds + win_log_odds\n    title_probability = prob(title_log_odds)\n\n    capability_weight = title_probability\n    environment_weight = ONE - title_probability\n\n    capability_signal = roster_log_odds + nhl_log_odds + health_log_odds\n    environment_signal = competition_log_odds + variance_log_odds\n\n    combined_log_odds = base_log_odds + capability_weight * capability_signal + environment_weight * environment_signal\n\n    output_probability = prob(combined_log_odds)\n    return output_probability"
+  },
+  "analytica/hockey_usa": {
+   "train_dates": [
+    "2026-01-14",
+    "2026-01-28",
+    "2026-02-08"
+   ],
+   "test_dates": [
+    "2026-02-15",
+    "2026-02-20"
+   ],
+   "train_mae": 0.07299298864583333,
+   "test_mae": 0.285387294921875,
+   "test_within_tol": 0.0,
+   "program": "def forecast():\n    roster_strength = p_nhl_participation * p_usa_elite_roster_or_top_contender\n    roster_strength = roster_strength * p_no_major_disruption_or_good_health\n\n    canada_headwind = p_stronger_opponent_or_canada_favorite\n    upset_room = ONE - canada_headwind\n\n    variance_boost = tournament_variance_probability * upset_room\n    effective_upset_factor = upset_room + variance_boost\n\n    win_if_reach_adjusted = p_usa_win_final_given_reach * effective_upset_factor\n    title_chance_conditional = p_usa_reach_final * win_if_reach_adjusted\n\n    raw_title = roster_strength * title_chance_conditional\n\n    baseline_shrink = HALF * tournament_variance_probability\n    shrunk_title = raw_title * (ONE - baseline_shrink)\n\n    return clamp(shrunk_title, ZERO, ONE)"
+  },
+  "bayesian/hockey_can": {
+   "train_dates": [
+    "2026-01-14",
+    "2026-01-28",
+    "2026-02-08"
+   ],
+   "test_dates": [
+    "2026-02-15",
+    "2026-02-20"
+   ],
+   "train_mae": 0.00031963828304702274,
+   "test_mae": 0.002070001904976873,
+   "test_within_tol": 1.0,
+   "program": "def forecast():\n    bayes_posterior_odds = prior_odds_canada_gold * likelihood_ratio_product\n    bayes_posterior_probability = prob(bayes_posterior_odds)\n\n    prior_odds_implied_probability = prob(prior_odds_canada_gold)\n    prior_probability_gap = prior_probability_canada_gold - prior_odds_implied_probability\n\n    calibration_pull = abs(prior_probability_gap) / (abs(prior_probability_gap) + ONE)\n    posterior_adjustment = calibration_pull * prior_probability_gap\n\n    adjusted_probability = bayes_posterior_probability + posterior_adjustment\n\n    forecast_probability = clamp(adjusted_probability, ZERO, ONE)\n    return forecast_probability"
+  },
+  "bayesian/hockey_usa": {
+   "train_dates": [
+    "2026-01-14",
+    "2026-01-28",
+    "2026-02-08"
+   ],
+   "test_dates": [
+    "2026-02-15",
+    "2026-02-20"
+   ],
+   "train_mae": 0.0005456366882786445,
+   "test_mae": 0.003417126186520167,
+   "test_within_tol": 1.0,
+   "program": "def forecast():\n    prior_odds_from_probability = odds(prior_probability_usa_gold)\n\n    prior_odds_consensus = sqrt(prior_odds_usa_gold * prior_odds_from_probability)\n\n    likelihood_product_from_factors = (\n        lr_roster_strength_positive\n        * lr_opponent_canada_strength\n        * lr_injury_and_replacements\n        * lr_recent_game_results\n        * lr_nhl_participation_logistics\n        * lr_venue_or_media_sentiment\n    )\n\n    likelihood_product_consensus = sqrt(lr_total_product * likelihood_product_from_factors)\n\n    posterior_odds = prior_odds_consensus * likelihood_product_consensus\n\n    posterior_probability = prob(posterior_odds)\n\n    return posterior_probability"
+  },
+  "futuresim/hockey_can": {
+   "train_dates": [
+    "2026-01-14",
+    "2026-01-28",
+    "2026-02-08"
+   ],
+   "test_dates": [
+    "2026-02-15",
+    "2026-02-20"
+   ],
+   "train_mae": 0.014583333333333318,
+   "test_mae": 0.02124999999999999,
+   "test_within_tol": 0.75,
+   "program": "def forecast():\n    base_probability = base_rate_canada_gold_nhl_bestonbest\n\n    net_adjustment = adjustment_canada_roster_star_power\n    net_adjustment += adjustment_usa_rival_strength\n    net_adjustment += adjustment_goaltending_net\n    net_adjustment += adjustment_venue_and_nhl_participation_risk\n    net_adjustment += adjustment_opponent_field_depth\n    net_adjustment += adjustment_single_elimination_variance\n    net_adjustment += adjustment_recent_form_and_results\n    net_adjustment += adjustment_injuries_and_roster_churn\n\n    updated_from_base = base_probability + net_adjustment\n\n    anchor_probability = prior_forecast_probability\n    anchored_update = (updated_from_base + anchor_probability) * HALF\n\n    blended_update = (anchored_update + updated_from_base) * HALF\n\n    forecast_probability = clamp(blended_update, ZERO, ONE)\n    return forecast_probability"
+  },
+  "futuresim/hockey_usa": {
+   "train_dates": [
+    "2026-01-14",
+    "2026-01-28",
+    "2026-02-08"
+   ],
+   "test_dates": [
+    "2026-02-15",
+    "2026-02-20"
+   ],
+   "train_mae": 0.05083854692788081,
+   "test_mae": 0.03165733968546148,
+   "test_within_tol": 0.25,
+   "program": "def forecast():\n    base_log_odds = log(odds(base_rate_usa_gold))\n\n    upside = adj_nhl_participation + adj_usa_roster_strength + adj_usa_team_chemistry + adj_usa_goaltending\n    downside = adj_usa_injury_seth_jones + adj_canada_strength + adj_tournament_format_variance + adj_other_risks_and_field_strength\n\n    net_signal = upside + downside\n\n    shock_scale = abs(adj_tournament_format_variance) + abs(adj_other_risks_and_field_strength) + ONE\n    matchup_scale = abs(adj_canada_strength) + ONE\n    team_scale = abs(upside) + abs(adj_usa_injury_seth_jones) + ONE\n\n    scaled_upside = upside / team_scale\n    scaled_downside = downside / (shock_scale + matchup_scale)\n\n    combined_shift = scaled_upside + scaled_downside\n\n    shifted_log_odds = base_log_odds + combined_shift\n    model_probability = logistic(shifted_log_odds)\n\n    interval_center = (interval_lower_bound + interval_upper_bound) / TWO\n    interval_mass = abs(interval_lower_bound) + abs(interval_upper_bound)\n\n    prior_mass = abs(previous_forecast_probability)\n    prior_pull = abs(model_probability - previous_forecast_probability)\n\n    anchor_weight = prior_mass / (prior_mass + prior_pull + ONE)\n    interval_weight = interval_mass / (interval_mass + ONE)\n    model_weight = abs(net_signal) + ONE\n\n    total_weight = model_weight + anchor_weight + interval_weight\n    blended_probability = (model_probability * model_weight + previous_forecast_probability * anchor_weight + interval_center * interval_weight) / total_weight\n\n    return blended_probability"
+  },
+  "react/hockey_can": {
+   "train_dates": [
+    "2026-01-14",
+    "2026-01-28",
+    "2026-02-08"
+   ],
+   "test_dates": [
+    "2026-02-15",
+    "2026-02-20"
+   ],
+   "train_mae": 0.044318781950996776,
+   "test_mae": 0.04627137787612082,
+   "test_within_tol": 0.5,
+   "program": "def forecast():\n    baseline_logodds = odds(prior_win_probability)\n\n    adjustment_sum = adj_roster_quality\n    adjustment_sum = adjustment_sum + adj_rivals_strength\n    adjustment_sum = adjustment_sum + adj_tournament_variance_structure\n    adjustment_sum = adjustment_sum + adj_injuries_availability\n    adjustment_sum = adjustment_sum + adj_momentum_leadership_form\n    adjustment_sum = adjustment_sum + adj_venue_logistics\n    adjustment_sum = adjustment_sum + adj_goaltending_uncertainty\n    adjustment_sum = adjustment_sum + adj_misc_other\n\n    full_roster_factor = roster_size_players / (roster_size_players + ONE)\n    continuity_factor = roster_continuity_players / (roster_size_players + ONE)\n    roster_stability = full_roster_factor * continuity_factor\n\n    adjustment_sum = adjustment_sum * (ONE + roster_stability)\n\n    replacement_pressure = notable_injuries_or_replacements_count / (roster_size_players + ONE)\n    adjustment_sum = adjustment_sum - replacement_pressure\n\n    updated_logodds = baseline_logodds + adjustment_sum\n    forecast_probability = prob(updated_logodds)\n    return forecast_probability"
+  },
+  "react/hockey_usa": {
+   "train_dates": [
+    "2026-01-14",
+    "2026-01-28",
+    "2026-02-08"
+   ],
+   "test_dates": [
+    "2026-02-15",
+    "2026-02-20"
+   ],
+   "train_mae": 0.2516686666666667,
+   "test_mae": 0.48711499999999996,
+   "test_within_tol": 0.0,
+   "program": "def forecast():\n    base_probability = prior_forecast_probability\n\n    roster_quality_effect = roster_quality_weight * roster_quality_adjustment_or_contribution\n    opponent_strength_effect = opponent_strength_weight * opponent_strength_adjustment_or_contribution\n    tournament_variance_effect = tournament_variance_weight * tournament_variance_adjustment_or_contribution\n\n    weighted_model_adjustment = roster_quality_effect + opponent_strength_effect\n    weighted_model_adjustment = weighted_model_adjustment + tournament_variance_effect\n\n    direct_adjustment = recent_form_adjustment_or_contribution + calibration_or_rounding_bump\n    direct_adjustment = direct_adjustment + roster_quality_adjustment_or_contribution\n    direct_adjustment = direct_adjustment + opponent_strength_adjustment_or_contribution\n    direct_adjustment = direct_adjustment + tournament_variance_adjustment_or_contribution\n\n    additive_probability = base_probability + weighted_model_adjustment\n    additive_probability = additive_probability + direct_adjustment\n\n    stage_product_distance = stage_win_probability_product - ONE\n    stage_product_pull = stage_product_distance * baseline_win_probability\n    stage_product_corrected = additive_probability - stage_product_pull\n\n    stage_specific_gap = stage_specific_win_probability - baseline_win_probability\n    stage_specific_pull = stage_specific_gap * roster_quality_weight\n    stage_specific_corrected = stage_product_corrected + stage_specific_pull\n\n    roster_size_scaled_adjustment = roster_size_players * calibration_or_rounding_bump\n    roster_size_corrected = stage_specific_corrected + roster_size_scaled_adjustment\n\n    return roster_size_corrected"
+  }
+ }
+}

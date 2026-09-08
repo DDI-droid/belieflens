@@ -238,7 +238,19 @@ def section_c(out: Path) -> dict:
                     (val, i["target"], prev_map.get((i["sample"], i["date"]))))
                 if numeric_name(n):
                     name_viols.add(n)
+        # Copy-detection is ill-posed when the target barely varies: any
+        # near-constant variable then "matches" under some transform. Such
+        # groups are marked uninformative, not contaminated -- recovering a
+        # program for a constant output is trivially easy and proves nothing.
+        tgts = [i["target"] for i in insts]
+        tmean = sum(tgts) / len(tgts) if tgts else 0.0
+        tstd = (sum((t - tmean) ** 2 for t in tgts) / len(tgts)) ** 0.5 if tgts else 0.0
         copies, collisions = {}, 0
+        if tstd < 0.02:
+            print("        constant-target group (std %.4f): copy-detection "
+                  "ill-posed; recovery uninformative" % tstd)
+            flags.append("constant-target: recovery uninformative (std %.4f)" % tstd)
+            per_var = {}
         for n, rows in per_var.items():
             tfs = []
             for val, tgt, prev in rows:

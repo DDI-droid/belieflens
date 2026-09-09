@@ -164,6 +164,62 @@ def stage_e1(args) -> None:
     print("\nwrote %s (%d runs, %.0fs total)" % (p, n_done, time.time() - t0))
 
 
+# ----------------------------------------------------------------- E1i
+
+def stage_e1i(args) -> None:
+    """Independent (non-sequential) counterpart of E1.
+
+    For every (harness, question, date): a FRESH single-date run -- same
+    system prompt, same date-gated search, but no forecast history and no
+    carry block, k2 rollouts each. This is the evidence-conditioned belief
+    without the anchoring pressure; sequential-vs-independent is then the
+    measurement of anchoring itself. Implementation reuses HarnessRunner.run
+    with a single date, which is by construction history-free.
+    """
+    ix = NewsIndex()
+    runner = HarnessRunner(client(), args.model, ix,
+                           max_tool_rounds=args.tool_rounds,
+                           reasoning_effort=args.effort or None)
+    qs = [q for q in QUESTIONS if not args.questions or q.id in args.questions.split(",")]
+    jobs = [(h, q, d, r) for q in qs for h in HARNESSES
+            for d in q.dates for r in range(args.k2)]
+    print("%d independent turns = %d questions x %d harnesses x %d dates x k2=%d"
+          % (len(jobs), len(qs), len(HARNESSES), len(qs[0].dates), args.k2))
+
+    out = Path(args.out); out.mkdir(parents=True, exist_ok=True)
+    _dump_config(out, "config_e1i.json", args, {"n_jobs": len(jobs)})
+    tmp = out / "e1_independent.jsonl.tmp"
+    n_done, t0 = 0, time.time()
+    with open(tmp, "w", encoding="utf-8") as fh,             ThreadPoolExecutor(max_workers=args.workers) as ex:
+        futs = {ex.submit(runner.run, h, q, [d], r): (h, q.id, d, r)
+                for h, q, d, r in jobs}
+        for i, f in enumerate(as_completed(futs), 1):
+            h, qid, d, r = futs[f]
+            try:
+                run = f.result()
+                t = run.turns[0]
+                fh.write(json.dumps({
+                    "mode": "independent", "harness": h, "question_id": qid,
+                    "date": d, "rollout": r, "forecast": t.forecast,
+                    "text": t.text, "tool_calls": t.tool_calls,
+                    "forced_stop": t.forced_stop, "error": t.error}) + "\n")
+                fh.flush()
+                n_done += 1
+                if i % 10 == 0 or i == len(jobs):
+                    print("  [%3d/%3d] latest %-10s %-11s %s r%d -> %s  (%.0fs)"
+                          % (i, len(jobs), h, qid, d[5:], r,
+                             "--" if t.forecast is None else "%.2f" % t.forecast,
+                             time.time() - t0), flush=True)
+            except Exception as e:                          # noqa: BLE001
+                print("  [%3d/%3d] FAILED %s %s %s r%d: %s"
+                      % (i, len(jobs), h, qid, d, r, str(e)[:120]), flush=True)
+    p = out / "e1_independent.jsonl"
+    if p.exists():
+        p.unlink()
+    tmp.rename(p)
+    print("wrote %s (%d/%d turns, %.0fs)" % (p, n_done, len(jobs), time.time() - t0))
+
+
 # ------------------------------------------------------------------ E2
 
 def load_runs(path: Path) -> list:
@@ -317,7 +373,7 @@ def _extract_group(cl, args, h: str, qid: str, rs: list) -> dict:
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--stage", default="e1", choices=["e1", "e2", "all"])
+    ap.add_argument("--stage", default="e1", choices=["e1", "e1i", "e2", "all"])
     ap.add_argument("--model", default="gpt-5-mini",
                     help="harness model -- MUST have a pre-2026 knowledge cutoff; "
                          "the default matches the documented runs")
@@ -325,6 +381,8 @@ def main() -> None:
                     help="step 1-3 model; contamination is irrelevant here")
     ap.add_argument("--effort", default="", help="reasoning_effort, if the model takes it")
     ap.add_argument("--samples", type=int, default=2)
+    ap.add_argument("--k2", type=int, default=5,
+                    help="rollouts per date for the independent stage (the distribution)")
     ap.add_argument("--questions", default="")
     ap.add_argument("--tool-rounds", type=int, default=6)
     ap.add_argument("--workers", type=int, default=8)
@@ -335,6 +393,8 @@ def main() -> None:
 
     if args.stage in ("e1", "all"):
         stage_e1(args)
+    if args.stage == "e1i":
+        stage_e1i(args)
     if args.stage in ("e2", "all"):
         stage_e2(args)
 

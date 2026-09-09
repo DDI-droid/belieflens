@@ -1,0 +1,16 @@
+{
+ "stage": "e1i",
+ "model": "gpt-5-mini",
+ "extractor": "gpt-5.2",
+ "effort": "medium",
+ "samples": 2,
+ "k2": 5,
+ "questions": "hockey_usa,hockey_can",
+ "tool_rounds": 5,
+ "workers": 8,
+ "tol": 0.02,
+ "attempts": 4,
+ "out": "results/exp1",
+ "timestamp": "2026-09-09 20:01:56",
+ "n_jobs": 200
+}

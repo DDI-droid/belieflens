@@ -175,6 +175,8 @@ footer{margin-top:80px;padding-top:22px;border-top:1px solid var(--rule);font-si
     <div class="tl flag"><span class="t">19:09</span><span class="e"><b>Independent adversarial review lands: 2 fatal, 7 serious, 6 moderate findings</b> plus a verified-sound list. The worst: the planned headline metric would have punished correct forecasting (F1), and the no-literal rule was semantically bypassable (F2). Full list with dispositions in <a href="#review">&sect;9</a>.</span></div>
     <div class="tl"><span class="t">19:25</span><span class="e"><b>All fixable findings patched and verified</b>: every reviewer exploit now rejected by the validator; the strict parser reproduces all 80 collected forecasts byte-identically (the parser bugs were latent, never realised &mdash; E1 data stands); crash-safety and audit-trail fixes in place. Corrected analysis metrics written.</span></div>
     <div class="tl"><span class="t">19:55</span><span class="e"><b>E2 complete on the patched pipeline: 8/8 groups, zero crashes.</b> The fixes visibly earned their keep in the log &mdash; near-target drops firing (F7), an instance-key exclusion never needed, incremental writes landing after every group (F3), OOS holdouts computed for all 8 groups (F2). First results in <a href="#results">&sect;10</a>.</span></div>
+    <div class="tl"><span class="t">Sep 06</span><span class="e"><b>Anti-gaming hardening + full audit.</b> New rules: no value may hide in a <em>name</em> (<span class="mono">two=2</span> rejected), no constant-only arithmetic, no dead code, answer-drop extended to odds/percent/complement transforms. Audit of all collected data: 11/11 exploits rejected, 80/80 forecasts reproduce, 483 searches gate-replayed with zero breaches, all groups CLEAN (<a href="#review">&sect;9b</a>).</span></div>
+    <div class="tl"><span class="t">Sep 08</span><span class="e"><b>Belief-dynamics analyses, the rigidity probe, and the four-question scale-up</b> (results/exp2: 32 runs, 949 searches gate-replayed clean). Everything lands in the rewritten <a href="#results">&sect;10</a>.</span></div>
   </div>
 </section>
 
@@ -372,7 +374,11 @@ footer{margin-top:80px;padding-top:22px;border-top:1px solid var(--rule);font-si
     <p><b>Dates:</b> 2026-01-14, 01-28, 02-08, 02-15, 02-20 &mdash; two pre-tournament (rosters,
     warm-ups), three inside it (group stage, playoffs, eve of the final), so evidence concentrates
     sharply across the last three and a belief that tracks it has to accelerate.</p>
-    <p><b>Why not more questions:</b> the 3-hour budget buys either breadth or sequential depth.
+    <p><b>Scale-up set (Sep 08):</b> four more OpenForesight questions with &ge;5-week spans &mdash;
+    IQAir most-polluted city, Newcastle/Carrick first defeat, Nepal PM swearing-in, SA T20 captaincy
+    &mdash; all resolving YES per the dataset (disclosed; they power the recovery statistics, not
+    directional claims). Runs live in <span class="mono">results/exp2</span>.</p>
+    <p><b>Why not more questions on day one:</b> the 3-hour budget buys either breadth or sequential depth.
     Dynamics is the object, and the trajectory is the measurement, so depth won: 2 questions &times; 4
     harnesses &times; 2 samples &times; 5 sequential days = 80 forecast-turns, each with a full
     extractable trace. Statistical claims at n=2 questions are explicitly out of scope; this run
@@ -761,13 +767,13 @@ def forecast():
         <tr><td>Shared SQLite connection across threads</td><td>corrupted search results, missing forecasts (hit us: 32% of first run's turns)</td><td class="good">FIXED &mdash; thread-local connections, verified under 48-way concurrency; first run quarantined, rerun clean-started</td></tr>
         <tr><td>Future-dated leakage through search</td><td>the entire premise dies</td><td class="good">gate in SQL, crawl-date field, hand-verified</td></tr>
         <tr><td>Harness model post-dates events</td><td>recall masquerading as forecasting; frozen beliefs</td><td class="good">gpt-5-mini (2025-08); flagged in every doc</td></tr>
-        <tr><td>Extractor knows the outcome</td><td>step-1 values tilted toward truth; fits flattered</td><td class="bad">OPEN &mdash; mitigated by transcribe-only instruction; spot-check step-1 tables vs traces before trusting fits</td></tr>
+        <tr><td>Extractor knows the outcome</td><td>step-1 values tilted toward truth; fits flattered</td><td class="good">AUDITED &mdash; every table scanned under the transform battery; one systematic copy in 320 tables, referenced by no program (&sect;9b)</td></tr>
         <tr><td>Degenerate fit (answer smuggled as a variable or as constant arithmetic)</td><td>perfect MAE, zero meaning</td><td class="good">HARDENED post-review &mdash; bool ban, constant-construction detector, lookup-table flag, tolerance-band target drop, and the out-of-sample holdout as the deciding gate (&sect;7, &sect;9 F2)</td></tr>
         <tr><td>Forecast-parse fallback grabs a stray number</td><td>a fabricated forecast enters the data</td><td class="good">FIXED &mdash; fallback removed; % and comma handled; out-of-range = retry. Retro-verified: all 80 collected forecasts identical under the strict parser</td></tr>
         <tr><td>Retry-on-failure selection effect</td><td>retried turns are a second draw; if failures correlate with hedgy answers, trajectories tilt</td><td class="bad">OPEN &mdash; retries are logged per turn; count will be reported alongside results</td></tr>
         <tr><td>Weaker retrieval than the paper's hybrid index</td><td>absolute forecast quality understated</td><td class="good">accepted &amp; disclosed &mdash; identical across harnesses, so comparisons stand; absolute numbers carry the caveat</td></tr>
         <tr><td>Observer effect of &ldquo;write your numbers&rdquo;</td><td>verbalising may change the forecast itself</td><td class="good">inherent to any trace-based method; identical across harnesses; disclosed</td></tr>
-        <tr><td>n = 2 questions, 2 samples</td><td>population claims unsupported</td><td class="good">scope limited by design: this run establishes the instrument and effect directions, not statistics</td></tr>
+        <tr><td>n small (now 6 questions, 2 samples; hockey pair the only directional control, scale-up set all-YES)</td><td>population claims unsupported</td><td class="good">scope stated everywhere: effect directions and instrument validation, not rankings; disclosed in &sect;10</td></tr>
         <tr><td>No LLM response caching in this pipeline</td><td>reruns cost money; exact reproduction impossible</td><td class="bad">PARTIAL &mdash; raw turns fully serialised and config JSON (model, flags, tolerances, timestamps) now written next to every output; generation itself is still not replayable</td></tr>
         <tr><td>One bad synthesised program crashes all of E2</td><td>every paid group discarded at once</td><td class="good">FIXED &mdash; NameError caught as a failed fit; per-group isolation; report written incrementally (&sect;9 F3)</td></tr>
         <tr><td>Chained E2 reads a partially written e1_runs.jsonl</td><td>silent truncation or crash</td><td class="good">FIXED &mdash; watcher killed in time; E1 now streams to .tmp with atomic rename (&sect;9 F4)</td></tr>
@@ -954,74 +960,98 @@ def forecast():
       <li><b>Carry blocks work</b>: memory/belief extraction succeeded on every non-errored turn, and
       carry persists across a failed day rather than being wiped.</li>
     </ul>
+    <div class="callout" id="audit"><b>&sect;9b &middot; The standing audit
+    (<span class="mono">scripts/audit_exp1.py</span>).</b> Re-runnable against any results directory:
+    the full exploit battery must REJECT (11/11, incl. number-spelling names, <span class="mono">x/x</span>,
+    dead-code padding), every stored forecast must re-parse from its own text (80/80 and 160/160),
+    <b>every logged search is re-executed with its turn's date</b> (483 + 949 replays, zero articles
+    past the gate), every stored program must re-execute to its reported MAE, and every variable table
+    is scanned for answer-copies under the transform battery &mdash; a copy counts only if it tracks
+    the answer on &ge;80% of instances (one coincidence cannot carry a 10-instance fit), with
+    yesterday's forecast exempt and near-constant-target groups marked ill-posed rather than flagged.
+    Result across both experiment sets: <b>one</b> systematic copy found in 320 variable tables
+    (<span class="mono">posterior_odds</span>, odds-form, 10/10) &mdash; referenced by no program.
+    Verdict: all fits clean.</div>
   </div>
 </section>
 
 <section id="results">
   <div class="col sec-head">
-    <span class="eyebrow">&sect;10 &middot; First results</span>
-    <h2>What came out &mdash; pilot numbers, corrected metrics</h2>
+    <span class="eyebrow">&sect;10 &middot; Results</span>
+    <h2>What was measured, and what came out</h2>
   </div>
   <div class="col">
-    <p>Scope reminder before any number: one question pair, two samples (F9) &mdash; these are effect
-    directions from a working instrument, not population claims.</p>
+    <p>Scope: 6 questions (the hockey pair is the only <em>directional</em> control; the four
+    scale-up questions all resolve YES, disclosed), 2 samples per cell. Effect directions, not laws.
+    Every number below survives the audit in &sect;9b.</p>
   </div>
 
+  <div class="col"><h3>Replay (E1) &mdash; does the belief move, and coherently?</h3>
+  <p>Five sequential dates per question; each day the harness carries its own forecast history and
+  memory/belief block. Metrics are the corrected ones from &sect;4: <span class="mono">semi-rise</span>
+  (both paired beliefs rise across the semifinal), <span class="mono">sum@last</span>
+  (P(USA)+P(CAN)&rarr;~1).</p></div>
   <div class="tablewrap">
     <table class="mid">
-      <thead><tr><th>harness</th><th>|&Delta;| total</th><th>net USA</th><th>net CAN</th><th>semi-rise</th><th>sum@last</th></tr></thead>
+      <thead><tr><th>harness</th><th>|&Delta;| total</th><th>semi-rise</th><th>sum@last</th><th>reading</th></tr></thead>
       <tbody>
-        <tr><td class="k">analytica</td><td class="num">0.364</td><td class="num">+0.281</td><td class="num">+0.042</td><td class="num good">1.00</td><td class="num good">0.99</td></tr>
-        <tr><td class="k">bayesian</td><td class="num">0.334</td><td class="num">+0.184</td><td class="num">+0.141</td><td class="num">0.50</td><td class="num good">1.01</td></tr>
-        <tr><td class="k">react</td><td class="num">0.206</td><td class="num">+0.225</td><td class="num">+0.150</td><td class="num">0.50</td><td class="num">0.84</td></tr>
-        <tr><td class="k">futuresim</td><td class="num">0.117</td><td class="num bad">&minus;0.070</td><td class="num">+0.075</td><td class="num bad">0.00</td><td class="num">0.82</td></tr>
+        <tr><td class="k">analytica</td><td class="num">0.364</td><td class="num good">1.00</td><td class="num good">0.99</td><td>cleanest evidence-tracker</td></tr>
+        <tr><td class="k">bayesian</td><td class="num">0.334</td><td class="num">0.50</td><td class="num good">1.01</td><td>coherent, half-consistent</td></tr>
+        <tr><td class="k">react</td><td class="num">0.206</td><td class="num">0.50</td><td class="num">0.84</td><td>middling</td></tr>
+        <tr><td class="k">futuresim</td><td class="num bad">0.117</td><td class="num bad">0.00</td><td class="num">0.82</td><td>most anchored: held P(USA)&asymp;0.2 with the USA already in the final</td></tr>
       </tbody>
     </table>
   </div>
-  <div class="col">
-    <p><b>E1, corrected metrics.</b> semi-rise = fraction of samples where <em>both</em> beliefs rose
-    across the semifinal date (the correct direction for this event path, per F1); sum@last =
-    P(USA)+P(CAN) on the eve of the final, which should approach 1. <span class="mono">analytica</span>
-    is the cleanest tracker: both beliefs rose in both samples and the pair sums to 0.99.
-    <span class="mono">futuresim</span> &mdash; the harness with explicit anchoring-check guidelines and
-    a memory block &mdash; moved least, never raised both after the semifinals, and on 02-20, with the
-    USA <em>already in the gold-medal game</em>, still held P(USA gold) at 0.17&ndash;0.22. Its
-    base-rate anchor beat live evidence: the FutureSim paper's anchoring finding, reproduced in
-    miniature by the harness named after it.</p>
-  </div>
+  <div class="col"><p>Replicated on a second event: on <span class="mono">nepal_shah</span> every
+  harness catches a real news break between 03-05 and 03-15 (react 0.07&rarr;0.84, bayesian
+  0.34&rarr;0.89) &mdash; and futuresim again rises least (0.06&rarr;0.66).</p></div>
 
+  <div class="col"><h3>Recovery (E2) &mdash; is the reasoning a stable program?</h3>
+  <p>One literal-free program per harness&times;question, fitted over all 10 instances; two
+  <b>blind</b> holdouts decide (targets hidden from the synthesiser): <em>sample</em> (train s0,
+  test s1) and <em>temporal</em> (train first 3 dates, test last 2, answer-copies excluded).</p></div>
   <div class="tablewrap">
     <table class="wide">
-      <thead><tr><th>harness / question</th><th>in-sample MAE</th><th>in-tol</th><th>OOS test MAE</th><th>OOS in-tol</th><th>reading</th></tr></thead>
+      <thead><tr><th>group</th><th>in-sample MAE</th><th>sample-holdout MAE</th><th>temporal early&rarr;late MAE</th><th>verdict</th></tr></thead>
       <tbody>
-        <tr><td class="k">futuresim / hockey_can</td><td class="num good">0.0175</td><td class="num">70%</td><td class="num good">0.0140</td><td class="num good">80%</td><td><b>most program-like and best transfer</b>: small adjustments on a stable base rate, 6 ops &mdash; the held-out sample is predicted at 80% within tolerance</td></tr>
-        <tr><td class="k">bayesian / hockey_usa</td><td class="num">0.0274</td><td class="num">40%</td><td class="num good">0.0160</td><td class="num">60%</td><td><b>strong transfer</b>: log-odds additive updating + shrink-to-prior, recovered and predictive on held-out days</td></tr>
-        <tr><td class="k">futuresim / hockey_usa</td><td class="num">0.0445</td><td class="num">50%</td><td class="num">0.1348</td><td class="num">20%</td><td>fits in-sample, transfers weakly</td></tr>
-        <tr><td class="k">react / hockey_can</td><td class="num">0.0700</td><td class="num">20%</td><td class="num">0.0732</td><td class="num">40%</td><td>middling both ways</td></tr>
-        <tr><td class="k">bayesian / hockey_can</td><td class="num">nan</td><td class="num">0%</td><td class="num">0.0628</td><td class="num">0%</td><td>full-fit program crashed on some instances (caught, isolated); holdout program ran</td></tr>
-        <tr><td class="k">analytica / hockey_usa</td><td class="num bad">0.1077</td><td class="num">10%</td><td class="num">0.2743</td><td class="num">20%</td><td rowspan="2">the decomposition itself changes day to day &mdash; the structure moves, not just the values</td></tr>
-        <tr><td class="k">analytica / hockey_can</td><td class="num bad">0.3009</td><td class="num">10%</td><td class="num">0.3962</td><td class="num">20%</td></tr>
-        <tr><td class="k">react / hockey_usa</td><td class="num bad">&mdash;</td><td class="num">&mdash;</td><td class="num">0.1777</td><td class="num">0%</td><td>no valid full-fit program in 4 attempts: the free-form loop resisted compression</td></tr>
+        <tr><td class="k">bayesian / usa</td><td class="num">0.027</td><td class="num good">0.016</td><td class="num good">0.0005 &rarr; 0.003</td><td><b>a true fixed formula</b> (log-odds additive + shrink-to-prior); belief = the variables</td></tr>
+        <tr><td class="k">bayesian / can</td><td class="num">&mdash;</td><td class="num">0.063</td><td class="num good">0.0003 &rarr; 0.002</td><td>same formula; full-fit program failed to execute (recorded)</td></tr>
+        <tr><td class="k">futuresim / can</td><td class="num good">0.018</td><td class="num good">0.014</td><td class="num">0.015 &rarr; 0.021</td><td>stable method; both data-halves recover the <em>identical</em> program (d=0.0000)</td></tr>
+        <tr><td class="k">futuresim / usa</td><td class="num">0.045</td><td class="num">0.135</td><td class="num">0.051 &rarr; 0.032</td><td>stable-ish</td></tr>
+        <tr><td class="k">react / can</td><td class="num">0.070</td><td class="num">0.073</td><td class="num">0.044 &rarr; 0.046</td><td>weak method</td></tr>
+        <tr><td class="k">react / usa</td><td class="num bad">none</td><td class="num">0.178</td><td class="num bad">0.252 &rarr; 0.487</td><td><b>incompressible</b>: no program found in 4 attempts</td></tr>
+        <tr><td class="k">analytica / usa</td><td class="num bad">0.108</td><td class="num">0.274</td><td class="num bad">0.073 &rarr; 0.285</td><td rowspan="2">the method itself changes day to day; residual drift +0.34</td></tr>
+        <tr><td class="k">analytica / can</td><td class="num bad">0.301</td><td class="num">0.396</td><td class="num">0.520 &rarr; 0.335</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="col"><p>Scale-up (results/exp2, 16 more groups under the hardened rules): 10 CLEAN,
+  5 marked <em>recovery-uninformative</em> (near-constant targets &mdash; copy-detection and program
+  recovery are both ill-posed there, flagged honestly, not counted), 1 no-program.</p></div>
+
+  <div class="col"><h3>Probe (7) &mdash; does the harness honour its own recovered rule?</h3>
+  <p>Each harness was continued from its real end-state to a probe day with search disabled and one
+  injected role-based news item (goalie out / top centre out / placebo). Its own program, run on
+  bindings re-extracted from the probe-day reasoning, gives the rule-implied forecast; the gap to the
+  actual forecast is live rule-compliance. Placebo moves &le;0.02; <b>all 8 directional probes moved
+  the correct direction</b>.</p></div>
+  <div class="tablewrap">
+    <table class="wide">
+      <thead><tr><th>harness</th><th>method stable?</th><th>tracks evidence?</th><th>honours own rule?</th><th>diagnosis</th></tr></thead>
+      <tbody>
+        <tr><td class="k">futuresim</td><td class="good">yes</td><td class="bad">poorly in replay</td><td class="good">yes (gaps &le;0.04)</td><td><b>rigidity lives in evidence <em>acquisition</em>, not belief revision</b> &mdash; handed the news, it updates exactly per its rule</td></tr>
+        <tr><td class="k">bayesian</td><td class="good">yes</td><td>mixed</td><td class="bad">asymmetric</td><td>compliant on good news (gap &le;0.02); over-drops on bad news vs its own rule (gap &minus;0.13)</td></tr>
+        <tr><td class="k">react</td><td class="bad">no</td><td class="good">yes</td><td>n/a &mdash; rule has no evidence channel</td><td>updates flow through machinery its recoverable structure does not contain (&Delta;rule=0, actual &plusmn;0.09&ndash;0.13)</td></tr>
+        <tr><td class="k">analytica</td><td class="bad">no</td><td class="good">best</td><td>unverdictable (floor&asymp;signal)</td><td>adapts by rewriting its method daily</td></tr>
       </tbody>
     </table>
   </div>
   <div class="col">
-    <p><b>E2.</b> No group passed the strict gate (MAE &le; 0.02 <em>and</em> &ge;80% in-tolerance
-    <em>and</em> zero failures) &mdash; these are descriptive fits, as the review demanded. The
-    headline observation is an <b>inversion</b>: the harness whose reasoning is most program-like
-    (futuresim &mdash; stable structure, tiny fit error) is the one whose belief was most rigid, and
-    the harness that tracked evidence best (analytica) is the one whose structure would not hold still
-    across days. In this pilot, structural stability and evidence-tracking pulled in opposite
-    directions &mdash; which, if it survives more questions, is exactly the kind of law the
-    belief-dynamics program is after.</p>
-    <div class="callout"><b>Circularity audit on the best result.</b> The bayesian/hockey_usa schema
-    contained <span class="mono">posterior_odds_usa_gold</span>, and
-    <span class="mono">prob(odds)</span> of it reconstructs the target to 3 decimals &mdash; a
-    transformed copy of the answer that slipped the probability-scale drop (the F7 channel in odds
-    clothing). Checked: <b>the recovered program never references that variable</b> &mdash; it rebuilds
-    the posterior from the prior and six likelihood ratios in log space, then shrinks toward the
-    prior. The OOS transfer (test MAE 0.016) stands on the structural program. Next-run fix queued:
-    extend the near-target drop to odds and logit transforms of the forecast.</div>
+    <div class="callout"><b>The one-line finding.</b> Method stability and evidence-tracking
+    anticorrelate across all four harnesses &mdash; and the probe localises <em>where</em> each
+    harness's rigidity or plasticity lives: in the searching (futuresim), in the update rule's
+    asymmetry (bayesian), outside the recoverable structure entirely (react), or in daily rewrites of
+    the structure itself (analytica).</div>
   </div>
 </section>
 
@@ -1042,8 +1072,18 @@ python scripts/run_exp1.py --stage e1 --model gpt-5-mini --effort medium \
 <span class="c"># E2: variable extraction + program synthesis per harness x question</span>
 python scripts/run_exp1.py --stage e2 --extractor gpt-5.2 --out results/exp1
 
-<span class="c"># measurements: separation, movement, fit table, programs, trajectories</span>
-python scripts/analyze_exp1.py results/exp1</pre>
+<span class="c"># measurements: coherence, movement, fit table, programs, trajectories</span>
+python scripts/analyze_exp1.py results/exp1
+
+<span class="c"># the standing audit (exploit battery, parser + fit reproduction, date-gate replay)</span>
+python scripts/audit_exp1.py results/exp1
+
+<span class="c"># belief dynamics: trajectories, residual drift, sensitivity, distances (+ --temporal)</span>
+python scripts/beliefdyn.py results/exp1 --temporal
+
+<span class="c"># the rigidity probe + multi-coordinate rule-compliance</span>
+python scripts/run_probe.py --out results/exp1
+python scripts/probe_rule_check.py --out results/exp1</pre>
   <div class="col">
     <p>Outputs: <code>results/exp1/e1_runs.jsonl</code> &mdash; every turn with its searches (queries +
     returned titles), full reasoning text, carry blocks, forecast, and any error;
@@ -1056,8 +1096,7 @@ python scripts/analyze_exp1.py results/exp1</pre>
 <footer>
   Companion to the BeliefLens research-program page. Corpus: shash42/forecast-news (HF) ·
   questions: nikhilchandak/OpenForesight, split aljazeera2026Q1 · papers: FutureSim
-  arXiv:2605.15188, Analytica arXiv:2604.23072, Agent-BRACE arXiv:2605.11436. This ledger is updated
-  in place as the run and the review proceed.
+  arXiv:2605.15188, Analytica arXiv:2604.23072, Agent-BRACE arXiv:2605.11436. Code, data and every log on this page: <a href="https://github.com/DDI-droid/belieflens">github.com/DDI-droid/belieflens</a>. This ledger is updated in place as the work proceeds; results current as of 2026-09-09.
 </footer>
 
 </div>

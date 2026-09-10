@@ -13,3 +13,6 @@ __pycache__/
 /tmp/
 report/pages/
 tools/
+
+# Vendored clone (reproduce via futuresim_integration/README.md)
+vendor/

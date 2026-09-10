@@ -1,0 +1,71 @@
+diff --git a/scripts/run_forecast_sim.py b/scripts/run_forecast_sim.py
+index f71bc60..1bcfd4b 100644
+--- a/scripts/run_forecast_sim.py
++++ b/scripts/run_forecast_sim.py
+@@ -306,6 +306,9 @@ def create_inference_provider(provider: str, model: str, args, openrouter_provid
+         if provider_cfg:
+             kwargs["provider"] = provider_cfg
+         return OpenRouterInference(model, **kwargs)
++    elif provider == "openai":
++        from inference.openai_direct import OpenAIDirectInference
++        return OpenAIDirectInference(model)
+     else:
+         raise ValueError(f"Unknown provider: {provider}")
+ 
+@@ -770,7 +773,7 @@ def main():
+     # Single-agent settings (used when no config file)
+     parser.add_argument("--scaffold", choices=["basic", "allQ", "allq", "allqd", "qwenbasic", "qwenallq", "minimalHarness"], default="basic",
+                        help="Agent scaffold to use (default: basic). Qwen wrappers are available as qwenbasic/qwenallq.")
+-    parser.add_argument("--provider", choices=["vllm", "openrouter"], default="openrouter",
++    parser.add_argument("--provider", choices=["vllm", "openrouter", "openai"], default="openrouter",
+                        help="Inference provider: 'vllm' (local) or 'openrouter' (API)")
+     parser.add_argument("--model_path", default=MODEL_PATH,
+                        help="Path to model for VLLM inference")
+@@ -863,7 +866,7 @@ def main():
+     # Search settings
+     parser.add_argument("--search_db", default="",
+                        help="Path to LanceDB directory for article search (optional)")
+-    parser.add_argument("--search_backend", choices=["", "lancedb", "openreward"], default=os.getenv("FSIM_SEARCH_BACKEND", ""),
++    parser.add_argument("--search_backend", choices=["", "lancedb", "openreward", "bm25"], default=os.getenv("FSIM_SEARCH_BACKEND", ""),
+                        help="Search backend for search_news: lancedb when --search_db is set, or openreward")
+     parser.add_argument("--embedding_model", default=EMBEDDING_MODEL_PATH,
+                        help="Path to embedding model for semantic search")
+@@ -1194,7 +1197,19 @@ def main():
+     search_backend = (getattr(args, "search_backend", "") or "").strip().lower()
+     if not search_backend and args.search_db:
+         search_backend = "lancedb"
+-    if search_backend == "openreward":
++    if search_backend == "bm25":
++        print(f"\nSetting up BM25/SQLite search tool (BeliefLens adapter)...", flush=True)
++        from futuresim_agents.search_tools.bm25_sqlite import BM25SqliteSearchTool
++
++        bm25_db = os.getenv("BL_INDEX", str(REPO_ROOT.parent.parent / "data" / "news.db"))
++        search_tool = BM25SqliteSearchTool(bm25_db)
++        if search_tool.is_available:
++            n = search_tool.count_articles()
++            print(f"  BM25 search ready over {bm25_db} ({n} articles)")
++        else:
++            print(f"  Warning: no index at {bm25_db}; search unavailable")
++            search_tool = None
++    elif search_backend == "openreward":
+         print(f"\nSetting up OpenReward search tool...", flush=True)
+         from futuresim_agents.search_tools.openreward import OpenRewardSearchTool
+ 
+@@ -1332,7 +1347,16 @@ def main():
+             print(f"Using OpenRouter model: {args.openrouter_model}")
+             inference_provider = OpenRouterInference(args.openrouter_model)
+             model_name = args.openrouter_model
+-        
++
++        elif args.provider == "openai":
++            from inference.openai_direct import OpenAIDirectInference
++            if not args.openrouter_model:
++                print("Error: --openrouter_model is required in single-agent mode with --provider openai")
++                sys.exit(1)
++            print(f"Using OpenAI model: {args.openrouter_model}")
++            inference_provider = OpenAIDirectInference(args.openrouter_model)
++            model_name = args.openrouter_model
++
+         # Create agent
+         model_short = get_model_short_name(model_name)
+         agent_id = f"basic_{model_short}_001"

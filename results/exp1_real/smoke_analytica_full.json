@@ -1,0 +1,158 @@
+{
+ "mode": "par",
+ "harness": "analytica_full",
+ "question_id": "hockey_usa",
+ "date": "2026-01-14",
+ "rollout": 0,
+ "forecast": 0.43846,
+ "trace": {
+  "tree": {
+   "n0": {
+    "id": "n0",
+    "statement": "Will the United States win the men's ice hockey gold medal at the Milano Cortina 2026 Winter Olympics?",
+    "parent": null,
+    "p": 0.43846,
+    "report": "I weight the direct outcome node (n4: winning the gold-medal game) most heavily because it is the immediate determinant of the parent proposition. Reaching the final (n3) is an important precursor and thus receives a substantial but smaller weight; NHL participation (n2) raises the team\u2019s odds and gets moderate weight, while mere participation (n1) is necessary but adds little marginal information",
+    "b0": 0.02,
+    "betas": {
+     "n1": 0.049,
+     "n2": 0.098,
+     "n3": 0.245,
+     "n4": 0.588
+    },
+    "last_grounded": null
+   },
+   "n1": {
+    "id": "n1",
+    "statement": "The United States men's national ice hockey team plays in the men's ice hockey tournament at the Milano Cortina 2026 Winter Olympics.",
+    "parent": "n0",
+    "p": 0.99,
+    "report": "Multiple news articles from late 2025 and early 2026 indicate the United States men\u2019s ice hockey team is set to participate in the Milano Cortina 2026 Winter Olympics. On Jan 2, 2026 several pieces (Straits Times) reported the U.S. unveiled a 25-player roster for the Milano\u2011Cortina Games and discussed team chemistry and medal ambitions. Earlier reports in December 2025 (Straits Times, Independent)",
+    "b0": 0.0,
+    "betas": {},
+    "last_grounded": "2026-01-14"
+   },
+   "n2": {
+    "id": "n2",
+    "statement": "The National Hockey League (NHL) formally allows NHL-contracted players to participate in the Milano Cortina 2026 Winter Olympics and at least one NHL-contracted player appears on the United States men's Olympic ice hockey roster.",
+    "parent": "n0",
+    "p": 0.9,
+    "report": "Multiple news reports from Dec 2025\u2013Jan 2026 indicate the NHL has agreed to break its season and permit NHL-contracted players to participate at Milano Cortina 2026 (Dec 10, 2025; Jan 2, 2026). Coverage around Jan 2026 describes the return of NHL stars to the Games and says the U.S. and Canada have handpicked top NHL talent for their Olympic rosters (Jan 2, 2026). The NHL and the players\u2019 union ex",
+    "b0": 0.0,
+    "betas": {},
+    "last_grounded": "2026-01-14"
+   },
+   "n3": {
+    "id": "n3",
+    "statement": "The United States men's national ice hockey team reaches the gold-medal game (the final) at the Milano Cortina 2026 Winter Olympics.",
+    "parent": "n0",
+    "p": 0.55,
+    "report": "Sources from Dec 2025\u2013Jan 2026 report that NHL players will return to Milano\u2011Cortina and both the U.S. and Canada announced strong, NHL\u2011heavy 25\u2011player rosters (Canada Dec 31, 2025; U.S. Jan 2, 2026). The U.S. roster (Jan 2, 2026) is described as having strong goaltending, a solid defensive core and high\u2011powered forwards and is nearly identical to the group that reached the 4 Nations Face\u2011Off fina",
+    "b0": 0.0,
+    "betas": {},
+    "last_grounded": "2026-01-14"
+   },
+   "n4": {
+    "id": "n4",
+    "statement": "The United States men's national ice hockey team wins the gold-medal game (is awarded the gold medal) at the Milano Cortina 2026 Winter Olympics.",
+    "parent": "n0",
+    "p": 0.25,
+    "report": "Evidence through 2026-01-14 does not include any game results; the Milano Cortina 2026 tournament has not yet been played. A Jan 2, 2026 report (The Straits Times) states that NHL stars are returning to the Olympics, boosting both the United States and Canada and making the men's tournament more competitive. Other retrieved items from Dec 2025 relate to ceremonies honoring the 1980 'Miracle on Ice",
+    "b0": 0.0,
+    "betas": {},
+    "last_grounded": "2026-01-14"
+   }
+  },
+  "edits": {
+   "added": [
+    "n1",
+    "n2",
+    "n3",
+    "n4"
+   ],
+   "removed": []
+  },
+  "searches": [
+   {
+    "leaf": "n1",
+    "query": "United States men's ice hockey team qualified Milano Cortina 2026 Olympics",
+    "from": null,
+    "n": 5,
+    "titles": [
+     "US unveil men's ice hockey roster looking to end gold-medal drought at Milano-Cortina Games",
+     "NHL stars return to boost US, Canada ice hockey teams at Milano-Cortina Games",
+     "Canada announce men's ice hockey roster for Milano-Cortina",
+     "US hope team chemistry helps men's ice hockey squad snap gold-medal drought at Milano-Cortina",
+     "Winter Olympics schedule Milano Cortina 2026 and day-by-day events"
+    ]
+   },
+   {
+    "leaf": "n1",
+    "query": "USA men's ice hockey roster Milano Cortina 2026 Olympic tournament United States will play",
+    "from": null,
+    "n": 5,
+    "titles": [
+     "US unveil men's ice hockey roster looking to end gold-medal drought at Milano-Cortina Games",
+     "US hope team chemistry helps men's ice hockey squad snap gold-medal drought at Milano-Cortina",
+     "NHL stars return to boost US, Canada ice hockey teams at Milano-Cortina Games",
+     "Canada announce men's ice hockey roster for Milano-Cortina",
+     "Short rinks cut no ice with NHL players, including McDavid"
+    ]
+   },
+   {
+    "leaf": "n3",
+    "query": "United States men's hockey Milano Cortina 2026 roster NHL participation news 2025 2026",
+    "from": null,
+    "n": 5,
+    "titles": [
+     "US unveil men's ice hockey roster looking to end gold-medal drought at Milano-Cortina Games",
+     "Canada announce men's ice hockey roster for Milano-Cortina",
+     "NHL stars return to boost US, Canada ice hockey teams at Milano-Cortina Games",
+     "US hope team chemistry helps men's ice hockey squad snap gold-medal drought at Milano-Cortina",
+     "Short rinks cut no ice with NHL players, including McDavid"
+    ]
+   },
+   {
+    "leaf": "n4",
+    "query": "The United States men's national ice hockey team wins the gold-medal game (is aw",
+    "from": null,
+    "n": 5,
+    "titles": [
+     "Trump to honor USA 'Miracle on Ice' team during Congressional Medal Act signing",
+     "NHL stars return to boost US, Canada ice hockey teams at Milano-Cortina Games",
+     "Trump to honor \"Miracle on Ice\" U.S. Olympic men's hockey team during Congressional Medal Act signing today",
+     "Trump to honor \"Miracle on Ice\" U.S. Olympic men's hockey team during Congressional Medal Act signing today",
+     "Trump to honor \"Miracle on Ice\" U.S. Olympic men's hockey team during Congressional Medal Act signing today"
+    ]
+   },
+   {
+    "leaf": "n2",
+    "query": "The National Hockey League (NHL) formally allows NHL-contracted players to parti",
+    "from": null,
+    "n": 5,
+    "titles": [
+     "NHL says test event at unfinished Milan-Cortina ice hockey arena was 'good trial run'",
+     "NHL stars return to boost US, Canada ice hockey teams at Milano-Cortina Games",
+     "Winter Olympic organisers insist ice hockey arena ready despite hole in rink",
+     "NHL players' Olympic return threatened by arena construction delays",
+     "NHL 'optimistic' about Olympic rink but could pull out"
+    ]
+   },
+   {
+    "leaf": "n3",
+    "query": "USA men's national ice hockey team exhibition results pre-Olympics 2025 2026 predictions Milano Cortina 2026",
+    "from": null,
+    "n": 5,
+    "titles": [
+     "US unveil men's ice hockey roster looking to end gold-medal drought at Milano-Cortina Games",
+     "NHL stars return to boost US, Canada ice hockey teams at Milano-Cortina Games",
+     "Canada announce men's ice hockey roster for Milano-Cortina",
+     "Winter Olympics schedule Milano Cortina 2026 and day-by-day events",
+     "US hope team chemistry helps men's ice hockey squad snap gold-medal drought at Milano-Cortina"
+    ]
+   }
+  ]
+ },
+ "secs": 42.0,
+ "error": ""
+}

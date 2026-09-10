@@ -36,6 +36,17 @@ SEMI_DATE = "2026-02-20"
 
 # ------------------------------------------------------------------ load
 
+def _nsearch(rec):
+    """Search count: prompt-shape records log tool_calls; real-harness
+    records log them inside trace["searches"]."""
+    if "tool_calls" in rec:
+        return len(rec["tool_calls"] or [])
+    tr = rec.get("trace")
+    if isinstance(tr, dict):
+        return len(tr.get("searches") or [])
+    return 0
+
+
 def load():
     seq = defaultdict(dict)          # (h,q,s) -> {date: p}
     seq_tools = defaultdict(list)    # (h) -> [n_searches...]
@@ -52,7 +63,7 @@ def load():
             for t in r["turns"]:
                 if t["forecast"] is not None:
                     seq[(r["harness"], r["question_id"], r["sample"])][t["date"]] = t["forecast"]
-                seq_tools[r["harness"]].append(len(t.get("tool_calls", [])))
+                seq_tools[r["harness"]].append(_nsearch(t))
     par = defaultdict(list)          # (h,q,d) -> [p...]
     par_tools = defaultdict(list)
     for line in (OUT / "e1_independent.jsonl").read_text(encoding="utf-8").splitlines():
@@ -61,12 +72,14 @@ def load():
         r = json.loads(line)
         if r["forecast"] is not None:
             par[(r["harness"], r["question_id"], r["date"])].append(r["forecast"])
-        par_tools[r["harness"]].append(len(r.get("tool_calls", [])))
+        par_tools[r["harness"]].append(_nsearch(r))
     dates = sorted({d for (_, _, d) in par})
     return seq, par, dates, seq_tools, par_tools
 
 
 seq, par, DATES, seq_tools, par_tools = load()
+_present = {h for (h, _, _) in seq} | {h for (h, _, _) in par}
+HARNESSES = [h for h in HARNESSES if h in _present] or sorted(_present)
 K_SEQ = len({s for (_, _, s) in seq})
 K_PAR = max((len(v) for v in par.values()), default=0)
 
@@ -154,7 +167,9 @@ for h in HARNESSES:
 # ------------------------------------------------------------------ svg kit
 
 CV = {"analytica": "var(--c1)", "bayesian": "var(--c2)",
-      "futuresim": "var(--c3)", "react": "var(--c4)"}
+      "futuresim": "var(--c3)", "react": "var(--c4)",
+      "analytica_full": "var(--c1)", "blf_full": "var(--c2)",
+      "futuresim_full": "var(--c3)"}
 W, HP, ML, MR, MT, MB = 470, 260, 44, 14, 22, 34
 
 

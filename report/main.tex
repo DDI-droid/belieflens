@@ -12,7 +12,7 @@
 \title{\textbf{BeliefLens: Belief Dynamics in LLM Forecasting Harnesses}\\[2pt]
 \Large Technical Report}
 \author{BeliefLens Project\\\small Deep Digital Intelligence \; · \; \url{https://github.com/DDI-droid/belieflens}}
-\date{September 10, 2026 \; · \; v1.0}
+\date{September 10, 2026 \; · \; v1.1}
 
 \begin{document}
 \maketitle
@@ -20,8 +20,10 @@
 \begin{abstract}
 LLM forecasters are \emph{judgmental} forecasters: behind every stated probability is something
 that behaves like a belief, and behind every revision an update rule. BeliefLens measures both.
-Four reasoning harnesses (\hr{react}, \hr{futuresim}, \hr{analytica}, \hr{bayesian}), built as
-prompts over one shared substrate on a 339{,}801-article date-gated news corpus, forecast real
+Four \emph{harness shapes} (\hr{react}, \hr{futuresim}, \hr{analytica}, \hr{bayesian})---prompt-defined
+re-implementations of each source system's reasoning structure, with shape-specific state-carry
+code, executed by one shared single-agent tool loop on a 339{,}801-article date-gated news
+corpus---forecast real
 January--March 2026 events under two protocols: \textbf{sequential} (five dates in order, own
 history carried; $k{=}5$ rollouts) and \textbf{parallel} (fresh one-shot per date; $k_2{=}5$
 rollouts), so every belief is a distribution. From each trajectory we \emph{recover the reasoning
@@ -98,9 +100,22 @@ prebuilt hybrid index; retrieval (BM25) is weaker than the paper's but byte-iden
 harnesses, so it is a constant of the experiment, not a confound in it.
 
 \subsection{Harnesses}
-Four system prompts over one substrate (same model, tools, tool budget, output contract
-\texttt{FORECAST:\,$p$}); Table~\ref{tab:harness}. Installing the papers' repositories would
-compare repositories; holding the substrate fixed makes reasoning shape the only variable.
+\textbf{What these are, precisely.} All four run on \emph{one} shared code path: a
+single-agent tool loop (at most five \texttt{search\_news} rounds, then a forced answer, output
+contract \texttt{FORECAST:\,$p$}). What differs per harness is (i) the system prompt imposing the
+reasoning structure and (ii) a small amount of shape-specific code---for \hr{futuresim} and
+\hr{bayesian}, programmatic extraction of the memory/belief block and its re-injection the next
+day. They are therefore \emph{prompt-level re-implementations of each source system's reasoning
+shape}, not the source systems themselves: real Analytica builds its proposition tree and computes
+its linear composition \emph{in orchestration code} with parallel per-leaf grounder agents; the
+real FutureSim harness maintains task state as an executable dataframe with structured memory
+tools; the BLF system adds multi-trial aggregation and calibration. Our \hr{react} coincides with
+its source (ReAct \emph{is} a prompt pattern over a tool loop); the others approximate.
+This is a deliberate control---installing the papers' repositories would compare repositories,
+whereas holding the substrate fixed makes reasoning shape the only manipulated variable---but it
+bounds the claims: every cross-harness result in this report is a statement about reasoning
+shapes at fixed capacity, \textbf{not} an evaluation of the source systems.
+Table~\ref{tab:harness} summarises.
 
 \begin{table}[tbp]\centering\small
 \begin{tabular}{@{}llll@{}}
@@ -310,7 +325,7 @@ recover the \emph{identical} program \\
 \hr{futuresim}/USA & 0.045 & 0.135 & 0.051$\,\to\,$0.032 & stable-ish \\
 \hr{react}/CAN & 0.070 & 0.073 & 0.044$\,\to\,$0.046 & weak method \\
 \hr{react}/USA & none & 0.178 & 0.252$\,\to\,$0.487 & incompressible \\
-\hr{analytica}/USA & 0.108 & 0.274 & 0.073$\,\to\,$0.285 & \multirow{2}{*}{structure changes daily} \\
+\hr{analytica}/USA & 0.108 & 0.274 & 0.073$\,\to\,$0.285 & \multirow{2}{*}{\parbox{4.4cm}{structure changes daily (in-context shape; \S\ref{sec:limits}, item 8)}} \\
 \hr{analytica}/CAN & 0.301 & 0.396 & 0.520$\,\to\,$0.335 & \\
 \bottomrule
 \end{tabular}
@@ -408,7 +423,7 @@ re-parse identically); 1{,}432 searches replayed with zero gate breaches; every 
 variable tables, referenced by no program.
 
 \FloatBarrier
-\section{Limitations}
+\section{Limitations}\label{sec:limits}
 (1) One question pair carries all directional claims; the scale-up set is all-YES by construction
 and supports only recovery statistics. (2) $k{=}5$ per cell bounds distributional claims; PIT
 placement has 5-draw granularity. (3) Draws are ordinary decoding variation (current reasoning
@@ -418,7 +433,12 @@ representations. (5) Retrieval is BM25, weaker than FutureSim's hybrid index---h
 across harnesses, but absolute accuracy is a lower bound. (6) The extractor knows the outcomes;
 the audit bounds but does not eliminate this channel. (7) Program recovery inherits the
 expressiveness of the program space; ``incompressible'' means no program \emph{in this space}
-within four repair attempts.
+within four repair attempts. (8) The harnesses are prompt-level shapes on a shared loop
+(\S3.2), not the source systems: in particular, real Analytica enforces its tree and linear
+composition \emph{in code}, so ``\hr{analytica}'s structure changes daily'' characterises a
+model asked to follow that procedure in-context, and would be prevented by construction in the
+original system; conversely, \hr{bayesian}'s recovered fixed formula is the more striking for
+being maintained by the model with no code enforcement.
 
 \section{Conclusion and Future Work}
 Treating a forecasting agent's reasoning as a recoverable, literal-free program turns belief

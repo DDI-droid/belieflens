@@ -176,6 +176,7 @@ footer{margin-top:80px;padding-top:22px;border-top:1px solid var(--rule);font-si
     <div class="tl"><span class="t">19:25</span><span class="e"><b>All fixable findings patched and verified</b>: every reviewer exploit now rejected by the validator; the strict parser reproduces all 80 collected forecasts byte-identically (the parser bugs were latent, never realised &mdash; E1 data stands); crash-safety and audit-trail fixes in place. Corrected analysis metrics written.</span></div>
     <div class="tl"><span class="t">19:55</span><span class="e"><b>E2 complete on the patched pipeline: 8/8 groups, zero crashes.</b> The fixes visibly earned their keep in the log &mdash; near-target drops firing (F7), an instance-key exclusion never needed, incremental writes landing after every group (F3), OOS holdouts computed for all 8 groups (F2). First results in <a href="#results">&sect;10</a>.</span></div>
     <div class="tl"><span class="t">Sep 06</span><span class="e"><b>Anti-gaming hardening + full audit.</b> New rules: no value may hide in a <em>name</em> (<span class="mono">two=2</span> rejected), no constant-only arithmetic, no dead code, answer-drop extended to odds/percent/complement transforms. Audit of all collected data: 11/11 exploits rejected, 80/80 forecasts reproduce, 483 searches gate-replayed with zero breaches, all groups CLEAN (<a href="#review">&sect;9b</a>).</span></div>
+    <div class="tl"><span class="t">Sep 09</span><span class="e"><b>Independent E1 condition added</b> (fresh eyes per date, k2=5 rollouts &rarr; per-date belief distributions; 200/200 turns) with the anchoring analysis: futuresim carries the largest anchor gap and updates one date behind the evidence; bayesian's sequential trajectory is unbiased vs fresh eyes (&sect;10).</span></div>
     <div class="tl"><span class="t">Sep 08</span><span class="e"><b>Belief-dynamics analyses, the rigidity probe, and the four-question scale-up</b> (results/exp2: 32 runs, 949 searches gate-replayed clean). Everything lands in the rewritten <a href="#results">&sect;10</a>.</span></div>
   </div>
 </section>
@@ -1004,7 +1005,18 @@ def forecast():
   </div>
   <div class="col"><p>Replicated on a second event: on <span class="mono">nepal_shah</span> every
   harness catches a real news break between 03-05 and 03-15 (react 0.07&rarr;0.84, bayesian
-  0.34&rarr;0.89) &mdash; and futuresim again rises least (0.06&rarr;0.66).</p></div>
+  0.34&rarr;0.89) &mdash; and futuresim again rises least (0.06&rarr;0.66).</p>
+  <p><b>Sequential vs independent (the anchoring measurement).</b> A second E1 condition: for every
+  date, a <em>fresh</em> run with no forecast history and no carry, k2=5 rollouts, giving a per-date
+  distribution of the evidence-conditioned belief (200 turns, hockey pair, all four harnesses).
+  Sanity holds (day-1 sequential is an independent draw by construction; 12/16 inside the fresh-eyes
+  spread). Results: <span class="mono">futuresim</span> has the largest signed anchor gap
+  (<b>+0.072</b> &mdash; its sequential belief sits above what the evidence alone supports) and is the
+  <b>only harness that lags</b>: its sequential forecasts track <em>yesterday's</em> fresh-eyes belief
+  better than today's. <span class="mono">bayesian</span> is nearly unbiased (+0.009) &mdash; its
+  trajectory is its evidence-conditioned belief. And a refinement: futuresim's <em>fresh-eyes</em>
+  belief also stays at 0.13&ndash;0.16 on the final's eve (react 0.29, bayesian 0.46) &mdash; part of
+  its rigidity is baked into the base-rate-first <em>procedure</em>, independent of history.</p></div>
 
   <div class="col"><h3>Recovery (E2) &mdash; is the reasoning a stable program?</h3>
   <p>One literal-free program per harness&times;question, fitted over all 10 instances; two

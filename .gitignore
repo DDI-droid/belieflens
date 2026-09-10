@@ -11,3 +11,5 @@ __pycache__/
 
 # Session scratch
 /tmp/
+report/pages/
+tools/

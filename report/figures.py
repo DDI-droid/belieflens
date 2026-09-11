@@ -151,7 +151,7 @@ def fig_flow():
             if j == 0:
                 ax.set_ylabel("P(event)")
             if i == 0 and j == 0:
-                ax.legend(loc="upper left", ncols=1)
+                ax.legend(loc="lower left", fontsize=7.2)
     fig.tight_layout()
     save(fig, "fig_flow")
 
@@ -188,43 +188,40 @@ def fig_gain():
 def fig_anchor():
     gap = {h: mean(M["per"][h]["gap"]) for h in HARNESSES}
     lag = {h: mean(M["per"][h]["lag0"]) - mean(M["per"][h]["lag1"]) for h in HARNESSES}
-    fig, axes = plt.subplots(1, 2, figsize=(7.0, 2.4))
+    fig, axes = plt.subplots(1, 2, figsize=(7.0, 2.5))
     pairs = ((axes[0], gap, "signed anchor gap  (sequential − parallel mean)"),
              (axes[1], lag, "lag advantage  (>0 ⇒ tracks yesterday better)"))
     for ax, vals, title in pairs:
         ys = [vals[h] for h in HARNESSES]
-        bars = ax.bar(HARNESSES, ys, color=[C[h] for h in HARNESSES], width=0.55)
+        span = max(abs(min(ys)), abs(max(ys)))
+        ax.bar(HARNESSES, ys, color=[C[h] for h in HARNESSES], width=0.55)
         ax.axhline(0, color="#c3c2b7", lw=0.9)
-        for b_, v in zip(bars, ys):
-            ax.text(b_.get_x() + b_.get_width() / 2, v + (0.002 if v >= 0 else -0.006),
-                    "%+.3f" % v, ha="center", va="bottom" if v >= 0 else "top",
-                    fontsize=7.5, color=INK2)
-        ax.set_title(title, loc="left", fontsize=8.5)
-        ax.margins(y=0.25)
+        for xi, v in enumerate(ys):
+            off = span * 0.10
+            ax.text(xi, v + (off if v >= 0 else -off), "%+.3f" % v, ha="center",
+                    va="bottom" if v >= 0 else "top", fontsize=8, color=INK2)
+        ax.set_ylim(-span * 1.55, span * 1.55)
+        ax.set_title(title, loc="left", fontsize=8.6)
+        ax.tick_params(axis="x", labelsize=8)
     fig.tight_layout()
     save(fig, "fig_anchor")
-
-
 # ==================================================================== F4/F5
 def _stab_pit(metrics, names, colmap, labmap, fname, title_sfx):
-    fig, axes = plt.subplots(1, 2, figsize=(7.0, 2.7))
+    fig, axes = plt.subplots(1, 2, figsize=(7.0, 2.8))
     ax = axes[0]
     for h in names:
         st = metrics["per"][h]["stab"]
         xs = [k for k, d in enumerate(DATES) if d in st]
         if not xs:
             continue
-        ax.plot(xs, [st[DATES[k]] for k in xs], color=colmap[h], lw=1.8, marker="o", ms=3)
-        ax.annotate(labmap[h], (xs[-1], st[DATES[xs[-1]]]), xytext=(4, 0), fontsize=7,
-                    textcoords="offset points", color=colmap[h], fontweight="bold",
-                    annotation_clip=False)
-    ax.axhline(1.0, color=MUT, lw=0.8, ls=(0, (4, 2)))
-    ax.text(0.04, 0.96, "1 = same spread as fresh eyes", fontsize=7, color=MUT,
-            transform=ax.transAxes, ha="left", va="top")
+        ax.plot(xs, [st[DATES[k]] for k in xs], color=colmap[h], lw=1.8, marker="o",
+                ms=3, label=labmap[h])
+    ax.axhline(1.0, color=MUT, lw=0.9, ls=(0, (4, 2)))
     ax.set_xticks(X, DL)
-    ax.margins(x=0.16)
+    ax.margins(x=0.06)
     ax.set_ylabel("sd(sequential) / sd(parallel)")
     ax.set_title("Is history a variance reducer?" + title_sfx, loc="left")
+    ax.legend(loc="upper right", fontsize=7.4, ncols=2 if len(names) > 2 else 1)
     ax = axes[1]
     for i, h in enumerate(names):
         vals = metrics["per"][h]["pit"]
@@ -234,52 +231,49 @@ def _stab_pit(metrics, names, colmap, labmap, fname, title_sfx):
                    s=14, color=colmap[h], alpha=0.4, lw=0)
         med = sorted(vals)[len(vals) // 2]
         ax.plot([med, med], [i - 0.22, i + 0.22], color=INK, lw=2)
-    ax.axvline(50, color=MUT, lw=0.8, ls=(0, (4, 2)))
-    ax.set_yticks(range(len(names)), [labmap[h] for h in names])
+    ax.axvline(50, color=MUT, lw=0.9, ls=(0, (4, 2)))
+    ax.set_yticks(range(len(names)), [labmap[h] for h in names], fontsize=8)
     ax.set_xlim(-3, 103)
     ax.set_xlabel("percentile of sequential forecast within parallel draws")
     ax.set_title("Placement (black = median; 50 = unbiased)", loc="left")
     fig.tight_layout()
     save(fig, fname)
-
-
 def fig_stab_pit():
     _stab_pit(M, HARNESSES, C, {h: h for h in HARNESSES}, "fig_stab_pit", "")
 
 
 # ==================================================================== F6/F7
 def _coh_brier(metrics, names, colmap, labmap, fname):
-    fig, axes = plt.subplots(2, 2, figsize=(7.0, 4.4), sharex=True)
-    spec = (("coh", "Coherence  P(USA)+P(CAN)", (0.4, 1.35), 1.0),
+    fig, axes = plt.subplots(2, 2, figsize=(7.0, 4.5), sharex=True)
+    spec = (("coh", "Coherence  P(USA)+P(CAN)", (0.4, 1.2), 1.0),
             ("brier", "Brier vs truth (lower is better)", (0.0, 0.62), 0.25))
+    handles = None
     for j, (fld, ttl, ylim, ref) in enumerate(spec):
         for k, cond in enumerate(("seq", "par")):
             ax = axes[j][k]
-            for n_i, h in enumerate(names):
+            for h in names:
                 ser = metrics["per"][h]["%s_%s" % (fld, cond)]
                 xs = [i for i, d in enumerate(DATES) if d in ser]
                 if not xs:
                     continue
                 ax.plot(xs, [ser[DATES[i]] for i in xs], color=colmap[h], lw=1.8,
-                        marker="o", ms=2.8)
-                dy = [6, -8, 11, -12, 15, -16][n_i % 6]
-                ax.annotate(labmap[h], (xs[-1], ser[DATES[xs[-1]]]), xytext=(4, dy),
-                            textcoords="offset points", fontsize=6.5, color=colmap[h],
-                            fontweight="bold", annotation_clip=False)
+                        marker="o", ms=2.8, label=labmap[h])
             if ref is not None:
-                ax.axhline(ref, color=MUT, lw=0.8, ls=(0, (4, 2)))
+                ax.axhline(ref, color=MUT, lw=0.9, ls=(0, (4, 2)))
             ax.set_ylim(*ylim)
-            ax.margins(x=0.14)
+            ax.margins(x=0.05)
             ax.set_title("%s — %s" % (ttl, "sequential" if cond == "seq" else "parallel"),
                          loc="left", fontsize=8.3)
             if j == 1:
                 ax.set_xticks(X, DL)
+            if handles is None:
+                handles, _lab = ax.get_legend_handles_labels()
+    fig.legend(handles, [labmap[h] for h in names], loc="lower center",
+               ncols=min(len(names), 4), fontsize=8, bbox_to_anchor=(0.5, -0.035))
     fig.tight_layout()
     save(fig, fname)
-
-
 def fig_coh_brier():
-    _coh_brier(M, HARNESSES, C, {h: h[:4] for h in HARNESSES}, "fig_coh_brier")
+    _coh_brier(M, HARNESSES, C, {h: h for h in HARNESSES}, "fig_coh_brier")
 
 
 # =================================================================== search
@@ -324,35 +318,40 @@ def fig_recovery():
         oos.append(o if (o is not None and o == o) else None)
         t = (bd.get("temporal_holdout") or {}).get(g, {}).get("test_mae")
         tmp.append(t if (t is not None and t == t) else None)
-    fig, ax = plt.subplots(figsize=(7.0, 2.9))
+    fig, ax = plt.subplots(figsize=(7.0, 3.2))
     w = 0.26
-    series = ((-w, ins, 1.0), (0, oos, 0.72), (w, tmp, 0.45))
+    series = ((-w, ins, 1.0), (0, oos, 0.70), (w, tmp, 0.42))
     for off, vals, alpha in series:
         for i, v in enumerate(vals):
-            h = groups[i].split("/")[0]
             if v is None:
-                ax.text(i + off, 6e-4, "×", ha="center", color=MUT, fontsize=9)
+                ax.text(i + off, 6e-4, "\u00d7", ha="center", color=MUT, fontsize=10)
                 continue
-            ax.bar(i + off, max(v, 4e-4), width=w * 0.92, color=C[h], alpha=alpha)
+            ax.bar(i + off, max(v, 4e-4), width=w * 0.92,
+                   color=C[groups[i].split("/")[0]], alpha=alpha)
+    proxies = [plt.Rectangle((0, 0), 1, 1, facecolor="#4b4b47", alpha=a)
+               for a in (1.0, 0.70, 0.42)]
+    ax.legend(proxies, ["in-sample fit", "blind sample holdout",
+                        "blind temporal holdout"],
+              loc="upper left", fontsize=7.6, ncols=3)
     ax.set_yscale("log")
-    ax.set_ylim(4e-4, 1.0)
-    ax.axhline(0.02, color=INK2, lw=0.9, ls=(0, (4, 2)))
-    ax.text(7.45, 0.023, "tolerance 0.02", fontsize=7, color=INK2, ha="right")
+    ax.set_ylim(4e-4, 1.6)
+    ax.axhline(0.02, color=INK2, lw=1.0, ls=(0, (4, 2)))
+    ax.text(-0.5, 0.026, "tolerance 0.02", fontsize=7.6, color=INK2, ha="left")
+    ax.set_xlim(-0.62, 7.6)
     ax.set_xticks(range(len(groups)),
-                  [g.replace("hockey_", "").replace("/", "\n") for g in groups], fontsize=7.5)
+                  [g.replace("hockey_", "").replace("/", "\n") for g in groups],
+                  fontsize=8)
     ax.set_ylabel("MAE (log scale)")
-    ax.set_title("Program recovery — one literal-free program per group. "
-                 "Darker→lighter: in-sample fit, blind sample holdout, blind temporal holdout",
-                 loc="left", fontsize=8.3)
+    ax.set_title("Program recovery \u2014 one literal-free program per group",
+                 loc="left", fontsize=9)
     fig.tight_layout()
     save(fig, "fig_recovery")
-
-
 # ==================================================================== probe
 def fig_probe():
     pr = jload(R1 / "probe_results.json")
     rc = jload(R1 / "probe_rule_check.json")
-    fig, axes = plt.subplots(1, 2, figsize=(7.0, 2.9))
+    fig, axes = plt.subplots(1, 2, figsize=(7.0, 3.5),
+                             gridspec_kw={"width_ratios": [1.45, 1.0]})
     ax = axes[0]
     directional = [j for j in pr if j["condition"] != "placebo"]
     for yi, j in enumerate(directional):
@@ -361,13 +360,13 @@ def fig_probe():
         ax.plot([j["implied"], act], [yi, yi], color=GRID, lw=1.2, zorder=1)
         ax.scatter([j["implied"]], [yi], marker="s", s=26, color=INK2, zorder=2)
         ax.scatter([act], [yi], marker="o", s=30, color=C[h], zorder=3)
-    ax.axvline(0, color="#c3c2b7", lw=0.8)
+    ax.axvline(0, color="#c3c2b7", lw=0.9)
     ax.set_yticks(range(len(directional)),
                   ["%s s%d %s" % (j["key"].split("/")[0], j["sample"], j["condition"])
-                   for j in directional], fontsize=6.2)
+                   for j in directional], fontsize=7.2)
     ax.invert_yaxis()
-    ax.set_xlabel(r"forecast change on probe day  ($\Delta$)")
-    ax.set_title("Implied by own rule (square) vs actual (dot)", loc="left", fontsize=8.3)
+    ax.set_xlabel("forecast change on probe day")
+    ax.set_title("Implied by own rule (square) vs actual (dot)", loc="left", fontsize=8.6)
     ax = axes[1]
     for i, h in enumerate(HARNESSES):
         for k, c_ in enumerate(["toward", "against", "placebo"]):
@@ -376,37 +375,34 @@ def fig_probe():
             if gs:
                 ax.bar(i + (k - 1) * 0.27, mean(gs), width=0.25, color=C[h],
                        alpha=[1.0, 0.65, 0.35][k])
-    ax.set_xticks(range(4), HARNESSES, fontsize=7.5)
-    ax.set_ylabel("|actual − rule-implied|")
-    ax.set_title("Rule-compliance gap (dark→light: toward, against, placebo)",
-                 loc="left", fontsize=8.3)
+    ax.set_xticks(range(4), HARNESSES, fontsize=7)
+    ax.set_ylabel("|actual - rule-implied|")
+    ax.set_title("Rule-compliance gap\n(dark to light: toward, against, placebo)",
+                 loc="left", fontsize=8.6)
     fig.tight_layout()
     save(fig, "fig_probe")
-
-
 # ================================================================= exemplar
 def fig_exemplar():
     rep = jload(R1 / "e2_programs.json")
     bd = jload(R1 / "beliefdyn.json")
     tj = rep["bayesian/hockey_usa"]["trajectory"]["s0"]
     dts = sorted(tj)
-    fig, axes = plt.subplots(1, 2, figsize=(7.0, 2.6))
+    fig, axes = plt.subplots(1, 2, figsize=(7.0, 2.8))
     ax = axes[0]
-    trio = (("lr_recent_game_results", "#2a78d6"),
-            ("lr_opponent_canada_strength", "#c98500"),
-            ("prior_odds_usa_gold", "#1baf7a"))
-    for name, col in trio:
-        ax.plot(range(len(dts)), [tj[d].get(name, 0) for d in dts], lw=1.8,
-                marker="o", ms=3, color=col)
-        ax.annotate(name.replace("lr_", "").replace("_", " ")[:18],
-                    (len(dts) - 1, tj[dts[-1]].get(name, 0)), xytext=(4, 0),
-                    textcoords="offset points", fontsize=6.5, color=col,
-                    fontweight="bold", annotation_clip=False)
-    ax.axhline(1.0, color=MUT, lw=0.7, ls=(0, (4, 2)))
+    trio = (("lr_recent_game_results", "#2a78d6", "LR: recent game results"),
+            ("lr_opponent_canada_strength", "#c98500", "LR: opponent strength"),
+            ("prior_odds_usa_gold", "#1baf7a", "prior odds, USA gold"))
+    top = 0.0
+    for name, col, lab in trio:
+        vals = [tj[d].get(name, 0) for d in dts]
+        top = max(top, max(vals))
+        ax.plot(range(len(dts)), vals, lw=1.8, marker="o", ms=3, color=col, label=lab)
+    ax.axhline(1.0, color=MUT, lw=0.8, ls=(0, (4, 2)))
     ax.set_xticks(range(len(dts)), [d[5:] for d in dts])
-    ax.margins(x=0.16)
-    ax.set_title("bayesian/USA: belief in its discovered coordinates (s0)",
-                 loc="left", fontsize=8.3)
+    ax.margins(x=0.05)
+    ax.set_ylim(top=top * 1.6)
+    ax.legend(loc="upper left", fontsize=7.2)
+    ax.set_title("Belief in its discovered coordinates", loc="left", fontsize=8.6)
     ax.set_ylabel("value")
     ax = axes[1]
     ax.plot(range(len(dts)), [tj[d]["_target"] for d in dts], color="#eb6834",
@@ -414,14 +410,16 @@ def fig_exemplar():
     th = bd["temporal_holdout"].get("bayesian/hockey_usa", {})
     ax.set_xticks(range(len(dts)), [d[5:] for d in dts])
     ax.set_ylim(0, 0.6)
-    ax.set_title("…and the forecast those coordinates produce (early-theory program\n"
-                 "predicts the held-out late days at MAE %.3f)" % th.get("test_mae", float("nan")),
-                 loc="left", fontsize=8.3)
+    ax.margins(x=0.05)
+    ax.set_title("...and the forecast they produce", loc="left", fontsize=8.6)
     ax.set_ylabel("P(USA gold)")
-    fig.tight_layout()
+    ax.text(0.04, 0.07, "early-theory program predicts the\nheld-out late days at MAE %.3f"
+            % th.get("test_mae", float("nan")), transform=ax.transAxes, fontsize=7.4,
+            color=INK2, va="bottom")
+    fig.suptitle("bayesian / USA, rollout s0", x=0.008, y=0.99, ha="left",
+                 fontsize=9, fontweight="bold", color=INK)
+    fig.tight_layout(rect=(0, 0, 1, 0.96))
     save(fig, "fig_exemplar")
-
-
 # ============================================================ E1R: real tier
 def fig_flow_real():
     fig, axes = plt.subplots(2, 2, figsize=(7.0, 4.6), sharex=True, sharey=True)
@@ -435,7 +433,7 @@ def fig_flow_real():
             if j == 0:
                 ax.set_ylabel("P(event)")
             if i == 0 and j == 0:
-                ax.legend(loc="upper left", ncols=1)
+                ax.legend(loc="lower left", fontsize=7.2)
     fig.tight_layout()
     save(fig, "fig_flow_real")
 
@@ -459,8 +457,7 @@ def fig_coh_brier_real():
 
 def fig_shape_vs_real():
     """The headline of E1R: same metric, prompt shape vs real orchestration."""
-    pairs = [("analytica", "analytica_full", "Analytica lineage"),
-             ("bayesian", "blf_full", "BLF lineage")]
+    pairs = [("analytica", "analytica_full"), ("bayesian", "blf_full")]
 
     def tot_move(store, h):
         vals = []
@@ -479,35 +476,35 @@ def fig_shape_vs_real():
         ("coherence at last date\n(1 = additive)",
          lambda h, real: (M2 if real else M)["per"][h]["coh_seq"][DATES[-1]], False),
     ]
-    fig, axes = plt.subplots(1, 3, figsize=(7.0, 2.6))
+    fig, axes = plt.subplots(1, 3, figsize=(7.0, 2.7))
     for ax, (title, fn, zeroline) in zip(axes, metrics):
         labels, vals, cols, alphas = [], [], [], []
-        for shape, real, _lin in pairs:
+        for shape, real in pairs:
             labels.append(shape)
             vals.append(fn(shape, False))
             cols.append(C[shape])
-            alphas.append(0.5)
+            alphas.append(0.45)
             labels.append(RLAB[real])
             vals.append(fn(real, True))
             cols.append(C[real])
             alphas.append(1.0)
         ys = list(range(len(vals)))[::-1]
+        hi = max(vals + ([1.0] if zeroline else []))
+        lo = min(vals + [0.0])
+        pad = (hi - lo) * 0.20
         for y, v, col, a in zip(ys, vals, cols, alphas):
-            ax.barh(y, v, height=0.62, color=col, alpha=a)
-            ax.text(v + (0.012 if v >= 0 else -0.012), y, "%.2f" % v,
-                    va="center", ha="left" if v >= 0 else "right",
-                    fontsize=7.2, color=INK2)
+            ax.barh(y, v, height=0.6, color=col, alpha=a)
+            xt = v + (hi - lo) * 0.03 if v >= 0 else (hi - lo) * 0.03
+            ax.text(xt, y, "%.2f" % v, va="center", ha="left", fontsize=7.8, color=INK2)
+        ax.set_xlim(lo - pad, hi + pad * 1.45)
         if zeroline:
-            ax.axvline(0, color="#c3c2b7", lw=0.9)
-            ax.axvline(1.0, color=MUT, lw=0.8, ls=(0, (4, 2)))
-        ax.set_yticks(ys, labels, fontsize=7)
+            ax.axvline(0, color="#8a8a80", lw=1.0)
+            ax.axvline(1.0, color=MUT, lw=0.9, ls=(0, (4, 2)))
+        ax.set_yticks(ys, labels, fontsize=7.6)
         ax.set_title(title, loc="left", fontsize=8.2)
-        ax.margins(x=0.32)
         ax.grid(axis="y", visible=False)
     fig.tight_layout()
     save(fig, "fig_shape_vs_real")
-
-
 # ============================================================ schematics
 def _box(ax, x, y, w, h, title, subs, edge, fill, tcol=None):
     ax.add_patch(FancyBboxPatch((x, y), w, h, boxstyle="round,pad=0.006,rounding_size=0.012",
@@ -642,32 +639,33 @@ def fig_pipeline():
 
 
 def fig_timeline():
-    fig, ax = plt.subplots(figsize=(7.0, 1.25))
-    ax.set_xlim(-0.4, 5.9)
+    fig, ax = plt.subplots(figsize=(7.0, 1.55))
+    ax.set_xlim(-0.55, 5.75)
     ax.set_ylim(0, 1)
     ax.axis("off")
-    ax.plot([0, 4], [0.52, 0.52], color="#b9b8ae", lw=1.2, zorder=1)
-    ax.plot([4, 5.1], [0.52, 0.52], color=MUT, lw=1.0, ls=(0, (4, 3)), zorder=1)
+    ax.plot([0, 4], [0.42, 0.42], color="#b9b8ae", lw=1.4, zorder=1)
+    ax.plot([4, 5.1], [0.42, 0.42], color=MUT, lw=1.1, ls=(0, (4, 3)), zorder=1)
     for i, d in enumerate(DL):
         last = (i == len(DL) - 1)
-        ax.scatter([i], [0.52], s=64 if last else 40,
+        ax.scatter([i], [0.42], s=78 if last else 46,
                    color=C["futuresim"] if last else C["analytica"], zorder=3)
-        ax.text(i, 0.33, d, ha="center", fontsize=7.5, color=INK2)
-    ax.scatter([5.1], [0.52], s=44, facecolor="white", edgecolor=MUT, lw=1.3, zorder=3)
-    ax.text(5.1, 0.33, "02-22", ha="center", fontsize=7.5, color=MUT)
-    ax.text(0, 0.75, "five forecast dates per rollout", fontsize=7.2, color=INK2, ha="left")
-    ax.text(4, 0.75, "semifinals: both teams win", fontsize=7.2,
-            color=C["futuresim"], ha="center", fontweight="bold")
-    ax.text(5.1, 0.75, "final — outside the window", fontsize=7.2, color=MUT, ha="right")
-    ax.text(0, 0.10, "Because the gold medal is decided after the last date any harness sees, "
-                     "a correct forecaster raises BOTH paired beliefs toward ~0.5 on 02-20; "
-                     "coherence, not separation, is the legitimate metric.",
-            fontsize=6.8, color=INK2, ha="left")
+        ax.text(i, 0.17, d, ha="center", fontsize=9, color=INK2)
+    ax.scatter([5.1], [0.42], s=52, facecolor="white", edgecolor=MUT, lw=1.5, zorder=3)
+    ax.text(5.1, 0.17, "02-22", ha="center", fontsize=9, color=MUT)
+    # staggered annotations -- three different heights, never the same baseline
+    ax.annotate("five forecast dates per rollout", xy=(1.5, 0.42), xytext=(1.5, 0.93),
+                ha="center", fontsize=8.6, color=INK2,
+                arrowprops=dict(arrowstyle="-", color=GRID, lw=0.9,
+                                connectionstyle="arc3,rad=0"))
+    ax.annotate("semifinals:\nboth teams win", xy=(4, 0.42), xytext=(4, 0.60),
+                ha="center", va="bottom", fontsize=8.6, color=C["futuresim"],
+                fontweight="bold")
+    ax.annotate("final — outside\nthe window", xy=(5.1, 0.42), xytext=(5.1, 0.60),
+                ha="center", va="bottom", fontsize=8.2, color=MUT)
     fig.tight_layout()
     save(fig, "fig_timeline")
 
 
-# ---------------------------------------------------------------- driver
 FIGURES = [
     ("fig_timeline", fig_timeline),
     ("fig_arch_analytica", fig_arch_analytica),

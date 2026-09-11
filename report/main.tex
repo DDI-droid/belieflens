@@ -8,6 +8,14 @@
 \newcommand{\pl}{\textsc{par}}
 \newcommand{\hr}[1]{\texttt{#1}}
 \graphicspath{{figs/}}
+% float packing -- keep figures with text, not on near-empty pages
+\renewcommand{\topfraction}{0.92}
+\renewcommand{\bottomfraction}{0.80}
+\renewcommand{\textfraction}{0.06}
+\renewcommand{\floatpagefraction}{0.78}
+\setcounter{topnumber}{3}
+\setcounter{bottomnumber}{2}
+\setcounter{totalnumber}{5}
 
 \title{\textbf{BeliefLens: Belief Dynamics in LLM Forecasting Harnesses}\\[3pt]
 \Large Recovering the update rule, and what changes when the harness is real}
@@ -625,12 +633,11 @@ group & in-sample & sample-holdout & temporal (early$\to$late) & reading \\
 \midrule
 \hr{bayesian}/USA & 0.027 & \textbf{0.016} & 0.0005$\,\to\,$\textbf{0.003} & fixed log-odds formula \\
 \hr{bayesian}/CAN & --- & 0.063 & 0.0003$\,\to\,$\textbf{0.002} & same; full-fit failed to execute \\
-\hr{futuresim}/CAN & \textbf{0.018} & \textbf{0.014} & 0.015$\,\to\,$0.021 & stable; both halves
-recover the \emph{identical} program \\
+\hr{futuresim}/CAN & \textbf{0.018} & \textbf{0.014} & 0.015$\,\to\,$0.021 & stable; either half recovers the same program \\
 \hr{futuresim}/USA & 0.045 & 0.135 & 0.051$\,\to\,$0.032 & stable-ish \\
 \hr{react}/CAN & 0.070 & 0.073 & 0.044$\,\to\,$0.046 & weak method \\
 \hr{react}/USA & none & 0.178 & 0.252$\,\to\,$0.487 & incompressible \\
-\hr{analytica}/USA & 0.108 & 0.274 & 0.073$\,\to\,$0.285 & \multirow{2}{*}{\parbox{4.4cm}{structure changes daily (in-context shape; \S\ref{sec:limits}, item 8)}} \\
+\hr{analytica}/USA & 0.108 & 0.274 & 0.073$\,\to\,$0.285 & \multirow{2}{*}{\parbox{4.2cm}{structure changes daily}} \\
 \hr{analytica}/CAN & 0.301 & 0.396 & 0.520$\,\to\,$0.335 & \\
 \bottomrule
 \end{tabular}
@@ -999,7 +1006,9 @@ search would not change your belief. You have at most {tmax} steps.
 
 %=========================================================================
 \section{Per-date Series}\label{app:series}
-All values as stored in \texttt{results/*/seqpar\_metrics.json}.
+Table~\ref{tab:series} gives every per-date series behind the figures of
+\S\ref{sec:e1res} and \S\ref{sec:e1r}, exactly as stored in each run directory's
+\texttt{seqpar\_metrics.json}.
 
 \begin{table}[htbp]\centering\small
 \begin{tabular}{@{}llrrrrr@{}}
@@ -1039,6 +1048,8 @@ pair (0.25 is the constant-$\tfrac12$ forecaster).}
 
 %=========================================================================
 \section{Cost Ledger and Reproduction}\label{app:cost}
+Table~\ref{tab:cost} is the Tier-B cost ledger.
+
 \begin{table}[htbp]\centering\small
 \begin{tabular}{@{}lrrrr@{}}
 \toprule

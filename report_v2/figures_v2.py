@@ -38,6 +38,7 @@ QTEXT = {q.id: q.text for q in QUESTIONS}
 QSHORT = {"hockey_usa": "USA gold", "hockey_can": "Canada gold",
           "ausopen_alcaraz": "Alcaraz title", "ausopen_djokovic": "Djokovic title",
           "superbowl_sea": "Seahawks win", "superbowl_ne": "Patriots win"}
+# NOTE: never truncate these in a label; a clipped "Alcaraz titl" reads as a typo.
 GLAB = {"hockey": "Olympic hockey gold", "ausopen": "Australian Open title",
         "superbowl": "Super Bowl LX"}
 STEPS = ["D1", "D2", "D3", "D4", "D5"]
@@ -296,51 +297,54 @@ def fig_search():
 def fig_probe():
     """The outcome probe: D6 sits two days after resolution, so the corpus
     already contains the answer."""
-    fig, axes = plt.subplots(1, 2, figsize=(7.0, 3.0),
-                             gridspec_kw={"width_ratios": [1.45, 1.0]})
+    fig, axes = plt.subplots(1, 2, figsize=(7.0, 3.4),
+                             gridspec_kw={"width_ratios": [1.6, 1.0]})
     ax = axes[0]
     qids = [q.id for q in QUESTIONS]
-    yl = []
-    y = 0
-    for q in qids:
+    off = {h: (i - 1.5) * 0.19 for i, h in enumerate(H)}
+    for qi, q in enumerate(qids):
         for h in H:
             pr = M["per"][h]["probe"][q]
             if pr["seq_prev_mean"] is None or pr["seq_mean"] is None:
-                y += 1
-                yl.append("")
                 continue
             a, b = pr["seq_prev_mean"], pr["seq_mean"]
+            y = qi + off[h]
             ax.annotate("", xy=(b, y), xytext=(a, y),
-                        arrowprops=dict(arrowstyle="-|>", color=C[h], lw=1.6,
+                        arrowprops=dict(arrowstyle="-|>", color=C[h], lw=1.5,
                                         shrinkA=0, shrinkB=0))
-            ax.scatter([a], [y], s=16, color=C[h], alpha=0.5, zorder=3)
-            yl.append("%s %s" % (QSHORT[q][:12], HLAB[h][:9]))
-            y += 1
-        ax.scatter([TRUTH[q]], [y - 2.5], marker="*", s=95, color=INK, zorder=4)
-        y += 1
-        yl.append("")
-    ax.set_yticks(range(len(yl)), yl, fontsize=5.6)
+            ax.scatter([a], [y], s=13, color=C[h], alpha=0.55, zorder=3)
+        ax.scatter([TRUTH[q]], [qi], marker="*", s=130, color=INK, zorder=5,
+                   edgecolor="white", linewidth=0.6)
+        if qi:
+            ax.axhline(qi - 0.5, color=GRID, lw=0.8)
+    ax.set_yticks(range(len(qids)),
+                  ["%s\n(%s)" % (QSHORT[q], "YES" if TRUTH[q] else "NO")
+                   for q in qids], fontsize=7.2)
     ax.invert_yaxis()
-    ax.set_xlim(-0.05, 1.05)
-    ax.set_xlabel("P(event):  D5  ->  D6 (answer now in the corpus)")
-    ax.set_title("Does the belief move to the truth? (star = truth)",
-                 loc="left", fontsize=8.4)
+    ax.set_xlim(-0.06, 1.06)
+    ax.set_ylim(len(qids) - 0.5, -0.5)
+    ax.set_xlabel("P(event):  D5  ->  D6")
+    ax.set_title("Does the belief move to the truth?  (star = truth)",
+                 loc="left", fontsize=8.6)
+    ax.grid(axis="y", visible=False)
+    handles = [plt.Line2D([0], [0], color=C[h], lw=2.2, label=HLAB[h]) for h in H]
+    ax.legend(handles=handles, loc="lower center", ncols=2, fontsize=7,
+              bbox_to_anchor=(0.5, -0.42))
+
     ax = axes[1]
     err = [mean([v["abs_err_seq"] for v in M["per"][h]["probe"].values()
                  if v["abs_err_seq"] is not None]) for h in H]
-    bars = ax.barh(range(len(H)), err, color=[C[h] for h in H], height=0.6)
-    for i, (b_, e) in enumerate(zip(bars, err)):
-        ax.text(e + 0.012, i, "%.3f" % e, va="center", fontsize=8, color=INK2)
+    ax.barh(range(len(H)), err, color=[C[h] for h in H], height=0.6)
+    for i, e in enumerate(err):
+        ax.text(e + 0.012, i, "%.3f" % e, va="center", fontsize=8.2, color=INK2)
     ax.set_yticks(range(len(H)), [HLAB[h] for h in H], fontsize=8)
     ax.invert_yaxis()
-    ax.set_xlim(0, max(err) * 1.35)
+    ax.set_xlim(0, max(err) * 1.4)
     ax.set_xlabel("mean |forecast - truth| at D6")
-    ax.set_title("Residual error once the answer is public", loc="left", fontsize=8.4)
+    ax.set_title("Residual error once the answer is public", loc="left", fontsize=8.6)
     ax.grid(axis="y", visible=False)
     fig.tight_layout()
     save(fig, "fig_probe")
-
-
 # ------------------------------------------------------- F: v1 vs v2 (gain)
 def fig_replication():
     v1 = {"analytica_full": 0.05, "blf_full": -0.17}
@@ -358,11 +362,13 @@ def fig_replication():
                     va="bottom" if v >= 0 else "top", fontsize=8, color=INK2)
     ax.axhline(0, color="#8a8a80", lw=1.0)
     ax.axhline(1.0, color=MUT, lw=0.9, ls=(0, (4, 2)))
-    ax.text(1.42, 1.02, "1.0 = tracks evidence exactly", fontsize=7, color=MUT)
+    ax.text(-0.42, 1.03, "1.0 = tracks evidence exactly", fontsize=7, color=MUT,
+            ha="left", va="bottom")
     ax.set_xticks(range(len(names)), [HLAB[h] for h in names], fontsize=8.4)
-    ax.set_ylim(-0.35, 1.2)
+    ax.set_xlim(-0.55, 1.55)
+    ax.set_ylim(-0.35, 1.28)
     ax.set_ylabel("update gain")
-    ax.legend(loc="upper left", fontsize=7.6)
+    ax.legend(loc="upper right", fontsize=7.6)
     ax.set_title("The v1 sign on blf-full does not replicate", loc="left", fontsize=8.8)
     fig.tight_layout()
     save(fig, "fig_replication")
@@ -370,14 +376,13 @@ def fig_replication():
 
 # --------------------------------------------------------------- F: timeline
 def fig_timeline():
-    fig, ax = plt.subplots(figsize=(7.0, 2.2))
-    ax.set_ylim(-0.6, 2.7)
+    fig, ax = plt.subplots(figsize=(7.0, 2.5))
+    ax.set_ylim(-1.45, 2.75)
     ax.axis("off")
     for gi, (g, (qa, _)) in enumerate(GROUPS.items()):
         dates = TRAJECTORY[qa] + [PROBE_DATE[qa]]
         y = 2 - gi
-        xs = list(range(6))
-        ax.plot(xs[:5], [y] * 5, color="#b9b8ae", lw=1.3, zorder=1)
+        ax.plot(range(5), [y] * 5, color="#b9b8ae", lw=1.3, zorder=1)
         ax.plot([4, 5], [y, y], color=MUT, lw=1.1, ls=(0, (4, 3)), zorder=1)
         for k, d in enumerate(dates):
             probe = (k == 5)
@@ -388,20 +393,22 @@ def fig_timeline():
         ax.text(-0.55, y, GLAB[g], ha="right", va="center", fontsize=8.4,
                 fontweight="bold", color=INK)
     for k, lab in enumerate(["D1", "D2", "D3", "D4", "D5", "D6"]):
-        ax.text(k, 2.5, lab, ha="center", fontsize=8, color=MUT, fontweight="bold")
-    ax.text(5, 2.5, "D6", ha="center", fontsize=8, color=INK, fontweight="bold")
+        ax.text(k, 2.52, lab, ha="center", fontsize=8,
+                color=INK if k == 5 else MUT, fontweight="bold")
     ax.set_xlim(-2.4, 5.7)
-    ax.text(5.0, -0.45, "D6 = resolution + 2 days: the OUTCOME PROBE,\n"
-                        "by which point the corpus contains the answer",
-            ha="center", fontsize=7.2, color=INK2)
-    ax.text(2, -0.45, "D1..D5 = R-39, -25, -14, -7, -2\nthe forecasting trajectory",
-            ha="center", fontsize=7.2, color=INK2)
+    # annotations go BELOW every row, clear of the date ticks
+    ax.annotate("", xy=(0, -0.62), xytext=(4, -0.62),
+                arrowprops=dict(arrowstyle="<->", color="#b9b8ae", lw=1.0))
+    ax.text(2, -0.80, "D1..D5 -- the forecasting trajectory\n"
+                      "at R-39, -25, -14, -7, -2 days",
+            ha="center", va="top", fontsize=7.2, color=INK2)
+    ax.annotate("", xy=(5, -0.62), xytext=(5, -0.30),
+                arrowprops=dict(arrowstyle="-", color="#b9b8ae", lw=1.0))
+    ax.text(5.6, -0.80, "D6 = R+2 -- the OUTCOME PROBE:\n"
+                        "the corpus now contains the answer",
+            ha="right", va="top", fontsize=7.2, color=INK)
     fig.tight_layout()
     save(fig, "fig_timeline")
-
-
-
-
 # ------------------------------------------------------------ F: schematics
 def _box(ax, x, y, w, h, title, subs, edge, fill, tcol=None):
     ax.add_patch(FancyBboxPatch((x, y), w, h,

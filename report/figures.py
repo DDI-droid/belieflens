@@ -208,7 +208,7 @@ def fig_anchor():
     save(fig, "fig_anchor")
 # ==================================================================== F4/F5
 def _stab_pit(metrics, names, colmap, labmap, fname, title_sfx):
-    fig, axes = plt.subplots(1, 2, figsize=(7.0, 2.9))
+    fig, axes = plt.subplots(1, 2, figsize=(7.0, 2.7))
     ax = axes[0]
     handles = None
     for h in names:
@@ -249,7 +249,7 @@ def fig_stab_pit():
 
 # ==================================================================== F6/F7
 def _coh_brier(metrics, names, colmap, labmap, fname):
-    fig, axes = plt.subplots(2, 2, figsize=(7.0, 4.5), sharex=True)
+    fig, axes = plt.subplots(2, 2, figsize=(7.0, 4.1), sharex=True)
     spec = (("coh", "Coherence  P(USA)+P(CAN)", (0.4, 1.2), 1.0),
             ("brier", "Brier vs truth (lower is better)", (0.0, 0.62), 0.25))
     handles = None
@@ -392,7 +392,7 @@ def fig_exemplar():
     bd = jload(R1 / "beliefdyn.json")
     tj = rep["bayesian/hockey_usa"]["trajectory"]["s0"]
     dts = sorted(tj)
-    fig, axes = plt.subplots(1, 2, figsize=(7.0, 2.8))
+    fig, axes = plt.subplots(1, 2, figsize=(7.0, 2.6))
     ax = axes[0]
     trio = (("lr_recent_game_results", "#2a78d6", "LR: recent game results"),
             ("lr_opponent_canada_strength", "#c98500", "LR: opponent strength"),
@@ -407,8 +407,7 @@ def fig_exemplar():
     ax.margins(x=0.05)
     ax.set_ylim(top=top * 1.6)
     ax.legend(loc="upper left", fontsize=7.2)
-    ax.set_title("bayesian / USA (s0): belief in its discovered coordinates",
-                 loc="left", fontsize=8.4)
+    ax.set_title("Belief in its discovered coordinates", loc="left", fontsize=8.4)
     ax.set_ylabel("value")
     ax = axes[1]
     ax.plot(range(len(dts)), [tj[d]["_target"] for d in dts], color="#eb6834",
@@ -417,7 +416,7 @@ def fig_exemplar():
     ax.set_xticks(range(len(dts)), [d[5:] for d in dts])
     ax.set_ylim(0, 0.6)
     ax.margins(x=0.05)
-    ax.set_title("...and the forecast they produce", loc="left", fontsize=8.6)
+    ax.set_title("...and the forecast they produce", loc="left", fontsize=8.4)
     ax.set_ylabel("P(USA gold)")
     ax.text(0.04, 0.07, "early-theory program predicts the\nheld-out late days at MAE %.3f"
             % th.get("test_mae", float("nan")), transform=ax.transAxes, fontsize=7.4,
@@ -671,6 +670,126 @@ def fig_timeline():
     save(fig, "fig_timeline")
 
 
+def fig_diag_real():
+    """Real-tier diagnostics in one figure: stabilisation, placement,
+    coherence and Brier.  Kept as a single float so it fills a page instead
+    of stranding two half-empty ones."""
+    fig, axes = plt.subplots(3, 2, figsize=(7.0, 7.0))
+
+    # --- row 1 left: stabilisation
+    ax = axes[0][0]
+    for h in REAL:
+        st = M2["per"][h]["stab"]
+        xs = [k for k, d in enumerate(DATES) if d in st]
+        ax.plot(xs, [st[DATES[k]] for k in xs], color=C[h], lw=1.8, marker="o",
+                ms=3, label=RLAB[h])
+    ax.axhline(1.0, color=MUT, lw=0.9, ls=(0, (4, 2)))
+    ax.set_xticks(X, DL)
+    ax.margins(x=0.06)
+    ax.set_ylim(bottom=0)
+    ax.set_ylabel("sd(seq) / sd(par)")
+    ax.set_title("Is history a variance reducer?", loc="left", fontsize=8.6)
+    handles, labels = ax.get_legend_handles_labels()
+
+    # --- row 1 right: placement
+    ax = axes[0][1]
+    for i, h in enumerate(REAL):
+        vals = M2["per"][h]["pit"]
+        ax.scatter(vals, [i + (k % 7 - 3) * 0.035 for k, _ in enumerate(vals)],
+                   s=14, color=C[h], alpha=0.4, lw=0)
+        med = sorted(vals)[len(vals) // 2]
+        ax.plot([med, med], [i - 0.22, i + 0.22], color=INK, lw=2)
+    ax.axvline(50, color=MUT, lw=0.9, ls=(0, (4, 2)))
+    ax.set_yticks(range(len(REAL)), [RLAB[h] for h in REAL], fontsize=8)
+    ax.set_xlim(-3, 103)
+    ax.set_ylim(-0.6, len(REAL) - 0.4)
+    ax.set_xlabel("percentile within parallel draws")
+    ax.set_title("Placement (black = median; 50 = unbiased)", loc="left", fontsize=8.6)
+
+    # --- rows 2 and 3: coherence then Brier, sequential then parallel
+    spec = ((1, "coh", "Coherence  P(USA)+P(CAN)", (0.4, 1.2), 1.0),
+            (2, "brier", "Brier vs truth (lower is better)", (0.0, 0.62), 0.25))
+    for row, fld, ttl, ylim, ref in spec:
+        for k, cond in enumerate(("seq", "par")):
+            ax = axes[row][k]
+            for h in REAL:
+                ser = M2["per"][h]["%s_%s" % (fld, cond)]
+                xs = [i for i, d in enumerate(DATES) if d in ser]
+                ax.plot(xs, [ser[DATES[i]] for i in xs], color=C[h], lw=1.8,
+                        marker="o", ms=2.8)
+            ax.axhline(ref, color=MUT, lw=0.9, ls=(0, (4, 2)))
+            ax.set_ylim(*ylim)
+            ax.margins(x=0.05)
+            ax.set_xticks(X, DL)
+            ax.set_title("%s - %s" % (ttl, "sequential" if cond == "seq" else "parallel"),
+                         loc="left", fontsize=8.3)
+
+    fig.legend(handles, labels, loc="lower center", ncols=2, fontsize=8,
+               bbox_to_anchor=(0.5, -0.018))
+    fig.tight_layout(rect=(0, 0.022, 1, 1))
+    save(fig, "fig_diag_real")
+
+
+def fig_diag_real():
+    """Real-tier diagnostics in one figure: stabilisation, placement,
+    coherence and Brier.  Kept as a single float so it fills a page instead
+    of stranding two half-empty ones."""
+    fig, axes = plt.subplots(3, 2, figsize=(7.0, 7.0))
+
+    # --- row 1 left: stabilisation
+    ax = axes[0][0]
+    for h in REAL:
+        st = M2["per"][h]["stab"]
+        xs = [k for k, d in enumerate(DATES) if d in st]
+        ax.plot(xs, [st[DATES[k]] for k in xs], color=C[h], lw=1.8, marker="o",
+                ms=3, label=RLAB[h])
+    ax.axhline(1.0, color=MUT, lw=0.9, ls=(0, (4, 2)))
+    ax.set_xticks(X, DL)
+    ax.margins(x=0.06)
+    ax.set_ylim(bottom=0)
+    ax.set_ylabel("sd(seq) / sd(par)")
+    ax.set_title("Is history a variance reducer?", loc="left", fontsize=8.6)
+    handles, labels = ax.get_legend_handles_labels()
+
+    # --- row 1 right: placement
+    ax = axes[0][1]
+    for i, h in enumerate(REAL):
+        vals = M2["per"][h]["pit"]
+        ax.scatter(vals, [i + (k % 7 - 3) * 0.035 for k, _ in enumerate(vals)],
+                   s=14, color=C[h], alpha=0.4, lw=0)
+        med = sorted(vals)[len(vals) // 2]
+        ax.plot([med, med], [i - 0.22, i + 0.22], color=INK, lw=2)
+    ax.axvline(50, color=MUT, lw=0.9, ls=(0, (4, 2)))
+    ax.set_yticks(range(len(REAL)), [RLAB[h] for h in REAL], fontsize=8)
+    ax.set_xlim(-3, 103)
+    ax.set_ylim(-0.6, len(REAL) - 0.4)
+    ax.set_xlabel("percentile within parallel draws")
+    ax.set_title("Placement (black = median; 50 = unbiased)", loc="left", fontsize=8.6)
+
+    # --- rows 2 and 3: coherence then Brier, sequential then parallel
+    spec = ((1, "coh", "Coherence  P(USA)+P(CAN)", (0.4, 1.2), 1.0),
+            (2, "brier", "Brier vs truth (lower is better)", (0.0, 0.62), 0.25))
+    for row, fld, ttl, ylim, ref in spec:
+        for k, cond in enumerate(("seq", "par")):
+            ax = axes[row][k]
+            for h in REAL:
+                ser = M2["per"][h]["%s_%s" % (fld, cond)]
+                xs = [i for i, d in enumerate(DATES) if d in ser]
+                ax.plot(xs, [ser[DATES[i]] for i in xs], color=C[h], lw=1.8,
+                        marker="o", ms=2.8)
+            ax.axhline(ref, color=MUT, lw=0.9, ls=(0, (4, 2)))
+            ax.set_ylim(*ylim)
+            ax.margins(x=0.05)
+            ax.set_xticks(X, DL)
+            ax.set_title("%s - %s" % (ttl, "sequential" if cond == "seq" else "parallel"),
+                         loc="left", fontsize=8.3)
+
+    fig.legend(handles, labels, loc="lower center", ncols=2, fontsize=8,
+               bbox_to_anchor=(0.5, -0.018))
+    fig.tight_layout(rect=(0, 0.022, 1, 1))
+    save(fig, "fig_diag_real")
+
+
 FIGURES = [
     ("fig_timeline", fig_timeline),
     ("fig_arch_analytica", fig_arch_analytica),
@@ -690,8 +809,7 @@ if HAVE_REAL:
     FIGURES += [
         ("fig_flow_real", fig_flow_real),
         ("fig_gain_real", fig_gain_real),
-        ("fig_stab_pit_real", fig_stab_pit_real),
-        ("fig_coh_brier_real", fig_coh_brier_real),
+        ("fig_diag_real", fig_diag_real),
         ("fig_shape_vs_real", fig_shape_vs_real),
     ]
 

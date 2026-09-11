@@ -12,7 +12,7 @@
 \renewcommand{\topfraction}{0.92}
 \renewcommand{\bottomfraction}{0.80}
 \renewcommand{\textfraction}{0.06}
-\renewcommand{\floatpagefraction}{0.78}
+\renewcommand{\floatpagefraction}{0.70}
 \setcounter{topnumber}{3}
 \setcounter{bottomnumber}{2}
 \setcounter{totalnumber}{5}
@@ -523,51 +523,6 @@ source system's structure is requested or enforced.}
 \label{tab:e1r}
 \end{table}
 
-\begin{figure}[htbp]\centering
-\includegraphics[width=.95\textwidth]{fig_shape_vs_real.pdf}
-\caption{\textbf{The headline of E1R.} Same metric, both tiers, both lineages. Translucent bars:
-prompt shape. Solid: real orchestration code.}
-\label{fig:svr}
-\end{figure}
-
-\begin{figure}[htbp]\centering
-\includegraphics[width=.95\textwidth]{fig_flow_real.pdf}
-\caption{\textbf{Belief flow of the real systems} (same encoding as Fig.~\ref{fig:flow}; note the
-full $0$--$1$ vertical scale). \hr{analytica-full}'s carried belief on Canada climbs steadily
-while its own fresh-eyes mean dips to $0.44$ on 02-08 and recovers---history holding the belief
-above what that day's evidence alone supported. On USA its sequential mean is nearly flat across
-five weeks of news. \hr{blf-full} is tightly determined in both conditions (fresh-eyes
-sd ${\approx}0.03$) and drifts in small increments.}
-\label{fig:flow-real}
-\end{figure}
-
-\begin{figure}[htbp]\centering
-\includegraphics[width=.7\textwidth]{fig_gain_real.pdf}
-\caption{\textbf{Update gain of the real systems.} Real Analytica's slope of $0.05$ means a
-fresh-eyes movement of 10 points moves the carried belief by half a point. \hr{blf-full}'s
-negative slope should be read with its small $x$-range: its fresh-eyes mean rarely moves more
-than $\pm0.06$, so the sign is weakly identified; the robust statement is that its sequential
-movement is \emph{uncoupled} from evidence movement.}
-\label{fig:gain-real}
-\end{figure}
-
-\begin{figure}[htbp]\centering
-\includegraphics[width=.95\textwidth]{fig_stab_pit_real.pdf}
-\caption{\textbf{Stabilisation and placement, real tier.} \hr{analytica-full} sits far below 1
-through mid-window: carrying the tree strongly reduces cross-rollout variance.
-\hr{blf-full} sits above 1 throughout---carrying the belief state does not reduce variance at all.}
-\label{fig:stab-real}
-\end{figure}
-
-\begin{figure}[htbp]\centering
-\includegraphics[width=.95\textwidth]{fig_coh_brier_real.pdf}
-\caption{\textbf{Coherence and accuracy, real tier.} \hr{analytica-full}'s sequential Brier
-worsens monotonically while its parallel Brier improves---on identical evidence, carrying its own
-tree cost it accuracy that fresh eyes recovered.}
-\label{fig:coh-real}
-\end{figure}
-
-\FloatBarrier
 \subsection{What the real systems change}
 
 \paragraph{Rigidity is architectural.} The prompt-shape results \emph{understate} the source
@@ -611,6 +566,50 @@ structural dry run, but its live run is pending (\S\ref{sec:limits}). \hr{react}
 ``full'' variant: ReAct is a prompt pattern over a tool loop, and \S\ref{sec:tierA}'s \hr{react}
 \emph{is} its source system.
 
+\begin{figure}[htbp]\centering
+\includegraphics[width=.95\textwidth]{fig_shape_vs_real.pdf}
+\caption{\textbf{The headline of E1R.} Same metric, both tiers, both lineages. Translucent bars:
+prompt shape. Solid: real orchestration code.}
+\label{fig:svr}
+\end{figure}
+
+\begin{figure}[htbp]\centering
+\includegraphics[width=.95\textwidth]{fig_flow_real.pdf}
+\caption{\textbf{Belief flow of the real systems} (same encoding as Fig.~\ref{fig:flow}; note the
+full $0$--$1$ vertical scale). \hr{analytica-full}'s carried belief on Canada climbs steadily
+while its own fresh-eyes mean dips to $0.44$ on 02-08 and recovers---history holding the belief
+above what that day's evidence alone supported. On USA its sequential mean is nearly flat across
+five weeks of news. \hr{blf-full} is tightly determined in both conditions (fresh-eyes
+sd ${\approx}0.03$) and drifts in small increments.}
+\label{fig:flow-real}
+\end{figure}
+
+\begin{figure}[htbp]\centering
+\includegraphics[width=.7\textwidth]{fig_gain_real.pdf}
+\caption{\textbf{Update gain of the real systems.} Real Analytica's slope of $0.05$ means a
+fresh-eyes movement of 10 points moves the carried belief by half a point. \hr{blf-full}'s
+negative slope should be read with its small $x$-range: its fresh-eyes mean rarely moves more
+than $\pm0.06$, so the sign is weakly identified; the robust statement is that its sequential
+movement is \emph{uncoupled} from evidence movement.}
+\label{fig:gain-real}
+\end{figure}
+
+\begin{figure}[p]\centering
+\includegraphics[width=.93\textwidth]{fig_diag_real.pdf}
+\caption{\textbf{Real-tier diagnostics.} \textbf{Top left:} stabilisation ratio.
+\hr{analytica-full} sits far below 1 through mid-window---carrying the tree strongly reduces
+cross-rollout variance---while \hr{blf-full} sits above 1 throughout, so carrying the belief
+state does not reduce variance at all. \textbf{Top right:} placement of every sequential
+forecast within its date's fresh-eyes distribution. \textbf{Middle:} coherence,
+$P_\text{USA}{+}P_\text{CAN}$, which should approach 1. \textbf{Bottom:} plain Brier against
+the resolved outcomes; the dashed line at 0.25 is the constant-$\tfrac12$ forecaster.
+\hr{analytica-full}'s sequential Brier worsens monotonically while its parallel Brier
+improves---on identical evidence, carrying its own tree cost it accuracy that fresh eyes
+recovered.}
+\label{fig:diag-real}
+\end{figure}
+
+\FloatBarrier
 \FloatBarrier
 %=========================================================================
 \section{Experiment 2: Program Recovery}\label{sec:e2}
@@ -1010,7 +1009,7 @@ Table~\ref{tab:series} gives every per-date series behind the figures of
 \S\ref{sec:e1res} and \S\ref{sec:e1r}, exactly as stored in each run directory's
 \texttt{seqpar\_metrics.json}.
 
-\begin{table}[tp]\centering\small
+\begin{center}\small
 \begin{tabular}{@{}llrrrrr@{}}
 \toprule
 harness & series & 01-14 & 01-28 & 02-08 & 02-15 & 02-20 \\
@@ -1040,11 +1039,11 @@ harness & series & 01-14 & 01-28 & 02-08 & 02-15 & 02-20 \\
  & Brier (\seq/\pl) & .346/.349 & .363/.317 & .362/.353 & .361/.344 & .364/.346 \\
 \bottomrule
 \end{tabular}
-\caption{Per-date series, both tiers. Stabilisation is $\mathrm{sd}(\seq)/\mathrm{sd}(\pl)$;
+\captionof{table}{Per-date series, both tiers. Stabilisation is $\mathrm{sd}(\seq)/\mathrm{sd}(\pl)$;
 coherence is $P_\text{USA}{+}P_\text{CAN}$; Brier is the plain quadratic score pooled over the
 pair (0.25 is the constant-$\tfrac12$ forecaster).}
 \label{tab:series}
-\end{table}
+\end{center}
 
 %=========================================================================
 \section{Cost Ledger and Reproduction}\label{app:cost}

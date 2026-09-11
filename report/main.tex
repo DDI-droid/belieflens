@@ -265,8 +265,10 @@ sequential protocol (the anchoring pressure, applied uniformly); \hr{react} is t
 \paragraph{What Tier A is, and is not.} These are \emph{prompt-level re-implementations of each
 source system's reasoning shape}, not the source systems. Real Analytica builds its tree and
 computes its linear composition \emph{in orchestration code}, with parallel per-leaf grounder
-agents. The real FutureSim harness maintains task state as a file the agent edits, with shell and
-file tools. The real BLF system adds multi-trial aggregation and calibration. Holding the
+agents. The real FutureSim baseline agent (	exttt{basicAgent}) queries the question DataFrame by
+writing Python in a sandbox (	exttt{query\_df}), manages a structured memory store through
+four CRUD tools, submits a \emph{distribution} over outcomes it generates itself, and decides
+for itself when to advance the clock with 	exttt{next\_day}. The real BLF system adds multi-trial aggregation and calibration. Holding the
 substrate fixed is a deliberate control---installing three repositories would compare
 repositories, whereas fixing the substrate makes reasoning shape the only manipulated
 variable---but it bounds every Tier-A claim to being about \emph{shapes at fixed capacity}.
@@ -779,9 +781,22 @@ no program \emph{in this space} within four repair attempts.
 \item Experiments 1, 2 and the probe use prompt-level shapes on a shared loop
 (\S\ref{sec:tierA}), not the source systems. \S\ref{sec:e1r} closes this for the replay
 experiment on two of the three systems---and confirms the concern was material: the real
-architectures are substantially more rigid than their shapes. It remains open for E2 and the
-probe, and for FutureSim's simulator, whose integration passes a structural dry run but whose
-live run is pending.
+architectures are substantially more rigid than their shapes. \textbf{It remains open for
+\hr{futuresim}, which is the worst place for it to remain open}, because \hr{futuresim} carries
+more of this report's distinctive claims than any other harness: the only negative Tier-A update
+gain, the only positive lag advantage, the 80th-percentile placement, the semi-rise of zero, the
+cleanest program recovery, and the rule-compliance result behind ``rigidity lives in acquisition,
+not revision''. Every one of those is a statement about a prompt shape. The gap to the real thing
+is not small: their \texttt{basicAgent} manages memory through four CRUD tools rather than a
+200-word text block, queries the question table by writing Python, submits a distribution over
+outcomes it generates itself, and---most consequentially for us---\emph{chooses when to update}
+via \texttt{next\_day}, whereas our shape is forced to emit a forecast on every date. FutureSim's
+own anchoring finding is partly about agents declining to update at all, a behaviour our shape
+cannot exhibit by construction. The direction of the correction is therefore unpredictable,
+unlike the Analytica and BLF cases where the architecture could only add rigidity. The
+integration needed to close this gap is built and passes a structural dry run
+(\S\ref{sec:tierB}); only the paid run is outstanding. E2 and the probe likewise remain
+prompt-tier throughout.
 \item \hr{blf-full}'s negative update gain is weakly identified (its fresh-eyes mean moves little;
 Fig.~\ref{fig:gain-real}), and $K{=}3$ trials rather than the paper's $K{=}5$, with calibration
 omitted for lack of in-window training data, bound fidelity to the BLF paper.

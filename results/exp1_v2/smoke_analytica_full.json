@@ -1,0 +1,95 @@
+{
+ "mode": "par",
+ "harness": "analytica_full",
+ "question_id": "hockey_usa",
+ "date": "2026-01-14",
+ "rollout": 0,
+ "forecast": 0.4,
+ "trace": {
+  "tree": {
+   "n0": {
+    "id": "n0",
+    "statement": "Will the United States win the men's ice hockey gold medal at the Milano Cortina 2026 Winter Olympics?",
+    "parent": null,
+    "p": 0.4,
+    "report": "Child n2 (winning the gold-medal game) is the same proposition as the parent and therefore receives full weight. Child n1 (advancing to the gold-medal game) is necessary but not sufficient for winning and adds no independent information beyond n2, so it receives zero weight. This yields p_parent = p_n2 = 0.40.",
+    "b0": 0.0,
+    "betas": {
+     "n1": 0.0,
+     "n2": 1.0
+    },
+    "last_grounded": null
+   },
+   "n1": {
+    "id": "n1",
+    "statement": "The United States men's ice hockey team advances to the gold-medal (first-place) game at the Milano Cortina 2026 Winter Olympics.",
+    "parent": "n0",
+    "p": 0.45,
+    "report": "Multiple Jan 2, 2026 reports (Straits Times) note the U.S. announced a 25-player NHL-powered men\u2019s roster with strong goaltending, defense and scoring and cite recent form (reaching the 4 Nations Face-Off final) as evidence the team is a genuine gold-medal contender. Coverage (Dec 31\u2013Jan 2) also highlights that NHL stars are allowed back for Milano Cortina, boosting both the U.S. and Canada and ma",
+    "b0": 0.0,
+    "betas": {},
+    "last_grounded": "2026-01-14"
+   },
+   "n2": {
+    "id": "n2",
+    "statement": "The United States men's ice hockey team wins the gold-medal (first-place) game at the Milano Cortina 2026 Winter Olympics.",
+    "parent": "n0",
+    "p": 0.4,
+    "report": "The U.S. 25-player men's roster for Milano\u2011Cortina was announced Jan 2, 2026 and is described as featuring strong goaltending, a solid defensive core and high-powered forwards with good team chemistry (Jan 2, 2026). Reports note the return of top NHL players to the Olympics for the first time since 2014, boosting both the U.S. and Canada as contenders (Jan 2, 2026). Canada unveiled a veteran, NHL-",
+    "b0": 0.0,
+    "betas": {},
+    "last_grounded": "2026-01-14"
+   }
+  },
+  "edits": {
+   "added": [
+    "n1",
+    "n2"
+   ],
+   "removed": []
+  },
+  "searches": [
+   {
+    "leaf": "n2",
+    "query": "Milano Cortina 2026 men's ice hockey USA roster announcement injuries pre-tournament exhibition results",
+    "from": null,
+    "n": 5,
+    "titles": [
+     "US unveil men's ice hockey roster looking to end gold-medal drought at Milano-Cortina Games",
+     "US hope team chemistry helps men's ice hockey squad snap gold-medal drought at Milano-Cortina",
+     "Canada announce men's ice hockey roster for Milano-Cortina",
+     "NHL stars return to boost US, Canada ice hockey teams at Milano-Cortina Games",
+     "Short rinks cut no ice with NHL players, including McDavid"
+    ]
+   },
+   {
+    "leaf": "n1",
+    "query": "United States men's ice hockey Milano Cortina 2026 advance to gold-medal game",
+    "from": null,
+    "n": 5,
+    "titles": [
+     "US unveil men's ice hockey roster looking to end gold-medal drought at Milano-Cortina Games",
+     "NHL stars return to boost US, Canada ice hockey teams at Milano-Cortina Games",
+     "US hope team chemistry helps men's ice hockey squad snap gold-medal drought at Milano-Cortina",
+     "Winter Olympics schedule Milano Cortina 2026 and day-by-day events",
+     "US women eye ice hockey revenge against rival Canada at Milano-Cortina"
+    ]
+   },
+   {
+    "leaf": "n1",
+    "query": "Milano Cortina 2026 men's ice hockey results schedule United States team",
+    "from": null,
+    "n": 5,
+    "titles": [
+     "Winter Olympics schedule Milano Cortina 2026 and day-by-day events",
+     "US unveil men's ice hockey roster looking to end gold-medal drought at Milano-Cortina Games",
+     "NHL stars return to boost US, Canada ice hockey teams at Milano-Cortina Games",
+     "Canada announce men's ice hockey roster for Milano-Cortina",
+     "US hope team chemistry helps men's ice hockey squad snap gold-medal drought at Milano-Cortina"
+    ]
+   }
+  ]
+ },
+ "secs": 72.5,
+ "error": ""
+}

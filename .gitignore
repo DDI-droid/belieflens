@@ -21,3 +21,5 @@ vendor/
 .env
 *.log
 blf_paper.txt
+
+e1_v2.log

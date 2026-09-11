@@ -1,0 +1,71 @@
+{
+ "forecast": 0.5,
+ "trace": {
+  "actions": [
+   {
+    "step": 0,
+    "tool": "query_df"
+   },
+   {
+    "step": 1,
+    "tool": "query_df"
+   },
+   {
+    "step": 2,
+    "tool": "query_df"
+   },
+   {
+    "step": 3,
+    "tool": "query_df"
+   },
+   {
+    "step": 4,
+    "tool": "query_df"
+   },
+   {
+    "step": 5,
+    "tool": "query_df"
+   },
+   {
+    "step": 6,
+    "tool": "query_df"
+   },
+   {
+    "step": 7,
+    "tool": "query_df"
+   },
+   {
+    "step": 8,
+    "tool": "query_df"
+   },
+   {
+    "step": 9,
+    "tool": "query_df"
+   },
+   {
+    "step": 10,
+    "tool": "query_df"
+   },
+   {
+    "step": 11,
+    "tool": "submit_forecasts"
+   }
+  ],
+  "searches": [],
+  "memory": {
+   "agent_role": "I am a forecasting agent closing out the session dated 2026-01-14. My memory will be the only reasoning that persists to the next session; session context will be cleared.",
+   "reply_style_and_formatting": "Default reply style: concise, modestly detailed forecasts and explanations. Avoid heavy formatting (no Markdown/LaTeX/tables unless requested). Use simple bullet lists when helpful.",
+   "calibration_and_uncertainty_principles": "When providing forecasts, explicitly state probabilities and major assumptions, note sources or reasoning chains, and give calibration ranges/uncertainty bands. Flag when a prediction depends on time-sensitive data.",
+   "session_date": "2026-01-14 (date of this memory snapshot). Use this for any time-relative reasoning until updated."
+  },
+  "memory_ops": [
+   "memory: stored agent_role",
+   "memory: stored reply_style_and_formatting",
+   "memory: stored calibration_and_uncertainty_principles",
+   "memory: stored session_date"
+  ],
+  "submitted_today": true,
+  "declined_to_update": false,
+  "ended_by_agent": false
+ }
+}

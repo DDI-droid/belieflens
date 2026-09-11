@@ -1,4 +1,4 @@
-"""E1 on the REAL-orchestration harnesses (analytica-full, blf-full).
+"""E1 on the REAL-orchestration harnesses (analytica-full, blf-full, futuresim-full).
 
   python scripts/run_real_e1.py --smoke              # one day, one rollout each
   python scripts/run_real_e1.py --stage seq          # 5 rollouts x 5 dates
@@ -21,18 +21,51 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from belieflens.evidence import NewsIndex                              # noqa: E402
-from belieflens.real_harnesses import (AnalyticaFull, BLFFull, LLM,    # noqa: E402
+from belieflens.real_harnesses import (AnalyticaFull, BLFFull,          # noqa: E402
+                                       FutureSimFull, ReactReal, LLM,
                                        BudgetExceeded)
-from scripts.run_exp1 import QUESTIONS, client                         # noqa: E402
+from belieflens.harnesses import HarnessRunner                          # noqa: E402
+from belieflens.questions_v2 import QUESTIONS, GROUPS                   # noqa: E402
+from scripts.run_exp1 import client                                     # noqa: E402
 
-OUT = Path("results/exp1_real")
-HARNESSES = ("analytica_full", "blf_full")
+OUT = Path("results/exp1_v2")
+HARNESSES = ("analytica_full", "blf_full", "futuresim_full", "react")
 
 
-def build(llm, ix, name):
+def build(llm, ix, name, model="gpt-5-mini"):
     if name == "analytica_full":
         return AnalyticaFull(llm, ix)
+    if name == "futuresim_full":
+        return FutureSimFull(llm, ix)
+    if name == "react":
+        # ReAct IS its source system; ReactReal only slices it per date.
+        return ReactReal(HarnessRunner(llm.client, model, ix, max_tool_rounds=6,
+                                       max_results=6, reasoning_effort="low"), llm)
     return BLFFull(llm, ix)
+
+
+
+def _day(hobj, h, q, d, state, history, dates):
+    """Per-harness run_day signature. futuresim-full additionally needs the
+    question id (its `df` is keyed by qid) and the update cadence, because its
+    architecture lets the agent decide whether today is worth updating."""
+    if h == "blf_full":
+        return hobj.run_day(q.text, d, state, history, resolution=q.resolution_date)
+    if h == "react":
+        return hobj.run_day(q.text, d, state, history,
+                            background=getattr(q, "background", ""),
+                            resolution_date=q.resolution_date)
+    if h == "futuresim_full":
+        later = [x for x in dates if x > d]
+        cadence = ("Current date: %s. %s Resolution date: %s."
+                   % (d,
+                      ("Next scheduled update: %s." % later[0]) if later
+                      else "No later updates are scheduled.",
+                      q.resolution_date))
+        return hobj.run_day(q.text, d, state, history, qid=q.id,
+                            resolution=getattr(q, "resolution", "") or q.text,
+                            resolution_date=q.resolution_date, cadence=cadence)
+    return hobj.run_day(q.text, d, state, history)
 
 
 def run_chain(h, hobj, q, dates, rollout):
@@ -41,11 +74,7 @@ def run_chain(h, hobj, q, dates, rollout):
     for d in dates:
         t0 = time.time()
         try:
-            if h == "blf_full":
-                fc, state, trace = hobj.run_day(q.text, d, state, history,
-                                                resolution=q.resolution_date)
-            else:
-                fc, state, trace = hobj.run_day(q.text, d, state, history)
+            fc, state, trace = _day(hobj, h, q, d, state, history, dates)
             turns.append({"date": d, "forecast": fc, "trace": trace,
                           "secs": round(time.time() - t0, 1), "error": ""})
             history.append("  %s: %.3f" % (d, fc))
@@ -63,11 +92,7 @@ def run_single(h, hobj, q, date, rollout):
     """Parallel condition: fresh, no state, no history."""
     t0 = time.time()
     try:
-        if h == "blf_full":
-            fc, _, trace = hobj.run_day(q.text, date, None, [],
-                                        resolution=q.resolution_date)
-        else:
-            fc, _, trace = hobj.run_day(q.text, date, None, [])
+        fc, _, trace = _day(hobj, h, q, date, None, [], [date])
         err = ""
     except BudgetExceeded:
         raise
@@ -83,16 +108,16 @@ def main() -> None:
     ap.add_argument("--stage", default="all", choices=["seq", "par", "all"])
     ap.add_argument("--smoke", action="store_true")
     ap.add_argument("--model", default="gpt-5-mini")
-    ap.add_argument("--budget", type=int, default=4000)
+    ap.add_argument("--budget", type=int, default=32000)
     ap.add_argument("--k", type=int, default=5)
     ap.add_argument("--k2", type=int, default=5)
-    ap.add_argument("--workers", type=int, default=4)
+    ap.add_argument("--workers", type=int, default=12)
     args = ap.parse_args()
 
     OUT.mkdir(parents=True, exist_ok=True)
     ix = NewsIndex()
     llm = LLM(client(), args.model, budget=args.budget)
-    qs = [q for q in QUESTIONS if q.id in ("hockey_usa", "hockey_can")]
+    qs = list(QUESTIONS)
     t0 = time.time()
 
     if args.smoke:

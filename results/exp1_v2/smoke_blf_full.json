@@ -1,0 +1,303 @@
+{
+ "mode": "par",
+ "harness": "blf_full",
+ "question_id": "hockey_usa",
+ "date": "2026-01-14",
+ "rollout": 0,
+ "forecast": 0.21988323705938997,
+ "trace": {
+  "trial_ps": [
+   0.25,
+   0.22,
+   0.2,
+   0.2,
+   0.22
+  ],
+  "aggregate": 0.21988323705938997,
+  "alpha_note": "alpha=1/(1+var(logits))",
+  "belief": {
+   "p": 0.22,
+   "confidence": "medium",
+   "evidence_for": [
+    "NHL players are allowed to return to the 2026 Olympics, so the US can field a top-level, NHL-powered roster.",
+    "US announced a strong 25-player roster (reported Jan 2) with solid goaltending, defense and high-powered forwards; team chemistry was cited as a positive after recent tournament play (4 Nations Face-Off).",
+    "Historically the United States is one of the top ice hockey nations and, with NHL talent available, is competitively placed to contend for gold."
+   ],
+   "evidence_against": [
+    "Multiple reports characterize Canada as an early favourite with a proven, NHL-powered roster\u2014Canada is traditionally the primary rival and often favored in tournament odds.",
+    "Olympic tournaments are short and single-elimination knockout rounds introduce high variance; a single upset or poor goaltending stretch can eliminate any favourite.",
+    "Public reporting so far is limited (mostly roster announcements and general previews); detailed bookmaker odds, draw/bracket, injury status, and current form against other top nations (Sweden, Finland, Czechia, Slovakia, etc.) are not available or not definitive in the search results."
+   ],
+   "open_questions": [
+    "What are the current bookmaker betting odds (implied probabilities) for USA vs other top teams (Canada, Sweden, Finland) as of latest updates?",
+    "Are there any injuries, last-minute roster changes, or disciplinary issues affecting key US players before the tournament?",
+    "What is the tournament draw/bracket and potential matchup path for the US (could they face Canada/Sweden/Finland before the final)?",
+    "How are the US players performing in the immediate pre-Olympic games and NHL form (goaltending, scoring depth)?"
+   ]
+  },
+  "searches": [
+   {
+    "trial": 3,
+    "step": 0,
+    "query": "United States men's ice hockey Milano Cortina 2026 odds roster NHL participation 2026 Olympic hockey USA chances January",
+    "n": 5,
+    "titles": [
+     "US unveil men's ice hockey roster looking to end gold-medal drought at Milano-Cortina Games",
+     "NHL stars return to boost US, Canada ice hockey teams at Milano-Cortina Games",
+     "Canada announce men's ice hockey roster for Milano-Cortina",
+     "US hope team chemistry helps men's ice hockey squad snap gold-medal drought at Milano-Cortina",
+     "Short rinks cut no ice with NHL players, including McDavid"
+    ]
+   },
+   {
+    "trial": 2,
+    "step": 0,
+    "query": "United States men's ice hockey Milano Cortina 2026 odds roster NHL participation IIHF rankings January 2026 recent exhib",
+    "n": 5,
+    "titles": [
+     "Size of new Milan ice hockey arena defended by organisers",
+     "NHL stars return to boost US, Canada ice hockey teams at Milano-Cortina Games",
+     "US unveil men's ice hockey roster looking to end gold-medal drought at Milano-Cortina Games",
+     "Short rinks cut no ice with NHL players, including McDavid",
+     "Canada announce men's ice hockey roster for Milano-Cortina"
+    ]
+   },
+   {
+    "trial": 0,
+    "step": 0,
+    "query": "United States men's ice hockey chances Milano Cortina 2026 roster NHL availability IIHF rankings 2026 news",
+    "n": 5,
+    "titles": [
+     "US unveil men's ice hockey roster looking to end gold-medal drought at Milano-Cortina Games",
+     "Size of new Milan ice hockey arena defended by organisers",
+     "Short rinks cut no ice with NHL players, including McDavid",
+     "Canada announce men's ice hockey roster for Milano-Cortina",
+     "NHL stars return to boost US, Canada ice hockey teams at Milano-Cortina Games"
+    ]
+   },
+   {
+    "trial": 4,
+    "step": 0,
+    "query": "United States men's ice hockey Milano Cortina 2026 chances NHL participation roster IIHF ranking 2025 2024 recent result",
+    "n": 5,
+    "titles": [
+     "NHL stars return to boost US, Canada ice hockey teams at Milano-Cortina Games",
+     "US unveil men's ice hockey roster looking to end gold-medal drought at Milano-Cortina Games",
+     "Size of new Milan ice hockey arena defended by organisers",
+     "Short rinks cut no ice with NHL players, including McDavid",
+     "Canada announce men's ice hockey roster for Milano-Cortina"
+    ]
+   },
+   {
+    "trial": 2,
+    "step": 1,
+    "query": "USA men's ice hockey roster Milano Cortina 2026 odds gold medal betting January 2026 US team roster NHL players injuries",
+    "n": 5,
+    "titles": [
+     "US unveil men's ice hockey roster looking to end gold-medal drought at Milano-Cortina Games",
+     "US hope team chemistry helps men's ice hockey squad snap gold-medal drought at Milano-Cortina",
+     "Canada announce men's ice hockey roster for Milano-Cortina",
+     "NHL stars return to boost US, Canada ice hockey teams at Milano-Cortina Games",
+     "Several Colorado Avalanche skaters get the call to join national teams at 2026 Winter Olympics"
+    ]
+   },
+   {
+    "trial": 3,
+    "step": 1,
+    "query": "Milano Cortina 2026 men's ice hockey gold odds USA favorites betting odds Jan 2026 USA vs Canada odds 'Milano Cortina' '",
+    "n": 5,
+    "titles": [
+     "US unveil men's ice hockey roster looking to end gold-medal drought at Milano-Cortina Games",
+     "NHL stars return to boost US, Canada ice hockey teams at Milano-Cortina Games",
+     "US hope team chemistry helps men's ice hockey squad snap gold-medal drought at Milano-Cortina",
+     "US women eye ice hockey revenge against rival Canada at Milano-Cortina",
+     "Canada announce men's ice hockey roster for Milano-Cortina"
+    ]
+   },
+   {
+    "trial": 1,
+    "step": 1,
+    "query": "United States men's ice hockey chances Milano Cortina 2026 NHL participation roster odds recent results January 2026",
+    "n": 5,
+    "titles": [
+     "NHL stars return to boost US, Canada ice hockey teams at Milano-Cortina Games",
+     "US unveil men's ice hockey roster looking to end gold-medal drought at Milano-Cortina Games",
+     "Canada announce men's ice hockey roster for Milano-Cortina",
+     "US hope team chemistry helps men's ice hockey squad snap gold-medal drought at Milano-Cortina",
+     "Short rinks cut no ice with NHL players, including McDavid"
+    ]
+   },
+   {
+    "trial": 0,
+    "step": 2,
+    "query": "odds United States men's ice hockey gold Milano Cortina 2026 betting favorites USA Canada NHL players roster 2026 Jan",
+    "n": 5,
+    "titles": [
+     "US unveil men's ice hockey roster looking to end gold-medal drought at Milano-Cortina Games",
+     "NHL stars return to boost US, Canada ice hockey teams at Milano-Cortina Games",
+     "US hope team chemistry helps men's ice hockey squad snap gold-medal drought at Milano-Cortina",
+     "Canada announce men's ice hockey roster for Milano-Cortina",
+     "Several Colorado Avalanche skaters get the call to join national teams at 2026 Winter Olympics"
+    ]
+   },
+   {
+    "trial": 2,
+    "step": 2,
+    "query": "USA odds gold medal men's ice hockey Milano Cortina 2026 betting January 2026 USA odds favorites Canada Sweden Finland I",
+    "n": 5,
+    "titles": [
+     "US unveil men's ice hockey roster looking to end gold-medal drought at Milano-Cortina Games",
+     "Several Colorado Avalanche skaters get the call to join national teams at 2026 Winter Olympics",
+     "NHL stars return to boost US, Canada ice hockey teams at Milano-Cortina Games",
+     "US hope team chemistry helps men's ice hockey squad snap gold-medal drought at Milano-Cortina",
+     "Philadelphia Flyers' Sanheim, Ristolainen named to 2026 Olympic men's hockey rosters"
+    ]
+   },
+   {
+    "trial": 4,
+    "step": 2,
+    "query": "USA men's ice hockey roster Milano Cortina 2026 announced roster names odds injuries betting futures USA gold medal chan",
+    "n": 5,
+    "titles": [
+     "US unveil men's ice hockey roster looking to end gold-medal drought at Milano-Cortina Games",
+     "US hope team chemistry helps men's ice hockey squad snap gold-medal drought at Milano-Cortina",
+     "NHL stars return to boost US, Canada ice hockey teams at Milano-Cortina Games",
+     "Canada announce men's ice hockey roster for Milano-Cortina",
+     "Philadelphia Flyers' Sanheim, Ristolainen named to 2026 Olympic men's hockey rosters"
+    ]
+   },
+   {
+    "trial": 3,
+    "step": 2,
+    "query": "United States men's ice hockey Milano Cortina 2026 roster NHL participation odds chances Jan 2026 US gold probability",
+    "n": 5,
+    "titles": [
+     "US unveil men's ice hockey roster looking to end gold-medal drought at Milano-Cortina Games",
+     "NHL stars return to boost US, Canada ice hockey teams at Milano-Cortina Games",
+     "Canada announce men's ice hockey roster for Milano-Cortina",
+     "US hope team chemistry helps men's ice hockey squad snap gold-medal drought at Milano-Cortina",
+     "Short rinks cut no ice with NHL players, including McDavid"
+    ]
+   },
+   {
+    "trial": 1,
+    "step": 2,
+    "query": "Milano Cortina 2026 men's ice hockey betting odds USA Canada gold odds January 2026",
+    "n": 5,
+    "titles": [
+     "US unveil men's ice hockey roster looking to end gold-medal drought at Milano-Cortina Games",
+     "Canada announce men's ice hockey roster for Milano-Cortina",
+     "NHL stars return to boost US, Canada ice hockey teams at Milano-Cortina Games",
+     "US hope team chemistry helps men's ice hockey squad snap gold-medal drought at Milano-Cortina",
+     "Winter Olympics schedule Milano Cortina 2026 and day-by-day events"
+    ]
+   },
+   {
+    "trial": 3,
+    "step": 3,
+    "query": "Milano Cortina 2026 men's ice hockey odds USA betting favorites 'odds' 'United States' January 2026 ESPN OddsChecker Bet",
+    "n": 5,
+    "titles": [
+     "NHL stars return to boost US, Canada ice hockey teams at Milano-Cortina Games",
+     "US unveil men's ice hockey roster looking to end gold-medal drought at Milano-Cortina Games",
+     "2026 World Cup odds and betting markets",
+     "Winter Olympics schedule Milano Cortina 2026 and day-by-day events",
+     "US hope team chemistry helps men's ice hockey squad snap gold-medal drought at Milano-Cortina"
+    ]
+   },
+   {
+    "trial": 2,
+    "step": 3,
+    "query": "Milano Cortina 2026 men's ice hockey odds USA gold betting January 2026 IIHF rankings USA Canada Sweden Finland odds 'go",
+    "n": 5,
+    "titles": [
+     "US unveil men's ice hockey roster looking to end gold-medal drought at Milano-Cortina Games",
+     "Several Colorado Avalanche skaters get the call to join national teams at 2026 Winter Olympics",
+     "Short rinks cut no ice with NHL players, including McDavid",
+     "NHL stars return to boost US, Canada ice hockey teams at Milano-Cortina Games",
+     "US hope team chemistry helps men's ice hockey squad snap gold-medal drought at Milano-Cortina"
+    ]
+   },
+   {
+    "trial": 0,
+    "step": 4,
+    "query": "United States men's ice hockey chances Milano Cortina 2026 roster NHL availability IIHF rankings odds USA gold medal Mil",
+    "n": 5,
+    "titles": [
+     "US unveil men's ice hockey roster looking to end gold-medal drought at Milano-Cortina Games",
+     "NHL stars return to boost US, Canada ice hockey teams at Milano-Cortina Games",
+     "US hope team chemistry helps men's ice hockey squad snap gold-medal drought at Milano-Cortina",
+     "Canada announce men's ice hockey roster for Milano-Cortina",
+     "Short rinks cut no ice with NHL players, including McDavid"
+    ]
+   },
+   {
+    "trial": 4,
+    "step": 4,
+    "query": "Team USA men's ice hockey Milano Cortina 2026 odds roster announced US chances betting futures 'Team USA' 'Milano Cortin",
+    "n": 5,
+    "titles": [
+     "US unveil men's ice hockey roster looking to end gold-medal drought at Milano-Cortina Games",
+     "US hope team chemistry helps men's ice hockey squad snap gold-medal drought at Milano-Cortina",
+     "NHL stars return to boost US, Canada ice hockey teams at Milano-Cortina Games",
+     "Canada announce men's ice hockey roster for Milano-Cortina",
+     "Philadelphia Flyers' Sanheim, Ristolainen named to 2026 Olympic men's hockey rosters"
+    ]
+   },
+   {
+    "trial": 1,
+    "step": 4,
+    "query": "bookmaker odds USA gold Milano Cortina 2026 men's ice hockey Jan 2026 USA Canada favorites odds Bet365 Pinnacle",
+    "n": 5,
+    "titles": [
+     "US unveil men's ice hockey roster looking to end gold-medal drought at Milano-Cortina Games",
+     "NHL stars return to boost US, Canada ice hockey teams at Milano-Cortina Games",
+     "US hope team chemistry helps men's ice hockey squad snap gold-medal drought at Milano-Cortina",
+     "US women eye ice hockey revenge against rival Canada at Milano-Cortina",
+     "Canada announce men's ice hockey roster for Milano-Cortina"
+    ]
+   },
+   {
+    "trial": 0,
+    "step": 5,
+    "query": "odds USA gold Milano Cortina 2026 men's ice hockey betting odds favorites USA Canada Jan 2026",
+    "n": 5,
+    "titles": [
+     "US unveil men's ice hockey roster looking to end gold-medal drought at Milano-Cortina Games",
+     "NHL stars return to boost US, Canada ice hockey teams at Milano-Cortina Games",
+     "US hope team chemistry helps men's ice hockey squad snap gold-medal drought at Milano-Cortina",
+     "US women eye ice hockey revenge against rival Canada at Milano-Cortina",
+     "Canada announce men's ice hockey roster for Milano-Cortina"
+    ]
+   },
+   {
+    "trial": 1,
+    "step": 6,
+    "query": "Milano Cortina 2026 men's ice hockey gold odds USA Canada bookmakers Jan 2026 Pinnacle Bet365 odds USA Canada Sweden Fin",
+    "n": 5,
+    "titles": [
+     "US unveil men's ice hockey roster looking to end gold-medal drought at Milano-Cortina Games",
+     "NHL stars return to boost US, Canada ice hockey teams at Milano-Cortina Games",
+     "US hope team chemistry helps men's ice hockey squad snap gold-medal drought at Milano-Cortina",
+     "Several Colorado Avalanche skaters get the call to join national teams at 2026 Winter Olympics",
+     "US women eye ice hockey revenge against rival Canada at Milano-Cortina"
+    ]
+   },
+   {
+    "trial": 0,
+    "step": 9,
+    "query": "United States men's ice hockey gold probability Milano Cortina 2026 roster NHL players odds Jan 2026 US Canada favorites",
+    "n": 5,
+    "titles": [
+     "US unveil men's ice hockey roster looking to end gold-medal drought at Milano-Cortina Games",
+     "NHL stars return to boost US, Canada ice hockey teams at Milano-Cortina Games",
+     "Canada announce men's ice hockey roster for Milano-Cortina",
+     "US hope team chemistry helps men's ice hockey squad snap gold-medal drought at Milano-Cortina",
+     "Short rinks cut no ice with NHL players, including McDavid"
+    ]
+   }
+  ]
+ },
+ "secs": 87.5,
+ "error": ""
+}

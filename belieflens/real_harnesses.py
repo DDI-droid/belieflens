@@ -42,6 +42,7 @@ import json
 import math
 import re
 import threading
+import time
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 
@@ -62,6 +63,7 @@ class LLM:
         self.calls = 0
         self.tok_in = 0
         self.tok_out = 0
+        self.retries = 0
         self._lock = threading.Lock()
 
     def __call__(self, system: str, user: str, effort: str = "medium") -> str:
@@ -69,10 +71,20 @@ class LLM:
             if self.calls >= self.budget:
                 raise BudgetExceeded("call budget %d exhausted" % self.budget)
             self.calls += 1
-        r = self.client.chat.completions.create(
-            model=self.model, reasoning_effort=effort,
-            messages=[{"role": "system", "content": system},
-                      {"role": "user", "content": user}])
+        r = None
+        for attempt in range(5):          # a multi-hour run WILL meet rate limits
+            try:
+                r = self.client.chat.completions.create(
+                    model=self.model, reasoning_effort=effort,
+                    messages=[{"role": "system", "content": system},
+                              {"role": "user", "content": user}])
+                break
+            except Exception as e:                              # noqa: BLE001
+                if attempt == 4:
+                    raise
+                with self._lock:
+                    self.retries += 1
+                time.sleep(min(2 ** attempt * 2, 30))
         u = getattr(r, "usage", None)
         if u:
             with self._lock:
@@ -81,7 +93,8 @@ class LLM:
         return r.choices[0].message.content or ""
 
     def usage(self) -> dict:
-        return {"calls": self.calls, "tokens_in": self.tok_in, "tokens_out": self.tok_out}
+        return {"calls": self.calls, "tokens_in": self.tok_in,
+                "tokens_out": self.tok_out, "retries": self.retries}
 
 
 def _json_block(text: str) -> dict:
@@ -363,14 +376,15 @@ class BLFFull:
     """Real BLF loop (Algorithm 1) over the date-gated corpus."""
 
     def __init__(self, llm: LLM, index: NewsIndex, tmax: int = 10,
-                 k_trials: int = 3, results_per_query: int = 5):
+                 k_trials: int = 5, results_per_query: int = 5):
         self.llm = llm
         self.ix = index
         self.tmax = tmax
         self.k = k_trials
         self.rpq = results_per_query
 
-    def _trial(self, question, date, resolution, belief0, history, log: list) -> tuple:
+    def _trial(self, question, date, resolution, belief0, history, log: list,
+               trial_id: int = 0) -> tuple:
         sys_p = BLF_SYS.format(question=question, date=date,
                                resolution=resolution, tmax=self.tmax)
         msgs = []
@@ -395,7 +409,8 @@ class BLFFull:
             if action.get("type") == "search":
                 q = str(action.get("query", ""))[:120]
                 arts = self.ix.search(q, to_date=date, k=self.rpq)
-                log.append({"query": q, "n": len(arts),
+                log.append({"trial": trial_id, "step": step, "query": q,
+                            "n": len(arts),
                             "titles": [a.title for a in arts]})
                 msgs.append("SEARCH RESULTS for %r:\n%s" % (
                     q, "\n\n".join(a.render(450) for a in arts) or "(none)"))
@@ -423,7 +438,7 @@ class BLFFull:
         trials = []
         with ThreadPoolExecutor(max_workers=self.k) as ex:
             futs = [ex.submit(self._trial, question_text, date, resolution,
-                              state, history, log) for _ in range(self.k)]
+                              state, history, log, i) for i in range(self.k)]
             for f in futs:
                 trials.append(f.result())
         ps = [t[0] for t in trials]
@@ -432,3 +447,395 @@ class BLFFull:
         trace = {"trial_ps": ps, "aggregate": forecast, "alpha_note":
                  "alpha=1/(1+var(logits))", "belief": med_belief, "searches": log}
         return forecast, med_belief, trace
+
+
+# ===================================================================== FUTURESIM
+
+FSIM_SYS = """You are a forecasting agent. Today is {date}. Your goal is to make
+accurate and calibrated predictions.
+
+
+## UPDATE CADENCE
+You can make updates on scheduled dates. Your context is cleared after every
+session and your memory (along with past predictions) is the only information
+retained between sessions. New articles enter the corpus every day.
+{cadence}
+
+
+## SCORING (Brier Score, Binary)
+You are evaluated on Brier Score for binary Yes/No questions: (p - y)^2, where
+y is 1 if the event happens and 0 otherwise. Lower is better. A forecast that
+never moves is as suspect as one that thrashes -- but do not move without
+evidence.
+
+
+## AVAILABLE DATA
+`df` holds one row per forecasting question, with columns: qid, question,
+resolution_criteria, resolution_date, is_resolved, last_forecast,
+last_updated. `last_forecast` is YOUR most recent submitted probability for
+that question, or None if you have never submitted one.
+{memory_section}
+
+## TOOLS AVAILABLE FOR YOUR USE
+Call exactly ONE tool per turn, as a JSON object and nothing else.
+- {{"tool": "query_df", "code": "<python>"}} : inspect `df` and `mem_df`,
+  which are pandas DataFrames; `pd` is in scope. Use print(...) for output --
+  plain expressions are not echoed. One look is usually enough.
+- {{"tool": "search_news", "query": "<query>", "from_date": "<YYYY-MM-DD or null>"}}
+  : {search_desc}
+- {{"tool": "memory_new", "name": "<short key>", "content": "<text>"}}
+- {{"tool": "memory_update", "name": "<existing key>", "content": "<text>"}}
+- {{"tool": "memory_delete", "name": "<existing key>"}}
+- {{"tool": "submit_forecasts", "forecasts": [{{"qid": "<qid>",
+  "outcomes": [{{"outcome": "Yes", "probability": <p>}},
+                {{"outcome": "No", "probability": <1-p>}}]}}]}}
+- {{"tool": "next_day"}} : end this session.
+
+
+## INTERACTION FLOW
+You have at most {max_actions} tool calls this session. Work through them as
+you see fit: inspect the questions, search for evidence, revise your memory,
+and submit forecasts. When you are done, call next_day().
+
+You are NOT required to submit. If nothing you found today changes your view,
+calling next_day() without submitting leaves your previous forecast standing,
+which is a legitimate choice.
+
+
+## SUBMISSION RULES
+- qid must be an active (is_resolved=False) question you identified from `df`.
+- Each submit_forecasts call carries exactly one forecast for one qid.
+- You may submit again later in the same session to revise that qid.
+- Probabilities must sum to <= 1.0.
+
+Tip: after submitting, consider saving reusable reasoning and key evidence with
+memory_new / memory_update. At the end of the session you get one more chance
+to revise memory.
+
+---
+Begin."""
+
+FSIM_MEMORY_PHASE_SYS = """You are a forecasting agent closing out the session of
+{date}. Your context will be cleared; your memory is the only reasoning that
+survives to the next session.
+
+Current memory entries:
+{index}
+
+Revise it now, based on THIS SESSION below. Entries must capture what you
+learned about the question -- the evidence you found and what it implies, the
+reasoning behind today's number, and what would change your mind. Include the
+qid. Do NOT store generic notes about your role, your reply style, or the
+date; those are worthless tomorrow. Drop entries that have gone stale.
+
+Reply with JSON only:
+{{"operations": [{{"op": "new"|"update"|"delete", "name": "<key>",
+                  "content": "<text, omit for delete>"}}, ...]}}
+Return an empty list if nothing should change."""
+
+
+class _Sandbox:
+    """The `query_df` code sandbox.
+
+    Faithful to the source system in what the agent sees: `df` and `mem_df` are
+    real pandas DataFrames and `pd` is in scope, so the documented idioms
+    (df.to_string(), df.head(), boolean masks, joins on qid) all work.  Trimmed
+    only in what it may reach: no imports, no dunder access, and a small
+    builtins whitelist, so the sandbox cannot touch the filesystem or network.
+    """
+
+    SAFE = {"len": len, "range": range, "sorted": sorted, "sum": sum, "min": min,
+            "max": max, "abs": abs, "round": round, "str": str, "float": float,
+            "int": int, "bool": bool, "list": list, "dict": dict, "set": set,
+            "tuple": tuple, "enumerate": enumerate, "zip": zip, "any": any,
+            "all": all, "repr": repr, "print": print, "isinstance": isinstance,
+            "getattr": getattr, "hasattr": hasattr}
+
+    @staticmethod
+    def _unwrap(code: str) -> str:
+        """Models wrap code in ``` fences or <python> tags, sometimes without
+        closing them.  Strip whatever is there rather than raising SyntaxError,
+        which otherwise traps the agent in a retry loop and eats its budget."""
+        c = (code or "").strip()
+        m = re.findall(r"```(?:python)?\s*(.*?)```", c, re.S)
+        if m:
+            c = m[0]
+        else:
+            c = re.sub(r"^```(?:python)?\s*", "", c)
+            c = re.sub(r"```\s*$", "", c)
+        m = re.findall(r"<python>\s*(.*?)\s*</python>", c, re.S)
+        if m:
+            c = m[0]
+        else:                                   # tolerate an unclosed tag
+            c = re.sub(r"^<python>\s*", "", c)
+            c = re.sub(r"\s*</python>$", "", c)
+        return c.strip()
+
+    @classmethod
+    def run(cls, code: str, df, mem_df) -> str:
+        import pandas as pd
+        code = cls._unwrap(code)
+        if "__" in code or re.search(r"\bimport\b", code):
+            return ("ERROR: imports and dunder access are blocked. `df`, `mem_df` "
+                    "and `pd` are already in scope.")
+        out: list = []
+        ns = dict(cls.SAFE)
+        ns["print"] = lambda *a, **k: out.append(" ".join(str(x) for x in a))
+        g = {"df": df, "mem_df": mem_df, "pd": pd, "__builtins__": ns}
+        g.update(ns)
+        try:
+            exec(compile(code, "<query_df>", "exec"), g)
+        except Exception as e:              # the agent must see its own errors
+            return "ERROR: %s: %s" % (type(e).__name__, e)
+        return "\n".join(out)[:2500] or "(no output; remember to use print(...))"
+
+
+class FutureSimFull:
+    """Real FutureSim baseline-agent orchestration (their `basicAgent`),
+    trimmed to the sandbox.
+
+    Kept, because these are the architecture:
+      * SESSION structure -- context is cleared between dates; only memory and
+        past predictions survive.  Each date is a fresh message list.
+      * ONE tool call per turn, from their action set: query_df, search_news,
+        the memory CRUD tools, submit_forecasts, next_day.
+      * STRUCTURED MEMORY with create/update/delete, plus their separate
+        end-of-session memory-revision phase.
+      * The agent CHOOSES when to stop and whether to submit at all.  Ending a
+        session without submitting leaves the previous forecast standing --
+        the "declines to update" behaviour their anchoring result is about, and
+        the thing a forced-forecast prompt shape cannot express.
+      * An action budget per session, and a forced final submit only when the
+        budget runs out with nothing on record.
+
+    Trimmed, and why:
+      * Hybrid semantic+keyword retrieval -> the sandbox's BM25 index, which is
+        what every other harness in this report uses (a constant, not a
+        confound).
+      * pandas -> lists of dicts inside the same write-code-and-print sandbox.
+      * Post-resolution feedback -> inert: no question in the window resolves
+        inside the window, so their feedback handler would have nothing to say.
+      * Multi-agent peer scoring -> not applicable to a single-agent run.
+    """
+
+    def __init__(self, llm: LLM, index: NewsIndex, max_actions: int = 12,
+                 results_per_query: int = 5, max_memory: int = 8):
+        self.llm = llm
+        self.ix = index
+        self.max_actions = max_actions
+        self.rpq = results_per_query
+        self.max_memory = max_memory
+
+    # ---------------- memory helpers
+    @staticmethod
+    def _mem_index(mem: dict) -> str:
+        if not mem:
+            return "(empty)"
+        return "\n".join("- %s: %s" % (k, v[:160]) for k, v in mem.items())
+
+    def _apply_mem_op(self, mem: dict, op: dict) -> str:
+        kind = str(op.get("op", "")).lower()
+        name = str(op.get("name", "")).strip()[:60]
+        if not name:
+            return "memory: missing name"
+        if kind == "delete":
+            mem.pop(name, None)
+            return "memory: deleted %s" % name
+        content = str(op.get("content", ""))[:800]
+        if kind == "new" and len(mem) >= self.max_memory and name not in mem:
+            return "memory: full (%d entries); update or delete first" % self.max_memory
+        mem[name] = content
+        return "memory: %s %s" % ("updated" if kind == "update" else "stored", name)
+
+    # ---------------- one session == one simulated date
+    def run_day(self, question_text: str, date: str, state: dict | None,
+                history: list, qid: str = "q1", resolution: str = "",
+                resolution_date: str = "", cadence: str = "") -> tuple:
+        state = state or {}
+        mem: dict = dict(state.get("memory") or {})
+        last_forecast = state.get("last_forecast")
+
+        import pandas as pd
+        df = pd.DataFrame([{"qid": qid, "question": question_text,
+                            "resolution_criteria": resolution,
+                            "resolution_date": resolution_date,
+                            "is_resolved": False, "last_forecast": last_forecast,
+                            "last_updated": state.get("last_updated")}])
+        mem_df = pd.DataFrame(
+            [{"qid": qid, "name": k, "memory": v} for k, v in mem.items()],
+            columns=["qid", "name", "memory"])
+
+        mem_section = ("\n## YOUR MEMORY (%d entries, max %d)\n%s\n"
+                       % (len(mem), self.max_memory, self._mem_index(mem)))
+        sys_p = FSIM_SYS.format(
+            date=date, cadence=cadence or "Current date: %s." % date,
+            memory_section=mem_section, max_actions=self.max_actions,
+            search_desc=("search the dated news archive; returns up to %d articles, "
+                         "never later than today. from_date is optional."
+                         % self.rpq))
+
+        msgs = []
+        if history:
+            msgs.append("YOUR PAST PREDICTIONS:\n" + "\n".join(history))
+        msgs.append("Session %s. Output your first tool call." % date)
+
+        submitted = None
+        searches: list = []
+        actions: list = []
+        ended = False
+
+        for step in range(self.max_actions):
+            last = (step == self.max_actions - 1)
+            if last and submitted is None:
+                msgs.append("Final action. You MUST call submit_forecasts now.")
+            out = self.llm(sys_p, "\n\n".join(msgs), effort="low")
+            try:
+                call = _json_block(out)
+            except ValueError:
+                msgs.append("Invalid output. Reply with ONE JSON tool call.")
+                actions.append({"step": step, "tool": "[parse-failed]"})
+                continue
+            tool = str(call.get("tool", "")).strip()
+            rec = {"step": step, "tool": tool}
+            actions.append(rec)
+
+            if tool == "next_day":
+                if submitted is None:
+                    # forced-submit protocol: a date must carry a forecast, so the
+                    # agent may not end the session without one.  (Their system
+                    # allows it; we disable it to stay comparable with the other
+                    # harnesses, and disclose the change.)
+                    msgs.append("You have not submitted a forecast for %s yet. "
+                                "Call submit_forecasts before next_day." % date)
+                    continue
+                ended = True
+                break
+
+            if tool == "query_df":
+                code = str(call.get("code", ""))
+                res = _Sandbox.run(code, df, mem_df)
+                rec["code"] = code[:300]
+                rec["result"] = res[:300]
+                msgs.append("query_df ->\n%s" % res)
+
+            elif tool == "search_news":
+                q = str(call.get("query", ""))[:120]
+                frm = call.get("from_date") or None
+                arts = self.ix.search(q, to_date=date, from_date=frm, k=self.rpq)
+                searches.append({"query": q, "from": frm, "n": len(arts),
+                                 "titles": [a.title for a in arts]})
+                msgs.append("search_news(%r) ->\n%s" % (
+                    q, "\n\n".join(a.render(450) for a in arts) or "(no results)"))
+
+            elif tool in ("memory_new", "memory_update", "memory_delete"):
+                res = self._apply_mem_op(mem, {"op": tool.split("_", 1)[1],
+                                               "name": call.get("name"),
+                                               "content": call.get("content")})
+                mem_df = pd.DataFrame(
+                    [{"qid": qid, "name": k, "memory": v} for k, v in mem.items()],
+                    columns=["qid", "name", "memory"])
+                msgs.append(res)
+
+            elif tool == "submit_forecasts":
+                p = self._extract_p(call)
+                if p is None:
+                    msgs.append("submit_forecasts: could not read a Yes probability.")
+                else:
+                    submitted = p
+                    df.loc[0, "last_forecast"] = p
+                    df.loc[0, "last_updated"] = date
+                    msgs.append("submit_forecasts -> recorded P(Yes)=%.3f for %s" % (p, qid))
+            else:
+                msgs.append("Unknown tool %r. Use one of the listed tools." % tool)
+
+            msgs.append("Action %d of %d used. Next tool call." % (step + 1, self.max_actions))
+
+        # --- their end-of-session memory phase
+        mem_ops = []
+        try:
+            recap = "\n\n".join(msgs[-6:])[:6000]
+            out = self.llm(
+                FSIM_MEMORY_PHASE_SYS.format(date=date, index=self._mem_index(mem)),
+                "THIS SESSION:\n%s\n\nForecast submitted today: %s\n\nRevise memory now."
+                % (recap, "none" if submitted is None else round(submitted, 3)),
+                effort="low")
+            for op in (_json_block(out).get("operations") or [])[:6]:
+                mem_ops.append(self._apply_mem_op(mem, op))
+        except ValueError:
+            mem_ops.append("memory phase: parse failed")
+
+        # --- forced-submit protocol: the day's submission is the forecast; the
+        # standing one is only a fallback if every action was spent badly.
+        forecast = submitted if submitted is not None else last_forecast
+        new_state = {"memory": mem,
+                     "last_forecast": forecast,
+                     "last_updated": date if submitted is not None else state.get("last_updated")}
+        trace = {"actions": actions, "searches": searches, "memory": mem,
+                 "memory_ops": mem_ops, "submitted_today": submitted is not None,
+                 "declined_to_update": submitted is None and last_forecast is not None,
+                 "ended_by_agent": ended}
+        return forecast, new_state, trace
+
+    @staticmethod
+    def _extract_p(call: dict):
+        """P(Yes) from their outcome-distribution submission schema."""
+        fcs = call.get("forecasts")
+        if isinstance(fcs, dict):
+            fcs = [fcs]
+        if not isinstance(fcs, list) or not fcs:
+            return None
+        outs = fcs[0].get("outcomes")
+        if isinstance(outs, list):
+            for o in outs:
+                if isinstance(o, dict) and str(o.get("outcome", "")).strip().lower() in (
+                        "yes", "true", "y"):
+                    return _clip01(o.get("probability"))
+            for o in outs:                      # only a No given -> complement
+                if isinstance(o, dict) and str(o.get("outcome", "")).strip().lower() in (
+                        "no", "false", "n"):
+                    return _clip01(1.0 - _clip01(o.get("probability")))
+        for key in ("probability", "p"):
+            if key in fcs[0]:
+                return _clip01(fcs[0][key])
+        return None
+
+
+# ======================================================================== REACT
+
+class ReactReal:
+    """ReAct (Yao et al., ICLR 2023) IS a prompt pattern over a tool loop, so
+    unlike the other three there is nothing to re-implement -- the Tier-A
+    `react` harness already is its source system.  This adapter only exposes it
+    one date at a time, so it runs under the same protocol as the others.
+    """
+
+    def __init__(self, runner, llm: LLM | None = None):
+        self.runner = runner          # belieflens.harnesses.HarnessRunner
+        self.llm = llm                # for shared budget accounting only
+
+    def run_day(self, question_text: str, date: str, state: dict | None,
+                history: list, background: str = "",
+                resolution_date: str = "") -> tuple:
+        from .harnesses import SYSTEMS, parse_forecast
+        system = SYSTEMS["react"].format(date=date)
+        parts = ["QUESTION: " + question_text]
+        if background:
+            parts.append("BACKGROUND: " + background)
+        if resolution_date:
+            parts.append("RESOLVES: " + str(resolution_date))
+        if history:
+            parts.append("YOUR PREVIOUS FORECASTS:\n" + "\n".join(history))
+        parts.append("Today is %s. Produce your forecast for today." % date)
+
+        forecast, text, calls, forced = None, "", [], False
+        for _attempt in range(2):
+            text, calls, forced = self.runner._agent_turn(
+                system, [{"role": "user", "content": "\n\n".join(parts)}], date)
+            forecast = parse_forecast(text)
+            if forecast is not None:
+                break
+        if self.llm is not None:
+            with self.llm._lock:
+                self.llm.calls += len(calls) + 1
+        trace = {"searches": calls, "forced_stop": forced, "text": text[:1500]}
+        return forecast, None, trace

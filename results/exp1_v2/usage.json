@@ -1,0 +1,8 @@
+{
+ "calls": 19385,
+ "tokens_in": 35108288,
+ "tokens_out": 8185861,
+ "retries": 1780,
+ "model": "gpt-5-mini",
+ "elapsed_s": 8546
+}

@@ -16,3 +16,8 @@ tools/
 
 # Vendored clone (reproduce via futuresim_integration/README.md)
 vendor/
+
+# Local secrets and run logs
+.env
+*.log
+blf_paper.txt

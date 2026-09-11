@@ -9,10 +9,11 @@
 \newcommand{\hr}[1]{\texttt{#1}}
 \graphicspath{{figs/}}
 
-\title{\textbf{BeliefLens: Belief Dynamics in LLM Forecasting Harnesses}\\[2pt]
-\Large Technical Report}
-\author{BeliefLens Project\\\small Deep Digital Intelligence \; · \; \url{https://github.com/DDI-droid/belieflens}}
-\date{September 10, 2026 \; · \; v1.1}
+\title{\textbf{BeliefLens: Belief Dynamics in LLM Forecasting Harnesses}\\[3pt]
+\Large Recovering the update rule, and what changes when the harness is real}
+\author{BeliefLens Project\\\small Deep Digital Intelligence \; · \;
+\url{https://github.com/DDI-droid/belieflens}}
+\date{September 11, 2026 \; · \; v2.0}
 
 \begin{document}
 \maketitle
@@ -20,104 +21,217 @@
 \begin{abstract}
 LLM forecasters are \emph{judgmental} forecasters: behind every stated probability is something
 that behaves like a belief, and behind every revision an update rule. BeliefLens measures both.
-Four \emph{harness shapes} (\hr{react}, \hr{futuresim}, \hr{analytica}, \hr{bayesian})---prompt-defined
-re-implementations of each source system's reasoning structure, with shape-specific state-carry
-code, executed by one shared single-agent tool loop on a 339{,}801-article date-gated news
-corpus---forecast real
-January--March 2026 events under two protocols: \textbf{sequential} (five dates in order, own
-history carried; $k{=}5$ rollouts) and \textbf{parallel} (fresh one-shot per date; $k_2{=}5$
-rollouts), so every belief is a distribution. From each trajectory we \emph{recover the reasoning
-as a literal-free program}: named variables extracted from the reasoning are the only values a
-synthesized program may use, and blind sample/temporal holdouts decide whether the recovered
-method is real. Findings: reasoning-structure stability and evidence tracking
-\emph{anticorrelate}; \hr{bayesian}'s reasoning is a genuine fixed formula (its early-days
-program predicts held-out late days at MAE $\approx0.003$) and its sequential trajectory is
-unbiased against its own fresh-eyes belief; \hr{futuresim}'s rigidity decomposes into history
-anchoring (update gain $-0.14$, the only negative), procedure-level conservatism, and---under
-direct evidence---full rule compliance; \hr{react}'s updates flow through channels no recoverable
-program contains. All 1{,}432 logged searches replay with zero articles past the date gate, and
-an independent adversarial review is incorporated with every correction documented
-(\S\ref{sec:audit}).
+We build a date-gated replay sandbox over 339{,}801 news articles and run forecasting harnesses
+under two protocols---\textbf{sequential} (five dates in order, own history carried, $k{=}5$
+rollouts) and \textbf{parallel} (fresh one-shot per date, no history, $k_2{=}5$ rollouts)---so
+that every belief is a distribution and the effect of carrying history is isolated by
+construction. From each trajectory we \emph{recover the reasoning as a literal-free program}:
+named variables extracted from the harness's own reasoning are the only values a synthesized
+program may use, and blind sample and temporal holdouts decide whether the recovered method is
+real. The recovered program then serves as an executable referee for counterfactual probes.
+We run this twice. First on four \emph{prompt-defined reasoning shapes} on one shared tool loop,
+where we find a stability--plasticity inversion, a genuinely fixed log-odds update formula for
+the Bayesian shape (its early-days program predicts held-out late days at MAE ${\approx}0.003$),
+a three-way decomposition of the FutureSim shape's rigidity into acquisition, procedure and
+history---but \emph{not} rule violation---and the incompressibility of free-form ReAct reasoning.
+Then we run it again with the \textbf{real orchestration code} of two source
+systems: Analytica's analyzer/grounder/synthesizer pipeline with its linear composition computed
+in code, and the BLF system's Algorithm~1 with $K$-trial shrunken logit-mean aggregation. The
+real systems are markedly more rigid than their prompt shapes---Analytica's update gain falls
+from $0.22$ to $0.05$ and its total belief movement by $3.5\times$; BLF's falls from $0.47$ to
+$-0.17$---and in both cases the rigidity is traceable to specific architecture, not to an
+instruction a model may decline. All 1{,}432 logged searches replay with zero articles past the
+date gate, and an independent adversarial review is incorporated with every correction documented.
 \end{abstract}
 
+%=========================================================================
 \section{Introduction}
-Benchmarks such as FutureSim~\cite{futuresim} score LLM forecasting agents on outcomes, and observe
-behaviours---anchoring to initial forecasts, ``self-conditioning'' on past rationales---that are
-claims about \emph{belief dynamics}. But a score cannot say where a pathology lives: in what the
-agent \emph{believes}, in how it \emph{updates}, or in how it \emph{gathers evidence}. This report
-develops instrumentation that separates those layers, and applies it to four widely used reasoning
-shapes.
+Benchmarks such as FutureSim~\cite{futuresim} score LLM forecasting agents on outcomes, and
+observe behaviours---anchoring to initial forecasts, ``self-conditioning'' on past
+rationales---that are claims about \emph{belief dynamics}. But a score cannot say where a
+pathology lives: in what the agent \emph{believes}, in how it \emph{updates}, or in how it
+\emph{gathers evidence}. Those are three different failures with three different fixes, and one
+number per condition cannot separate them. This report develops instrumentation that does.
 
 The central device is \textbf{program recovery} (\S\ref{sec:e2}). If a harness's day-to-day
 reasoning is a stable method applied to changing inputs, then a single program---with \emph{no
 numeric literals anywhere}, only named quantities extracted from the reasoning itself---should
 reproduce every forecast the harness made, with only the variable bindings changing between days.
 The program is then the \emph{reasoning structure}; the bindings are the \emph{belief state}; and
-the split is forced by construction, because the literal ban leaves a number nowhere to hide.
-Once such a program exists, belief dynamics become measurable: the belief is a trajectory in the
-program's own coordinates, and the program is an executable referee for counterfactual probes
-(\S\ref{sec:probe}).
+the split is forced by construction, because the literal ban leaves a number nowhere to hide. It
+must arrive as a semantically named input or be computed.
+
+Once such a program exists, three things become measurable that were not. Belief \textbf{distance}
+becomes a distance in the program's own coordinates rather than between two output probabilities.
+\textbf{Theory change} becomes visible as the program failing to fit later days. And the program
+becomes an \textbf{executable referee}: inject one piece of news, ask what the agent's own rule
+implies, and compare that against what the agent actually did (\S\ref{sec:probe}). An agent can
+be caught violating itself.
 
 \paragraph{Contributions.}
 \begin{itemize}
-\item \textbf{Infrastructure.} A replayable forecasting environment on the real FutureSim corpus
+\item \textbf{Infrastructure.} A replayable forecasting environment on the FutureSim news corpus
 (339{,}801 articles, 2025-12-01--2026-03-31) with an SQL-enforced date gate verified by
-\emph{replaying all 1{,}432 logged searches} (zero breaches); four harness shapes on one substrate
-so that reasoning structure is the only manipulated variable; dual elicitation protocols
-(sequential $k{=}5$, parallel $k_2{=}5$) yielding belief \emph{distributions}, not points.
+\emph{replaying all 1{,}432 logged searches} (zero breaches); dual elicitation protocols
+(sequential $k{=}5$, parallel $k_2{=}5$) yielding belief \emph{distributions}, not points; and a
+hard per-run call budget enforced in the model wrapper.
 \item \textbf{Method.} A literal-free program space with a mechanical anti-gaming validator (no
 literals, no boolean constants, no constant-only arithmetic, no value-spelling names such as
 \texttt{two=2}, no dead code, no $x/x$), an answer-copy filter over raw/odds/percent/complement
-transforms, and blind sample/temporal holdouts as the deciding gate; a standing audit that
-re-verifies all of it against collected data.
-\item \textbf{Findings.} A stability--plasticity inversion across harnesses; recovery of a true
-fixed update formula for \hr{bayesian}; a three-way decomposition of \hr{futuresim}'s rigidity
-(acquisition, procedure, and history---but \emph{not} rule violation); quantified conservatism
-(update gains $0.22$--$0.47$, all $<\!1$) with \hr{futuresim} negative; and the incompressibility
-of free-form ReAct reasoning.
+transforms, and blind sample and temporal holdouts as the deciding gate; plus a standing audit
+that re-verifies all of it against the collected data on demand.
+\item \textbf{Findings, prompt tier.} A stability--plasticity inversion across harnesses;
+recovery of a true fixed update formula for the Bayesian shape; a three-way decomposition of the
+FutureSim shape's rigidity; quantified conservatism (update gains $0.22$--$0.47$, all $<\!1$);
+and the incompressibility of free-form ReAct reasoning.
+\item \textbf{Findings, real tier.} The same replay experiment run with faithful
+re-implementations of two source systems' \emph{orchestration code} (\S\ref{sec:e1r}). The
+prompt-tier results \emph{understate} rigidity, because the architectures enforce in code what a
+prompt can only request. The shape-versus-real difference is itself a measurement: how much of a
+system's belief dynamics lives in its wiring rather than in its instructions.
 \end{itemize}
 
-\section{Background}
-\textbf{Analytica}~\cite{analytica} decomposes a query into a tree of soft propositions, grounds
-leaves with tools, and composes upward with a linear rule, arguing bias falls at the leaves and
-variance in the composition. \textbf{FutureSim}~\cite{futuresim} replays dated news past model
-cutoffs and documents anchoring and self-conditioning in frontier agents.
-\textbf{Agent-BRACE}~\cite{agentbrace} represents an agent's belief as atomic claims with ordinal
-certainty and shows such beliefs grow calibrated as evidence accrues. Our harnesses instantiate
-these three shapes (plus a plain ReAct~\cite{react} floor); our measurements ask the question none
-of the three answers: whether the externalized structure \emph{is} the working belief, and what
-moves it.
+%=========================================================================
+\section{Background: the source systems in their own terms}\label{sec:bg}
+Because this report both imitates these systems (\S\ref{sec:e1}) and runs two of them
+(\S\ref{sec:e1r}), we state their base forms precisely enough that the deltas are checkable.
 
+\paragraph{Analytica~\cite{analytica} --- the architecture.}
+Three agent roles, two algorithms. \textsc{Analyze} (their Alg.~1) starts from a root proposition
+$\rho_0$ and repeatedly calls an \emph{Analyzer} $\mathsf{A_A}$ to add child nodes until a leaf
+budget $L_{max}$ or a completion signal is reached. \textsc{Synthesize} (their Alg.~2) walks the
+tree bottom-up: \emph{Grounder} agents $\mathsf{A_G}$ evaluate all leaves \emph{in parallel},
+each returning a soft truth value and a written report; a \emph{Synthesizer} $\mathsf{A_S}$ then
+scores each non-leaf from its children under a \textbf{linear} rule,
+\[\rho_i.p_{true}=\beta_0+\sum_j \beta_j\,\bar\rho_{ij}.p_{true},\]
+where the LLM emits the $\beta_j$ and $\beta_0$ as JSON and the arithmetic is not the model's job.
+Their §4.2 justifies this with a bias/variance argument: verify simple leaves, and let an
+``effectively free mathematical wrapper'' aggregate them, because a linear rule dampens leaf
+noise where a fuzzy-logic rule amplifies it. Crucially for us, the paper already defines
+\textbf{resynthesis} (their §4.1): after a tree is grounded, a user may ``edit the truth value,
+statements, or reports of any node, or add/remove nodes'' and the system ``update[s] only the
+affected branches up to the root.'' Continual forecasting (\S\ref{sec:e1r}) is exactly that
+mechanism with the counterfactual replaced by a calendar.
+
+\paragraph{FutureSim~\cite{futuresim} --- the environment.}
+A chronological, replayable simulation on a daily cadence. Task state is a CSV, one row per
+question (background, resolution criteria, resolution date, latest forecast); ground truth is
+appended once the simulated date passes resolution. The context is the set of CCNews documents
+available by that date, chosen because its snapshots are reliably dated and not retroactively
+edited. The environment enforces exactly two actions,
+\texttt{submit\_forecast(question\_id, outcomes)} and \texttt{next\_day()}; tools, prompts and
+orchestration are the agent's business. Their benchmark is 330 questions resolving
+2026-01-01--03-28 over 7.36M articles with a hybrid semantic$+$keyword search tool returning five
+512-token chunks. Two of their findings are this report's direct parents:
+
+\begin{itemize}
+\item \textbf{Anchoring.} Started from a deliberately poor initial forecast set, every frontier
+agent failed to adapt away from it---not one reached even the Brier skill score of making no
+prediction at all, \emph{despite being told} its predictions were scoring negatively.
+\item \textbf{Sequential $<$ direct.} The same agent, asked each question directly one day before
+resolution with full information and no prior prediction to anchor to, scored 31.2\% accuracy;
+walking the same information forward day by day, it scored 24.8\%.
+\end{itemize}
+
+That second result is a single aggregate accuracy gap. It establishes the phenomenon but cannot
+localise it. Our \seq/\pl{} design (\S\ref{sec:e1}) is that experiment refactored into a per-date,
+per-rollout \emph{distribution}, so the gap decomposes into anchoring, conservatism, lag and
+placement components that are separately measurable.
+
+\paragraph{Agent-BRACE~\cite{agentbrace} and BLF~\cite{blf} --- the representation.}
+Agent-BRACE formalises the agent as a POMDP and decouples it into a \emph{belief state model} and
+a \emph{policy model}, trained jointly with reinforcement learning; the belief is a set of atomic
+natural-language claims, each tagged on an ordinal Words-of-Estimative-Probability scale
+(\emph{confirmed} $\succ$ \emph{almost certain} $\succ$ \emph{probable} $\succ$ \emph{possible}
+$\succ$ \emph{unlikely} $\succ$ \emph{doubtful} $\succ$ \emph{unknown}). It is therefore a
+\emph{training method}, not an installable harness---without the RL stage there is nothing to
+run---so it contributes the framing question (is the externalised structure the working belief?)
+while the harness we implement comes from BLF, which instantiates the same idea for forecasting.
+BLF's Algorithm~1:
+
+\begin{quote}\small\begin{verbatim}
+Require: question q, cutoff date d, max steps T
+  b0 <- initial belief (p = 0.5);  m0 <- (q, b0)
+  for t = 1 .. T:
+      (a_t, b_t) <- LLM(m_{t-1})        # update belief AND choose action, one generation
+      if a_t = submit(p_hat): return p_hat
+      o_t <- Env(a_t; q, d)
+      if a_t is web search: o_t <- LeakFilter(o_t, d)     # 2nd-pass LLM filter
+      m_t <- m_{t-1} (+) (a_t, o_t, b_t)
+  Force submit; return b_T.p
+\end{verbatim}\end{quote}
+
+The belief $b_t$ is a semi-structured JSON object holding a probability, a confidence level, key
+evidence for and against, and open questions. Around the loop sit $K{=}5$ independent trials
+aggregated by a shrunken logit-space mean
+$\hat p=\sigma\!\left(\alpha\cdot\frac1K\sum_k\mathrm{logit}(p_k)\right)$ with $\alpha\in[0,1]$
+falling as between-trial variance rises, and hierarchical Platt calibration with per-source
+intercept offsets. $T_{max}{=}10$; submitted probabilities are clamped to $[0.05,0.95]$ to bound
+worst-case Brier loss.
+
+\paragraph{ReAct~\cite{react}} supplies the floor: an interleaved think/act loop with no imposed
+structure. Unlike the other three it \emph{is} a prompt pattern over a tool loop, so our
+\hr{react} coincides with its source and needs no ``full'' variant.
+
+%=========================================================================
 \section{Experimental Infrastructure}\label{sec:infra}
 \subsection{Corpus and date gate}
-Articles are the FutureSim corpus (HF \texttt{shash42/forecast-news}; CCNews-derived,
-deduplicated, dated): 120 day-partitions, 2025-12-01--2026-03-31, indexed to SQLite FTS5 (BM25),
-339{,}801 rows. At simulation date $D$ the one search tool returns only articles with
-$\text{date} \le D$; the constraint is in the SQL, not the prompt. \emph{Verification:} the audit
-re-executes every search any harness ever logged (483 in the main runs, 949 in the scale-up) with
-its turn's date; zero returned articles postdate the gate. We do not use FutureSim's 48\,GB
-prebuilt hybrid index; retrieval (BM25) is weaker than the paper's but byte-identical across
-harnesses, so it is a constant of the experiment, not a confound in it.
+Articles are the FutureSim corpus (HuggingFace \texttt{shash42/forecast-news}; CCNews-derived,
+deduplicated, dated), sliced to the simulation window: 120 day-partitions,
+2025-12-01--2026-03-31, indexed to SQLite FTS5 (BM25), 339{,}801 rows. At simulation date $D$ the
+one search tool returns only articles with $\text{date}\le D$; \textbf{the constraint is in the
+SQL, not in the prompt}. \emph{Verification:} the audit re-executes every search any harness ever
+logged (483 in the main runs, 949 in the scale-up) with its own turn's date; zero returned
+articles postdate the gate.
 
-\subsection{Harnesses}
-\textbf{What these are, precisely.} All four run on \emph{one} shared code path: a
-single-agent tool loop (at most five \texttt{search\_news} rounds, then a forced answer, output
-contract \texttt{FORECAST:\,$p$}). What differs per harness is (i) the system prompt imposing the
-reasoning structure and (ii) a small amount of shape-specific code---for \hr{futuresim} and
-\hr{bayesian}, programmatic extraction of the memory/belief block and its re-injection the next
-day. They are therefore \emph{prompt-level re-implementations of each source system's reasoning
-shape}, not the source systems themselves: real Analytica builds its proposition tree and computes
-its linear composition \emph{in orchestration code} with parallel per-leaf grounder agents; the
-real FutureSim harness maintains task state as an executable dataframe with structured memory
-tools; the BLF system adds multi-trial aggregation and calibration. Our \hr{react} coincides with
-its source (ReAct \emph{is} a prompt pattern over a tool loop); the others approximate.
-This is a deliberate control---installing the papers' repositories would compare repositories,
-whereas holding the substrate fixed makes reasoning shape the only manipulated variable---but it
-bounds the claims: every cross-harness result in this report is a statement about reasoning
-shapes at fixed capacity, \textbf{not} an evaluation of the source systems.
-Table~\ref{tab:harness} summarises.
+We do not use FutureSim's 48\,GB prebuilt hybrid index. Retrieval here is BM25 keyword search,
+weaker than the paper's, but byte-identical across every harness---so it is a constant of the
+experiment rather than a confound in it.
 
-\begin{table}[tbp]\centering\small
+\subsection{Model choice and contamination}
+Harnesses run on \texttt{gpt-5-mini} (released 2025-08-07). This is a validity decision, not a
+cost decision: the questions resolve January--March 2026, so any later model would \emph{recall}
+rather than forecast, and a model that already knows the outcome does not move its
+belief---destroying the very thing being measured. The extractor (\texttt{gpt-5.2}) post-dates
+the events; it writes variables and programs but makes no forecasts, and its one leakage channel
+(tilting extracted values toward the known outcome) is audited via the preserved
+pre-reconciliation variable tables: across 320 tables, exactly one systematically answer-tracking
+variable was found (\texttt{posterior\_odds}, odds-form, 10/10 instances), and no recovered
+program references it.
+
+\subsection{Questions}\label{sec:questions}
+The paired control: \emph{Will the USA / will Canada win the Milano-Cortina men's hockey gold?}
+One evidence stream, both resolving YES/NO. Both teams won their semifinals on 02-20---the last
+simulated date---and the final resolved 02-22, \emph{outside} the window.
+
+\begin{figure}[htbp]\centering
+\includegraphics[width=.96\textwidth]{fig_timeline.pdf}
+\caption{\textbf{The simulated calendar.} Five forecast dates per rollout; the gold medal is
+decided after the last date any harness ever sees.}
+\label{fig:timeline}
+\end{figure}
+
+That event path determines which metrics are legitimate. A correct forecaster on 02-20 raises
+\emph{both} beliefs toward ${\sim}0.5$, so the proper measures are coherence measures---both
+beliefs rising across the semifinal (\emph{semi-rise}) and
+$P_\text{USA}{+}P_\text{CAN}\!\to\!1$ (\emph{sum@last})---and \emph{not} directional separation.
+Our original design scored directional separation; the adversarial review (\S\ref{sec:audit})
+showed it would have punished correct forecasting, and it was replaced before any conclusion was
+drawn from it. A scale-up set of four further questions from the OpenForesight dataset
+(FutureSim's question source) supports the recovery statistics of \S\ref{sec:e2}; all four
+resolve YES, a bias we disclose and therefore exclude from every directional claim.
+
+%=========================================================================
+\section{Harnesses: two tiers}\label{sec:harness}
+\subsection{Tier A --- four prompt-defined reasoning shapes}\label{sec:tierA}
+All four Tier-A harnesses run on \emph{one} shared code path: a single-agent tool loop (at most
+five \texttt{search\_news} rounds, then a forced answer, output contract
+\texttt{FORECAST:\,$p$}). What differs per harness is (i) the system prompt imposing the reasoning
+structure and (ii) a small amount of shape-specific code---for \hr{futuresim} and \hr{bayesian},
+programmatic extraction of the memory or belief block and its re-injection the next day. The
+prompts are reproduced verbatim in Appendix~\ref{app:prompts}.
+
+\begin{table}[htbp]\centering\small
 \begin{tabular}{@{}llll@{}}
 \toprule
 harness & structure imposed & carries across days & lineage \\
@@ -130,8 +244,8 @@ baseline \\
 Analytica~\cite{analytica} \\
  & each by search $\to$ synthesize with weights & & \\
 \hr{bayesian} & prior $\to$ evidence $\to$ per-item likelihood & history + belief block &
-sequential Bayesian \\
- & ratio $\to$ posterior; forced belief block & & updating~\cite{blf} \\
+BLF~\cite{blf} / \\
+ & ratio $\to$ posterior; forced belief block & & Agent-BRACE~\cite{agentbrace} \\
 \bottomrule
 \end{tabular}
 \caption{The four reasoning shapes. $^{\ast}$All four see their own prior forecasts in the
@@ -140,29 +254,95 @@ sequential protocol (the anchoring pressure, applied uniformly); \hr{react} is t
 \label{tab:harness}
 \end{table}
 
-\subsection{Model choice and contamination}
-Harnesses run on \texttt{gpt-5-mini} (released 2025-08-07): the questions resolve January--March
-2026, so any later model would \emph{recall} rather than forecast, and a model that knows the
-outcome does not move its belief---destroying the dynamics measurement. The extractor
-(\texttt{gpt-5.2}) post-dates the events; it writes variables and programs but makes no forecasts,
-and its one leakage channel (tilting extracted values toward the known outcome) is audited via the
-preserved pre-reconciliation variable tables: across 320 tables, exactly one systematically
-answer-tracking variable was found (\texttt{posterior\_odds}, odds-form, 10/10 instances), and no
-recovered program references it.
+\paragraph{What Tier A is, and is not.} These are \emph{prompt-level re-implementations of each
+source system's reasoning shape}, not the source systems. Real Analytica builds its tree and
+computes its linear composition \emph{in orchestration code}, with parallel per-leaf grounder
+agents. The real FutureSim harness maintains task state as a file the agent edits, with shell and
+file tools. The real BLF system adds multi-trial aggregation and calibration. Holding the
+substrate fixed is a deliberate control---installing three repositories would compare
+repositories, whereas fixing the substrate makes reasoning shape the only manipulated
+variable---but it bounds every Tier-A claim to being about \emph{shapes at fixed capacity}.
+\S\ref{sec:e1r} removes that bound for two of the three systems and treats the difference as data.
 
-\subsection{Questions}
-The paired control: \emph{Will the USA / will Canada win the Milano-Cortina men's hockey gold?}
-(one evidence stream; resolves YES/NO). Both teams won their semifinals on 02-20---the last
-simulated date---and the final resolved 02-22, \emph{outside} the window; a correct forecaster
-therefore raises \emph{both} beliefs toward $\sim$0.5, and the proper metrics are coherence
-metrics---both beliefs rising across the semifinal (\emph{semi-rise}) and
-$P_\text{USA}{+}P_\text{CAN}\!\to\!1$---not directional separation. (Our
-original design scored directional separation; the adversarial review, \S\ref{sec:audit}, showed it
-would have punished correct forecasting, and it was replaced before any conclusion was drawn.)
-A scale-up set of four further questions from the OpenForesight dataset (FutureSim's question
-source) supports the recovery statistics of \S\ref{sec:e2}; all four resolve YES, a bias we
-disclose and therefore exclude from directional claims.
+\subsection{Tier B --- real orchestration code}\label{sec:tierB}
+Two source systems were re-implemented as what they actually are: multi-agent control flow,
+structured state and composition arithmetic executed in Python, with the LLM confined to the
+roles the papers give it. They run under the identical protocols of \S\ref{sec:e1}---same model,
+corpus, date gate, questions, $k{=}k_2{=}5$.
 
+\paragraph{\hr{analytica-full}.} An \emph{analyzer} agent decomposes the question into 3--5 soft
+sub-propositions (leaf budget 8, up to 3 expansion rounds on day 1); parallel per-leaf
+\emph{grounder} agents each generate search queries, read gated articles, and conclude a leaf
+probability with a written report in a separate second call; a \emph{synthesizer} agent assigns
+weights; and the linear composition $p=\mathrm{clamp}(\beta_0+\sum_i\beta_i p_i)$ is computed
+recursively \emph{in code}---the model never states the final probability.
+
+The paper is single-shot, so continual forecasting requires an extension, and the extension is
+precisely the paper's own resynthesis mechanism (\S\ref{sec:bg}) driven by a calendar:
+
+\begin{enumerate}
+\item The proposition tree is carried as state rather than rebuilt.
+\item Each new date runs an analyzer \textbf{edit pass}---add or remove leaves against the new
+window. Its prompt states explicitly that most days need no change.
+\item Every leaf is re-grounded in parallel, but \textbf{delta-grounded}: each grounder's search
+window is restricted to the period since \emph{that leaf} was last grounded, and the grounder is
+shown its own previous probability and report, with the instruction to keep its value close if
+nothing material changed.
+\item Synthesizer weights are re-elicited \textbf{only} where a node's child set changed;
+otherwise the stored $\beta$ are reused.
+\item The composition is recomputed in code.
+\end{enumerate}
+
+Three lines of architecture therefore produce rigidity by construction, and each is nameable: a
+leaf that sees only news \emph{since it last looked} cannot react to standing evidence it has
+already discounted; a leaf handed its own prior value is anchored by design; and a parent whose
+children did not change reuses yesterday's weights outright. None of this is an instruction the
+model may decline.
+
+\begin{figure}[htbp]\centering
+\includegraphics[width=.98\textwidth]{fig_arch_analytica.pdf}
+\caption{\textbf{Analytica: as published, and as run here.} Highlighted boxes are the whole
+continual-forecasting delta; everything else, including the composition arithmetic, is the
+paper's machinery unchanged.}
+\label{fig:arch-analytica}
+\end{figure}
+
+\paragraph{\hr{blf-full}.} The BLF system's Algorithm~1 verbatim in structure: the belief is an
+explicit JSON state (probability, confidence, evidence for/against, open questions); each step one
+generation returns an action (search or submit) \emph{and} the updated belief; at most
+$T_{\max}{=}10$ steps; the submitted probability is clamped to $[0.05,0.95]$. $K{=}3$ trials run
+per day (the paper uses $K{=}5$; reduced for budget) and are aggregated by the paper's shrunken
+logit-space mean with $\alpha=1/(1+\mathrm{Var}(\mathrm{logit}(p_k)))$---our instantiation of
+their variance-dependent $\alpha$, whose functional form they do not pin down. The belief state
+of the median-probability trial is carried across days in \seq{} and rebuilt from scratch in
+\pl. The paper's \texttt{LeakFilter} (a second-pass LLM filter on search results) is replaced by
+our SQL date gate, which is a strictly stronger guarantee. Platt calibration is omitted: it
+requires resolved training questions, which the sandbox window does not contain.
+
+\begin{figure}[htbp]\centering
+\includegraphics[width=.98\textwidth]{fig_arch_blf.pdf}
+\caption{\textbf{BLF: as published, and as run here.} Three deltas---belief carried across dates,
+$K{=}3$ rather than 5, and no calibration stage---each disclosed in \S\ref{sec:limits}.}
+\label{fig:arch-blf}
+\end{figure}
+
+\paragraph{Cost discipline.} Every model call passes through a wrapper that logs tokens and
+raises \texttt{BudgetExceeded} at a hard cap, so no run can overshoot silently. The Tier-B run
+cost 3{,}229 calls (6.39M input, 1.46M output tokens, 41 minutes at 4 workers) against a 4{,}000
+cap, with zero turn errors in 200 forecasts. The full ledger is Appendix~\ref{app:cost}.
+
+\paragraph{FutureSim's simulator.} The third source system is not re-implemented but
+\emph{integrated}: their actual codebase at a pinned commit, plus two adapter files (a direct
+OpenAI inference provider, and an implementation of their \texttt{BaseSearchTool} over our gated
+index) and a 71-line patch to their runner. A zero-cost structural dry run
+(\texttt{-{}-no\_inference}) confirms that the custom dataset loads, both questions activate,
+the BM25 backend serves all 339{,}801 articles, exact answer matching is selected---so no matcher
+model is needed---and the day loop enters. Leaving \texttt{articles\_base} empty is deliberate:
+corpus staging becomes a no-op, so the agent's \emph{only} information channel is the search
+tool. Their \texttt{-{}-start\_date}/\texttt{-{}-end\_date} define the \emph{resolution} window,
+not the simulated days. The live run is reported as pending in \S\ref{sec:limits}.
+
+%=========================================================================
 \section{The Literal-Free Program Space}\label{sec:dsl}
 A recovered program is one Python function \texttt{forecast()} over an injected namespace, with:
 \textbf{(R1)} no numeric, string, or \emph{boolean} literals anywhere; \textbf{(R2)} no
@@ -174,12 +354,22 @@ exp/log/sqrt}) and nine named constants; \textbf{(R4)} \emph{no value may hide i
 \texttt{two=2}, \texttt{half=0.5}, \texttt{const\_0\_62} are rejected in variable tables, schemas,
 and program locals alike; \textbf{(R5)} no constant-only arithmetic
 (\texttt{TENTH*(TWO+TWO+TWO)}\,$=$\,a smuggled $0.6$), no self-ops ($x{-}x$, $x/x$), no dead code
-(\texttt{ZERO*(\dots)}, identity ops, unused locals). An eleven-exploit battery (including all
-constructions found by the adversarial review) must reject under the validator and does; a
-legitimate program passes. Because in-sample fit with visible targets cannot by itself distinguish
-structure from memorisation, \textbf{the deciding gate is out-of-sample}: programs are
-re-synthesized on a subset whose complement's targets the synthesizer never sees.
+(\texttt{ZERO*(\dots)}, identity ops, unused locals).
 
+Every one of R4 and R5 exists because the first version of the rule was broken by the adversarial
+reviewer (\S\ref{sec:audit}). An eleven-exploit battery must reject under the validator and does;
+a legitimate program passes. Because in-sample fit with visible targets cannot by itself
+distinguish structure from memorisation, \textbf{the deciding gate is out-of-sample}: programs
+are re-synthesized on a subset whose complement's targets the synthesizer never sees.
+
+\begin{figure}[htbp]\centering
+\includegraphics[width=.98\textwidth]{fig_pipeline.pdf}
+\caption{\textbf{The recovery pipeline.} One program per harness--question, then two blind
+re-syntheses whose held-out targets the synthesizer never sees.}
+\label{fig:pipeline}
+\end{figure}
+
+%=========================================================================
 \section{Experiment 1: Replay}\label{sec:e1}
 \subsection{Protocols}
 \textbf{Sequential (\seq)}: five dates in order (01-14, 01-28, 02-08, 02-15, 02-20); each day the
@@ -187,42 +377,36 @@ harness sees its own previous forecasts (and its carry block) and may search the
 $k{=}5$ independent rollouts of the whole trajectory. \textbf{Parallel (\pl)}: for each date, a
 fresh single-shot run given all information up to that date and \emph{no} history; $k_2{=}5$
 rollouts per date. Day~1 of a sequential rollout is, by construction, a parallel draw---a built-in
-sanity check (12/16 day-1 sequential values fall inside the day-1 parallel spread at $\pm 0.05$).
-All 560 collected forecasts parse under the strict parser (200 sequential + 200 parallel on the
-pair, plus 160 scale-up; no fallback; percent and comma handled; out-of-range triggers a retry),
-and every stored forecast re-parses identically from its own turn text.
-Figure~\ref{fig:flow} shows the resulting trajectories.
+sanity check (Tier A: 12/16 day-1 sequential values inside the day-1 parallel spread at
+$\pm 0.05$; Tier B: 4/4).
 
-\begin{figure}[tbp]\centering
-\includegraphics[width=.98\textwidth]{fig_flow.pdf}
-\caption{\textbf{Belief flow, all four harnesses on the paired questions.} Shaded band and bold
-line: range and mean of the five \seq{} rollouts (history carried). Open dots and dashed line: the
-five \pl{} one-shot draws per date and their mean (fresh eyes on the same evidence). Dotted
-vertical: semifinal date. \hr{futuresim}--Canada's band rides above its fresh-eyes mean (anchoring)
-and \hr{futuresim}--USA barely responds even in \pl{} (procedure-level conservatism);
-\hr{bayesian} hugs its fresh-eyes mean in both panels.}
-\label{fig:flow}
-\end{figure}
+All 760 collected forecasts parse under the strict parser (200 sequential $+$ 200 parallel on the
+pair, 160 scale-up, 200 real-tier; no fallback; percent and comma handled; out-of-range triggers
+a retry), and every stored forecast re-parses identically from its own turn text.
 
 \subsection{Metrics}
 For dates $t\ge2$: \textbf{anchor gap} $=\seq_t-\overline{\pl}_t$ (signed; what carrying history
 does relative to evidence alone); \textbf{lag advantage} $=|\seq_t-\overline{\pl}_t| -
 |\seq_t-\overline{\pl}_{t-1}|$ (positive $\Rightarrow$ the sequence tracks \emph{yesterday's}
 evidence-conditioned belief better than today's); \textbf{update gain} $=$ OLS slope of
-$\Delta\seq_t$ on $\Delta\overline{\pl}_t$ (1 $=$ moves with the evidence; $<\!1$ conservatism);
-\textbf{placement} $=$ percentile of each \seq{} forecast within that date's \pl{} draws
-(50 $=$ unbiased); \textbf{stabilisation} $=\mathrm{sd}(\seq)/\mathrm{sd}(\pl)$ per date;
-\textbf{coherence} $=P_\text{USA}{+}P_\text{CAN}$ (\textbf{sum@last} is its value on 02-20);
-\textbf{total movement} $|\Delta|_\text{tot}$, the summed absolute day-to-day change of a rollout;
-and \textbf{Brier}~\cite{brier}. Placement is a probability-integral-transform (PIT) statistic,
-and PIT$_{\mathrm{med}}$ its median. Figures~\ref{fig:gain}--\ref{fig:coh} render these;
-Table~\ref{tab:e1} summarises. Throughout this report,
-Brier is the plain quadratic score $\frac1n\sum_i(p_i-y_i)^2$ with $y_i\in\{0,1\}$ the resolved
-outcome, pooled over the pair---\emph{not} a skill score (no baseline subtraction, no
-$1{-}\mathrm{MSE}$ orientation, no difficulty adjustment); 0 is perfect, 0.25 is the constant-0.5
-forecaster.
+$\Delta\seq_t$ on $\Delta\overline{\pl}_t$ (1 $=$ moves with the evidence; $<\!1$ conservatism;
+$<\!0$ moves against it); \textbf{placement} $=$ percentile of each \seq{} forecast within that
+date's \pl{} draws (50 $=$ unbiased); \textbf{stabilisation} $=\mathrm{sd}(\seq)/\mathrm{sd}(\pl)$
+per date; \textbf{coherence} $=P_\text{USA}{+}P_\text{CAN}$ (\textbf{sum@last} is its value on
+02-20, \textbf{semi-rise} the fraction of rollouts in which both paired beliefs rose across the
+semifinal); \textbf{total movement} $|\Delta|_\text{tot}$, the summed absolute day-to-day change
+of a rollout; and \textbf{Brier}~\cite{brier}. Placement is a probability-integral-transform (PIT)
+statistic, and PIT$_{\mathrm{med}}$ its median.
 
-\begin{table}[tbp]\centering\small
+Throughout this report, Brier is the plain quadratic score $\frac1n\sum_i(p_i-y_i)^2$ with
+$y_i\in\{0,1\}$ the resolved outcome, pooled over the pair---\emph{not} a skill score (no baseline
+subtraction, no $1{-}\mathrm{MSE}$ orientation, no difficulty adjustment); 0 is perfect, and
+\textbf{0.25} is the constant-$0.5$ forecaster.
+
+%=========================================================================
+\section{E1 Results: the prompt tier}\label{sec:e1res}
+
+\begin{table}[htbp]\centering\small
 \begin{tabular}{@{}lrrrrrrrr@{}}
 \toprule
 & \multicolumn{3}{c}{replay (\seq, $k{=}5$)} & \multicolumn{5}{c}{\seq{} vs \pl}\\
@@ -238,58 +422,189 @@ $\mathbf{-0.14}$ & $\mathbf{+0.003}$ & \textbf{80} \\
 \hr{react}     & 0.182 & 0.60 & 0.75 & $+0.019$ & 0.066 & 0.27 & $-0.011$ & 60 \\
 \bottomrule
 \end{tabular}
-\caption{\textbf{E1 headline metrics} ($k{=}5$ both conditions; pooled over the pair). Semi-rise:
-fraction of rollouts in which \emph{both} paired beliefs rose across the semifinal date (the
-correct direction). \hr{bayesian} is the best coherent tracker and is unbiased against its own
-fresh-eyes belief; \hr{futuresim} never raised both after the semifinals, carries the largest
-anchor gap, is the only harness with positive lag advantage, and its update gain is
-\emph{negative}---together consistent with tracking yesterday's evidence-conditioned belief
-rather than today's. Bold marks, per column, the value most indicative of anchoring or of its
-absence.}
+\caption{\textbf{E1 headline metrics} ($k{=}5$ both conditions; pooled over the pair). Bold marks,
+per column, the value most indicative of anchoring or of its absence.}
 \label{tab:e1}
 \end{table}
 
-\begin{figure}[tbp]\centering
-\includegraphics[width=.98\textwidth]{fig_gain.pdf}
+\paragraph{Read the \hr{futuresim} row across.} It moves least, never once raised both beliefs
+after the semifinals, carries the largest anchor gap, is the only harness with a positive lag
+advantage, sits at the 80th percentile of its own fresh-eyes distribution, and its update gain is
+\emph{negative}. Every one of those is the signature of tracking yesterday's evidence-conditioned
+belief rather than today's. \hr{bayesian} is the opposite: the best coherent tracker, and
+unbiased against its own fresh-eyes belief. \textbf{Every update gain is below 1}---conservatism
+is universal, and one harness moves the wrong way.
+
+\begin{figure}[htbp]\centering
+\includegraphics[width=.95\textwidth]{fig_flow.pdf}
+\caption{\textbf{Belief flow, all four shapes on the paired questions.} Shaded band and bold line:
+range and mean of the five \seq{} rollouts (history carried). Open dots and dashed line: the five
+\pl{} one-shot draws per date and their mean (fresh eyes on the same evidence). Dotted vertical:
+semifinal date. \hr{futuresim}--Canada's band rides above its fresh-eyes mean (anchoring) and
+\hr{futuresim}--USA barely responds even in \pl{} (procedure-level conservatism); \hr{bayesian}
+hugs its fresh-eyes mean in both panels.}
+\label{fig:flow}
+\end{figure}
+
+\begin{figure}[htbp]\centering
+\includegraphics[width=.95\textwidth]{fig_gain.pdf}
 \caption{\textbf{Update gain.} Each dot is one date-step: $x$, movement of the fresh-eyes mean;
-$y$, movement of a sequential rollout. Dashed: $y{=}x$. All fitted slopes are below 1
-(conservatism); \hr{futuresim}'s is negative.}
+$y$, movement of a sequential rollout. Dashed: $y{=}x$. All fitted slopes are below 1;
+\hr{futuresim}'s is negative.}
 \label{fig:gain}
 \end{figure}
 
-\begin{figure}[tbp]\centering
+\begin{figure}[htbp]\centering
 \includegraphics[width=.9\textwidth]{fig_anchor.pdf}
 \caption{\textbf{Anchoring summary.} Left: signed anchor gap. Right: lag advantage; only
 \hr{futuresim} is positive.}
 \label{fig:anchor}
 \end{figure}
 
-\begin{figure}[tbp]\centering
-\includegraphics[width=.98\textwidth]{fig_stab_pit.pdf}
+\begin{figure}[htbp]\centering
+\includegraphics[width=.95\textwidth]{fig_stab_pit.pdf}
 \caption{\textbf{Left:} stabilisation ratio $\mathrm{sd}(\seq)/\mathrm{sd}(\pl)$. History acts as
-a variance reducer where the ratio sits below 1 (\hr{futuresim}, \hr{react}); \hr{analytica}'s
-ratio above 1 on several dates is path dependence---rollouts diverge because their own early draws
-differed. \textbf{Right:} placement of every sequential forecast within its date's fresh-eyes
-distribution; \hr{futuresim}'s median sits at the 80th percentile (anchored high), \hr{bayesian}'s
-at the 40th.}
+a variance reducer where the ratio sits below 1; \hr{analytica}'s ratio above 1 on several dates
+is path dependence---rollouts diverge because their own early draws differed. \textbf{Right:}
+placement of every sequential forecast within its date's fresh-eyes distribution;
+\hr{futuresim}'s median sits at the 80th percentile (anchored high), \hr{bayesian}'s at the 40th.}
 \label{fig:stab}
 \end{figure}
 
-\begin{figure}[tbp]\centering
-\includegraphics[width=.98\textwidth]{fig_coh_brier.pdf}
+\begin{figure}[htbp]\centering
+\includegraphics[width=.95\textwidth]{fig_coh_brier.pdf}
 \caption{\textbf{Coherence and accuracy by condition.} Top: $P_\text{USA}{+}P_\text{CAN}$ should
-approach 1 by the semifinal (dashed). Bottom: plain Brier against the resolved outcomes (lower is
-better), pooled over the pair.}
+approach 1 by the semifinal (dashed). Bottom: plain Brier against the resolved outcomes, pooled
+over the pair; the dashed line is 0.25, the constant-$\tfrac12$ forecaster.}
 \label{fig:coh}
 \end{figure}
 
-\subsection{Search effort}
-Mean searches per turn (\seq{} / \pl): \hr{analytica} 7.3/6.8, \hr{futuresim} 6.6/6.2,
-\hr{react} 5.3/5.0, \hr{bayesian} 5.0/5.5. Memory does not substitute for retrieval at this
-scale; \hr{analytica}'s per-sub-proposition grounding makes it the heaviest searcher in both
-conditions (a truncation covariate logged per turn as \texttt{forced\_stop}).
+\begin{figure}[htbp]\centering
+\includegraphics[width=.95\textwidth]{fig_search.pdf}
+\caption{\textbf{Search effort across both tiers.} Memory does not substitute for retrieval at
+this scale. \hr{analytica}'s per-sub-proposition grounding makes it the heaviest Tier-A searcher;
+\hr{blf-full}'s $K{=}3$ trials per day make it by far the heaviest overall.}
+\label{fig:search}
+\end{figure}
 
 \FloatBarrier
+%=========================================================================
+\section{Experiment 1R: Replay with Real Orchestration Code}\label{sec:e1r}
+Identical model, corpus, date gate, questions and protocols. The only difference is whether the
+source system's structure is \emph{requested by a prompt} or \emph{enforced by code}.
+
+\begin{table}[htbp]\centering\small
+\begin{tabular}{@{}llrrrrrrrr@{}}
+\toprule
+lineage & tier & $|\Delta|_\text{tot}$ & semi-rise & sum@last & gap & $|$gap$|$ & gain &
+PIT$_{\mathrm{med}}$ & srch \seq/\pl \\
+\midrule
+\multirow{2}{*}{Analytica} & shape & 0.331 & 0.60 & 0.81 & $+0.019$ & 0.098 & 0.22 & 60 & 7.3/6.8 \\
+ & \textbf{full} & \textbf{0.093} & 0.20 & \textbf{1.04} & $+0.040$ & 0.089 & \textbf{0.05} & 60
+ & 6.5/6.9 \\
+\midrule
+\multirow{2}{*}{BLF} & shape & 0.283 & 0.80 & 0.99 & $-0.004$ & 0.072 & 0.47 & 40 & 5.0/5.5 \\
+ & \textbf{full} & \textbf{0.067} & 0.60 & 0.68 & $+0.007$ & \textbf{0.040} & $\mathbf{-0.17}$ &
+ 60 & 15.9/18.1 \\
+\bottomrule
+\end{tabular}
+\caption{\textbf{Shape vs.\ real orchestration}, identical protocols and metrics as
+Table~\ref{tab:e1} (shape rows repeated from there). The comparison is confounded only by what it
+measures: the two tiers share model, corpus, questions and protocols, and differ in whether the
+source system's structure is requested or enforced.}
+\label{tab:e1r}
+\end{table}
+
+\begin{figure}[htbp]\centering
+\includegraphics[width=.95\textwidth]{fig_shape_vs_real.pdf}
+\caption{\textbf{The headline of E1R.} Same metric, both tiers, both lineages. Translucent bars:
+prompt shape. Solid: real orchestration code.}
+\label{fig:svr}
+\end{figure}
+
+\begin{figure}[htbp]\centering
+\includegraphics[width=.95\textwidth]{fig_flow_real.pdf}
+\caption{\textbf{Belief flow of the real systems} (same encoding as Fig.~\ref{fig:flow}; note the
+full $0$--$1$ vertical scale). \hr{analytica-full}'s carried belief on Canada climbs steadily
+while its own fresh-eyes mean dips to $0.44$ on 02-08 and recovers---history holding the belief
+above what that day's evidence alone supported. On USA its sequential mean is nearly flat across
+five weeks of news. \hr{blf-full} is tightly determined in both conditions (fresh-eyes
+sd ${\approx}0.03$) and drifts in small increments.}
+\label{fig:flow-real}
+\end{figure}
+
+\begin{figure}[htbp]\centering
+\includegraphics[width=.7\textwidth]{fig_gain_real.pdf}
+\caption{\textbf{Update gain of the real systems.} Real Analytica's slope of $0.05$ means a
+fresh-eyes movement of 10 points moves the carried belief by half a point. \hr{blf-full}'s
+negative slope should be read with its small $x$-range: its fresh-eyes mean rarely moves more
+than $\pm0.06$, so the sign is weakly identified; the robust statement is that its sequential
+movement is \emph{uncoupled} from evidence movement.}
+\label{fig:gain-real}
+\end{figure}
+
+\begin{figure}[htbp]\centering
+\includegraphics[width=.95\textwidth]{fig_stab_pit_real.pdf}
+\caption{\textbf{Stabilisation and placement, real tier.} \hr{analytica-full} sits far below 1
+through mid-window: carrying the tree strongly reduces cross-rollout variance.
+\hr{blf-full} sits above 1 throughout---carrying the belief state does not reduce variance at all.}
+\label{fig:stab-real}
+\end{figure}
+
+\begin{figure}[htbp]\centering
+\includegraphics[width=.95\textwidth]{fig_coh_brier_real.pdf}
+\caption{\textbf{Coherence and accuracy, real tier.} \hr{analytica-full}'s sequential Brier
+worsens monotonically while its parallel Brier improves---on identical evidence, carrying its own
+tree cost it accuracy that fresh eyes recovered.}
+\label{fig:coh-real}
+\end{figure}
+
+\FloatBarrier
+\subsection{What the real systems change}
+
+\paragraph{Rigidity is architectural.} The prompt-shape results \emph{understate} the source
+systems' conservatism. Real Analytica moves $3.5\times$ less than its shape
+($|\Delta|_\text{tot}$ $0.093$ vs $0.331$) and its update gain collapses from $0.22$ to $0.05$:
+unchanged leaves are re-grounded only against news since they last looked, they are handed their
+own prior value as an anchor, and parent weights are reused unless children change---so the
+composed belief \emph{cannot} respond to evidence that does not survive the edit pass. This also
+answers a methodological suspicion raised against the shape experiment: that a single-loop
+\hr{analytica} was too easy to run to be the real thing. It was. The real pipeline behaves
+differently, in the direction the architecture predicts. Likewise \hr{blf-full}: logit-space
+averaging over $K$ trials with variance shrinkage is a low-pass filter applied \emph{after} the
+model reasons, and its day-to-day movement ($0.067$) is the smallest measured in this
+report---while its prompt shape, freed of the aggregation arithmetic, was Tier A's best
+evidence-tracker at $0.47$.
+
+\paragraph{Coherence can come from the wiring.} \hr{analytica-full} is the only harness in either
+tier whose paired beliefs sum to ${\approx}1$ ($1.04$ at the last date, $0.93$--$0.97$ before)
+\emph{without ever seeing the two questions together}: decomposition plus linear synthesis yields
+near-additive beliefs as a side effect of the architecture. \hr{blf-full} sums to
+$0.68$---the $[0.05,0.95]$ clamp and the shrinkage pull both members of the pair toward the
+interior.
+
+\paragraph{Stability of the belief distribution.} \hr{analytica-full}'s stabilisation ratio sits
+at $0.27$--$0.63$ through mid-window and reaches $1.04$ only at the end; \hr{blf-full}'s is
+$1.07$--$1.32$---carrying the belief state does not reduce cross-rollout variance at all,
+consistent with the carried JSON acting as a strong prior that each rollout drags along its own
+path.
+
+\paragraph{Accuracy caveat, stated plainly.} On this pair \emph{neither} real system beat the
+constant-$\tfrac12$ forecaster (pooled Brier $0.31$--$0.44$ everywhere, against $0.25$).
+\hr{analytica-full}'s sequential Brier worsens monotonically
+($0.371\to0.392\to0.408\to0.415\to0.444$) while its parallel Brier improves
+($0.375\to0.358$). These are $n{=}2$ questions and $k{=}5$ rollouts: \textbf{the dynamics are the
+result}---gains, gaps, stabilisation ratios and the shape-versus-real difference, all within-system
+comparisons on identical evidence. The Brier levels are reported because omitting them would be
+dishonest, not because they establish anything.
+
+\paragraph{What is not yet covered.} FutureSim's own simulator is integrated and passes a full
+structural dry run, but its live run is pending (\S\ref{sec:limits}). \hr{react} needs no
+``full'' variant: ReAct is a prompt pattern over a tool loop, and \S\ref{sec:tierA}'s \hr{react}
+\emph{is} its source system.
+
+\FloatBarrier
+%=========================================================================
 \section{Experiment 2: Program Recovery}\label{sec:e2}
 \subsection{Pipeline}
 For every forecast turn: \textbf{step 1}, the extractor reads that day's searches and reasoning
@@ -300,20 +615,10 @@ quantities, never values. \textbf{Step 2} reconciles the per-day tables into one
 (missing instance keys retried once, then excluded loudly---never zero-filled; pre-reconciliation
 tables preserved as the audit trail). \textbf{Step 3} synthesizes \emph{one} program per
 harness--question against all ($\le$10) instances, repaired against validator violations and worst
-residuals for at most four attempts; then re-synthesizes \emph{blind} on (a) sample~0 only and (b)
-the first three dates only, evaluated untouched on the held-out complement.
-Figure~\ref{fig:recovery} and Table~\ref{tab:e2} give the results.
+residuals for at most four attempts; then re-synthesizes \emph{blind} on (a) sample~0 only and
+(b) the first three dates only, evaluated untouched on the held-out complement.
 
-\begin{figure}[tbp]\centering
-\includegraphics[width=.98\textwidth]{fig_recovery.pdf}
-\caption{\textbf{Recovery quality per group} (log MAE; $\times$ marks ``no valid program'').
-\hr{bayesian}'s blind temporal holdouts reach MAE 0.002--0.003: a genuinely fixed update formula.
-\hr{analytica} fits poorly under every regime---its structure changes day to day. \hr{react}--USA
-admits no program at all.}
-\label{fig:recovery}
-\end{figure}
-
-\begin{table}[tbp]\centering\small
+\begin{table}[htbp]\centering\small
 \begin{tabular}{@{}lrrrp{4.6cm}@{}}
 \toprule
 group & in-sample & sample-holdout & temporal (early$\to$late) & reading \\
@@ -335,34 +640,43 @@ synthesizer); bold marks MAE at or below the 0.02 tolerance. No group passes the
 $\wedge$ 0 failures), so in-sample fits are reported as descriptive---but two blind holdouts
 individually meet every threshold (\hr{futuresim}/CAN sample-holdout: 0.014 at 80\% in-tolerance,
 0 failures; \hr{bayesian} temporal: 0.002--0.003 at 100\%), and the blind columns are the honest
-evidence throughout. Scale-up (four further questions, 16 groups, hardened rules): 10 clean, 5 marked
-recovery-uninformative (near-constant targets make both copy-detection and recovery ill-posed),
-1 no-program.}
+evidence throughout. Scale-up (four further questions, 16 groups, hardened rules): 10 clean, 5
+marked recovery-uninformative (near-constant targets make both copy-detection and recovery
+ill-posed), 1 no-program.}
 \label{tab:e2}
 \end{table}
 
-\begin{figure}[tbp]\centering
-\includegraphics[width=.98\textwidth]{fig_exemplar.pdf}
+\begin{figure}[htbp]\centering
+\includegraphics[width=.95\textwidth]{fig_recovery.pdf}
+\caption{\textbf{Recovery quality per group} (log MAE; $\times$ marks ``no valid program'').
+\hr{bayesian}'s blind temporal holdouts reach MAE 0.002--0.003: a genuinely fixed update formula.
+\hr{analytica} fits poorly under every regime---its structure changes day to day. \hr{react}--USA
+admits no program at all.}
+\label{fig:recovery}
+\end{figure}
+
+\begin{figure}[htbp]\centering
+\includegraphics[width=.95\textwidth]{fig_exemplar.pdf}
 \caption{\textbf{The belief in its discovered coordinates} (\hr{bayesian}/USA, rollout s0). Left:
 three recovered variables across the window---the recent-results likelihood ratio climbs
 $1.1\!\to\!2.9$ as the USA advances while the prior odds ratchet behind it. Right: the forecast
 those coordinates produce. The recovered programs are log-odds additive updating with a
-shrink-to-prior term (full-fit version listed in Appendix~\ref{app:prog}); re-synthesized blind
-on the first three dates alone, the temporal variant---same family, different expression---predicts
-the last two days at the MAE shown.}
+shrink-to-prior term (full-fit version in Appendix~\ref{app:prog}); re-synthesized blind on the
+first three dates alone, the temporal variant---same family, different expression---predicts the
+last two days at the MAE shown.}
 \label{fig:exemplar}
 \end{figure}
 
+\FloatBarrier
 \subsection{Residual drift and theory change}
 Fitting one program across all dates makes \emph{failure} informative: \hr{analytica}/CAN's mean
 $|$residual$|$ grows by $+0.34$ from first to last date (USA: $+0.05$)---its method decays---while
-\hr{futuresim}'s is flat or improving (CAN $-0.007$, USA $-0.07$). Figure~\ref{fig:exemplar}
-shows the recovered belief coordinates for the cleanest case. Function-space distance between the full-fit and
-sample-0-only programs (Monte-Carlo over the observed binding box):
-\hr{futuresim}/CAN \textbf{0.000} (identical theory from either half of the data),
-\hr{bayesian}/USA 0.044, \hr{react}/CAN 0.174, \hr{analytica}/CAN 0.391.
+\hr{futuresim}'s is flat or improving (CAN $-0.007$, USA $-0.07$). Function-space distance between
+the full-fit and the sample-0-only programs (Monte-Carlo over the observed binding box) says the
+same thing more sharply: \hr{futuresim}/CAN \textbf{0.000} (identical theory from either half of
+the data), \hr{bayesian}/USA 0.044, \hr{react}/CAN 0.174, \hr{analytica}/CAN 0.391.
 
-\FloatBarrier
+%=========================================================================
 \section{The Rigidity Probe}\label{sec:probe}
 Each probed harness was continued from its real end-of-run state to a probe day (02-21) with
 search disabled (stated as an outage) and exactly one injected, role-based news item---``Canada's
@@ -370,12 +684,11 @@ starting goaltender ruled out of the final'' / the USA mirror / an irrelevant pl
 recovered program supplies the referee twice over: a \emph{single-coordinate} implied change
 (perturb only the targeted variable), and a \emph{multi-coordinate} rule-implied forecast
 (re-extract the probe day's full bindings from the harness's own reasoning and execute the
-program). Placebo movements were $\le0.02$; \textbf{all sixteen directional probes (4 groups $\times$ 2
-rollouts $\times$ 2 directions) moved the correct direction}. Figure~\ref{fig:probe} and
-Table~\ref{tab:verdict} summarise.
+program). Placebo movements were $\le0.02$; \textbf{all sixteen directional probes (4 groups
+$\times$ 2 rollouts $\times$ 2 directions) moved the correct direction}.
 
-\begin{figure}[tbp]\centering
-\includegraphics[width=.98\textwidth]{fig_probe.pdf}
+\begin{figure}[htbp]\centering
+\includegraphics[width=.95\textwidth]{fig_probe.pdf}
 \caption{\textbf{Left:} single-coordinate implied change (square) vs actual change (dot) for every
 directional probe. \textbf{Right:} the multi-coordinate rule-compliance gap
 $|p_{\text{actual}}-p_{\text{rule}}|$ by condition. \hr{futuresim}'s gaps are $\le0.04$: handed
@@ -385,7 +698,7 @@ use machinery its recoverable structure does not contain.}
 \label{fig:probe}
 \end{figure}
 
-\begin{table}[tbp]\centering\small
+\begin{table}[htbp]\centering\small
 \begin{tabular}{@{}lcccl@{}}
 \toprule
 harness & method stable? & tracks evidence? & honours own rule? & diagnosis \\
@@ -395,60 +708,97 @@ harness & method stable? & tracks evidence? & honours own rule? & diagnosis \\
 & & & & \; not revision \\
 \hr{bayesian} & yes & good & asymmetric & compliant on good news; over-drops \\
 & & & & \; on bad news vs own rule ($\approx\!-0.135$) \\
-\hr{react} & no & yes & n/a (rule has no channel) & updates outside recoverable structure \\
+\hr{react} & no & yes & n/a --- no channel & updates outside recoverable structure \\
 \hr{analytica} & no & good & no verdict possible & rewrites its method daily \\
 \bottomrule
 \end{tabular}
-\caption{\textbf{Per-harness verdicts}, combining \S\ref{sec:e1}--\S\ref{sec:probe}. The one-line
-finding: structural stability and evidence-tracking anticorrelate, and the probe \emph{localises}
-each harness's rigidity or plasticity.}
+\caption{\textbf{Per-harness verdicts}, combining \S\ref{sec:e1res}--\S\ref{sec:probe}. The
+one-line finding: structural stability and evidence-tracking anticorrelate, and the probe
+\emph{localises} each harness's rigidity or plasticity.}
 \label{tab:verdict}
 \end{table}
 
+Two rows deserve reading twice. \textbf{\hr{futuresim} is not a rule-breaker}---handed the
+evidence directly it is more faithful to its own method than any other harness, and its failure
+in replay is that it does not go and find the evidence. That is a fixable engineering problem and
+a completely different diagnosis from ``the model is stubborn''. And \textbf{\hr{react}'s program
+implies zero response in every cell} while the live harness moved $\pm0.09$--$0.13$: its updates
+are real and correctly directed, but they travel through channels no program in our space contains.
+
 \FloatBarrier
+%=========================================================================
 \section{Adversarial Review and Standing Audit}\label{sec:audit}
 Mid-experiment, an independent reviewer was pointed at the entire codebase with instructions to
 break it. It returned 2 fatal, 7 serious, and 6 moderate findings; every fixable one was patched
-and re-verified before results were trusted. The fatals: (F1) the planned ``separation'' metric
-would have punished correct forecasting given the actual event path (\S\ref{sec:infra}); (F2) the
-no-literal rule was semantically bypassable (constant-construction, boolean arithmetic,
-if-chain lookup tables coached by the repair loop)---closed by the rules of \S\ref{sec:dsl} plus
-the blind holdouts. Serious findings included a thread-unsafe SQLite connection that corrupted 32\%
-of an early run (that run is quarantined and unused), a forecast parser that could fabricate
-certainty from ``85\%'' (fixed; the strict parser reproduces all collected forecasts exactly), and
-silent zero-filling in schema reconciliation (replaced by loud exclusion plus a preserved audit
-trail). The standing audit (\texttt{scripts/audit\_exp1.py}) re-verifies on demand: 11/11 exploits
-rejected; all 560 collected forecasts parse under the strict parser (the 240 audited retroactively
-re-parse identically); 1{,}432 searches replayed with zero gate breaches; every stored program re-executes to its reported MAE; one systematic answer-copy in 320
-variable tables, referenced by no program.
+and re-verified before results were trusted.
 
-\FloatBarrier
+\paragraph{The fatals.} (F1) the planned ``separation'' metric would have punished correct
+forecasting given the actual event path (\S\ref{sec:questions}); (F2) the no-literal rule was
+semantically bypassable---constant-construction, boolean arithmetic, $x/x$, dead-code padding, and
+if-chain lookup tables that the repair loop was effectively coaching the synthesizer to
+write---closed by the rules of \S\ref{sec:dsl} plus the blind holdouts.
+
+\paragraph{Serious findings worth naming.} A thread-unsafe SQLite connection corrupted 32\% of an
+early run (that run is quarantined and unused). A forecast parser could fabricate certainty from
+``85\%'' via a bare-number fallback (fixed; the strict parser reproduces all collected forecasts
+exactly, and the 240 already collected were retro-verified to re-parse identically). Schema
+reconciliation silently zero-filled missing keys, which would have invented belief values that
+were never stated (replaced by loud exclusion plus a preserved audit trail).
+
+\paragraph{The standing audit.} \texttt{scripts/audit\_exp1.py} re-verifies on demand: 11/11
+exploits rejected; all collected forecasts parse under the strict parser; 1{,}432 searches
+replayed with zero gate breaches; every stored program re-executes to its reported MAE; one
+systematic answer-copy in 320 variable tables, referenced by no program. One refinement cuts the
+other way and is recorded for honesty: the first copy-scan \emph{over-flagged}, treating
+single-instance coincidences as contamination and missing the legitimate prev-day-forecast
+exemption. The criterion was tightened to ``systematic across $\ge$80\% of instances'', and
+groups with near-constant targets are now marked \emph{recovery-uninformative} rather than
+contaminated---a weaker claim, and the correct one.
+
+%=========================================================================
 \section{Limitations}\label{sec:limits}
-(1) One question pair carries all directional claims; the scale-up set is all-YES by construction
-and supports only recovery statistics. (2) $k{=}5$ per cell bounds distributional claims; PIT
-placement has 5-draw granularity. (3) Draws are ordinary decoding variation (current reasoning
-endpoints reject temperature control). (4) Stated beliefs only: all measurements are consistency
-properties of verbalized probabilities under intervention, not claims about internal
-representations. (5) Retrieval is BM25, weaker than FutureSim's hybrid index---held constant
-across harnesses, but absolute accuracy is a lower bound. (6) The extractor knows the outcomes;
-the audit bounds but does not eliminate this channel. (7) Program recovery inherits the
-expressiveness of the program space; ``incompressible'' means no program \emph{in this space}
-within four repair attempts. (8) The harnesses are prompt-level shapes on a shared loop
-(\S3.2), not the source systems: in particular, real Analytica enforces its tree and linear
-composition \emph{in code}, so ``\hr{analytica}'s structure changes daily'' characterises a
-model asked to follow that procedure in-context, and would be prevented by construction in the
-original system; conversely, \hr{bayesian}'s recovered fixed formula is the more striking for
-being maintained by the model with no code enforcement.
+\begin{enumerate}
+\item One question pair carries all directional claims; the scale-up set is all-YES by
+construction and supports only recovery statistics.
+\item $k{=}5$ per cell bounds distributional claims; PIT placement has 5-draw granularity.
+\item Draws are ordinary decoding variation (current reasoning endpoints reject temperature
+control), so sampling spread cannot be widened or narrowed deliberately.
+\item Stated beliefs only: all measurements are consistency properties of verbalized
+probabilities under intervention, not claims about internal representations.
+\item Retrieval is BM25, weaker than FutureSim's hybrid index---held constant across harnesses,
+but absolute accuracy is a lower bound.
+\item The extractor knows the outcomes; the audit bounds but does not eliminate this channel.
+\item Program recovery inherits the expressiveness of the program space; ``incompressible'' means
+no program \emph{in this space} within four repair attempts.
+\item Experiments 1, 2 and the probe use prompt-level shapes on a shared loop
+(\S\ref{sec:tierA}), not the source systems. \S\ref{sec:e1r} closes this for the replay
+experiment on two of the three systems---and confirms the concern was material: the real
+architectures are substantially more rigid than their shapes. It remains open for E2 and the
+probe, and for FutureSim's simulator, whose integration passes a structural dry run but whose
+live run is pending.
+\item \hr{blf-full}'s negative update gain is weakly identified (its fresh-eyes mean moves little;
+Fig.~\ref{fig:gain-real}), and $K{=}3$ trials rather than the paper's $K{=}5$, with calibration
+omitted for lack of in-window training data, bound fidelity to the BLF paper.
+\end{enumerate}
 
+%=========================================================================
 \section{Conclusion and Future Work}
 Treating a forecasting agent's reasoning as a recoverable, literal-free program turns belief
 dynamics from a metaphor into a measurement: beliefs become trajectories in discovered
 coordinates, updates become testable against the agent's own rule, and rigidity decomposes into
-acquisition, procedure, history, and revision components that this report measures separately for
-four harness shapes. Next: paired NO-questions and longer date grids; per-search-call budgets; a
-code-execution harness as the recovery upper bound; program recovery on the parallel condition
-(does removing history delete the anchor variables from the schema?); and alignment of the
-\hr{bayesian} harness with its source paper's exact protocol.
+acquisition, procedure, history and revision components that this report measures separately.
+Running the real orchestration code of two source systems then adds an axis the prompt tier cannot
+see---prompts understate architectural rigidity, and the shape-versus-real gap is itself the
+measurement.
+
+The single most valuable experiment left undone is program recovery on the \emph{real} Analytica
+traces, because it is a known-rule validation: \hr{analytica-full}'s composition rule is literally
+$\beta_0+\sum\beta_ip_i$, computed in code and logged in every trace. If the recovery pipeline is
+sound it should find exactly that; if it finds something else, the pipeline is wrong and we would
+know. No other experiment in this report has ground truth to check itself against. After that:
+FutureSim's simulator live on the same sandbox; paired NO-questions and longer date grids;
+per-search-call budgets; and program recovery on the parallel condition---does removing history
+delete the anchor variables from the schema entirely?
 
 \begin{thebibliography}{9}\small
 \bibitem{analytica} \emph{Analytica: Soft Propositional Reasoning for Robust and
@@ -466,11 +816,12 @@ Monthly Weather Review, 1950.
 \end{thebibliography}
 
 \appendix
+%=========================================================================
 \section{A Recovered Program}\label{app:prog}
-The \hr{bayesian}/USA program (full-fit). The blind variants recover the same log-odds-additive family, though not this exact expression. Note the absence of
-literals; every quantity is a step-1 variable or a named constant. The schema contained an
-odds-form copy of the answer (\texttt{posterior\_odds\_usa\_gold}); the program does not reference
-it.
+The \hr{bayesian}/USA program (full-fit). The blind variants recover the same log-odds-additive
+family, though not this exact expression. Note the absence of literals; every quantity is a step-1
+variable or a named constant. The schema contained an odds-form copy of the answer
+(\texttt{posterior\_odds\_usa\_gold}); the program does not reference it.
 \begin{quote}\small\begin{verbatim}
 def forecast():
     p0 = prior_probability_usa_gold
@@ -491,10 +842,229 @@ def forecast():
     return p0 + w * (p_bayes - p0)
 \end{verbatim}\end{quote}
 
-\section{Reproduction}
-\texttt{git clone https://github.com/DDI-droid/belieflens \&\& python bootstrap.py} downloads the
-corpus ($\sim$412\,MB), builds the index, and runs the verification battery; \texttt{scripts/}
-contains every stage (\texttt{run\_exp1.py} for \seq/\pl/E2, \texttt{audit\_exp1.py},
-\texttt{beliefdyn.py}, \texttt{run\_probe.py}, \texttt{probe\_rule\_check.py},
-\texttt{make\_charts.py}). All collected data, configs, and logs ship in \texttt{results/}.
+%=========================================================================
+\section{Harness Prompts, Verbatim}\label{app:prompts}
+\subsection{Tier A: the shared preamble}
+\begin{quote}\small\begin{verbatim}
+You are forecasting a real future event.
+
+The current simulation date is {date}. You know nothing about events after
+this date. Use search_news to gather evidence; it can only return articles
+published on or before {date}.
+
+Write your reasoning out explicitly as you go -- state the quantities you are
+weighing and the numbers you assign them. Someone will later have to
+reconstruct exactly how you arrived at your number.
+
+End your final message with a line of exactly this form:
+FORECAST: <probability between 0 and 1>
+\end{verbatim}\end{quote}
+
+\subsection{Tier A: the four shape suffixes}
+\begin{quote}\small\begin{verbatim}
+[react]
+Work in a simple loop: think about what you need, search for it, read what
+comes back, think again. Stop when further searching would not change your
+answer.
+
+[futuresim]
+FORECASTING GUIDELINES (follow them in order):
+1. Restate the resolution criterion precisely. What exactly must happen?
+2. Set a base rate from reference-class outcomes before looking at news.
+3. Search for evidence. Run several distinct, targeted queries, not one broad
+   one. Look for disconfirming evidence specifically.
+4. Weigh evidence against the base rate. State how much each item moves you
+   and why.
+5. Check yourself for overconfidence and for anchoring on your previous
+   forecast. A forecast that never moves is as suspect as one that thrashes.
+6. Give a calibrated probability.
+
+MEMORY. Your memory from previous days is below. Before your final answer you
+MUST output an updated memory block, in this exact form:
+
+<memory>
+BASE RATE: ...
+KEY EVIDENCE: ...
+WHAT WOULD CHANGE MY MIND: ...
+LAST FORECAST AND WHY: ...
+</memory>
+
+Keep it under 200 words. It is all you will carry to the next day.
+
+[analytica]
+Work in three explicit stages, labelled.
+
+STAGE 1 - ANALYSE. Break the question into 3 to 5 sub-propositions that are
+independent of each other and each individually checkable. Number them P1, P2,
+...  Do not search yet.
+
+STAGE 2 - GROUND. For each sub-proposition in turn, search for evidence and
+assign it a probability. Write   P1 = <p>   with a one-line justification.
+
+STAGE 3 - SYNTHESISE. Assign each sub-proposition a weight showing how much it
+contributes to the overall question, state the combination you are performing
+with its numbers written out, and compute the result. Then give FORECAST.
+
+[bayesian]
+Maintain an explicit belief state and update it in the open.
+
+Your belief state from previous days is below. Each day, in this order:
+
+PRIOR: state your current probability and the one-sentence summary of the
+evidence it rests on.
+EVIDENCE: search, then state what is new since your last update.
+LIKELIHOOD: for each new item, state how much more likely it is if the event
+happens than if it does not -- an explicit ratio, e.g. "about 3x more likely
+under YES".
+POSTERIOR: apply the update to your prior odds and state the result.
+
+Then output an updated belief state in this exact form:
+
+<belief>
+P: <probability>
+EVIDENCE SUMMARY: ...
+STRONGEST COUNTER-EVIDENCE: ...
+</belief>
+
+Then give FORECAST.
+\end{verbatim}\end{quote}
+
+\subsection{Tier B: the real-harness agent prompts}
+\begin{quote}\small\begin{verbatim}
+[analytica-full :: ANALYZER, day 1]
+You are the Analyzer in the Analytica forecasting system.
+You expand a proposition tree. Each proposition must be atomic, checkable, and
+child propositions of one parent should be as independent of each other as
+possible. Leaves should be simple enough that a search-equipped analyst can
+score them from news evidence.
+Respond with JSON only:
+{"add": [{"parent": "<existing node id>", "statement": "<new proposition>"}, ...],
+ "done": true/false}
+Add 2-4 children per expansion; set done=true when the leaves are atomic enough
+or the leaf budget is reached.
+
+[analytica-full :: ANALYZER, edit pass on later dates]
+You are the Analyzer in the Analytica forecasting system, revisiting an existing
+proposition tree on a new day. New information may have made some propositions
+obsolete or new drivers relevant. Most days need no change.
+Respond with JSON only:
+{"add": [...], "remove": ["<leaf node id>", ...], "done": true}
+Only add or remove if genuinely warranted; otherwise return empty lists.
+
+[analytica-full :: GROUNDER, query phase]
+You are a Grounder agent in the Analytica forecasting system. Your job: assess
+ONE atomic proposition against news evidence and output a soft truth value.
+Today is {date}. You may request searches of a dated news archive (articles up
+to today only). First reply with up to {max_q} search queries as JSON:
+{"queries": ["...", "..."]}
+After receiving results you will be asked to conclude.
+
+[analytica-full :: GROUNDER, delta note -- appended on every date after the first]
+You previously assessed this proposition on {prev_date} as p_true={prev_p} with
+report: {prev_report}
+Search results below cover ONLY the period since then. If nothing material
+changed, keep your value close and say so.
+
+[analytica-full :: GROUNDER, conclude phase]
+You are a Grounder agent in the Analytica forecasting system. You have already
+gathered the evidence shown below for ONE atomic proposition. Today is {date};
+the evidence contains only articles up to today.
+Assess the proposition's soft truth value from the evidence (and general
+pre-{date} knowledge). Do NOT request searches. Output JSON only:
+{"p_true": <0..1>, "report": "<3-6 sentence evidence summary with dates>"}
+
+[analytica-full :: SYNTHESIZER]
+You are the Synthesizer in the Analytica forecasting system. Given a parent
+proposition and its scored children, output linear-combination weights expressing
+how the children's truth values compose into the parent's:
+p_parent = b0 + sum_j beta_j * p_child_j.
+Respond with JSON only:
+{"b0": <float>, "betas": {"<child_id>": <float>, ...}, "report": "..."}
+Prefer b0 >= 0, betas >= 0, and b0 + sum(betas) <= 1 so the result is a
+probability.
+
+[blf-full :: the single agent prompt, used at every step of every trial]
+You are a forecasting agent. Question: {question}
+Today is {date}; you know nothing after this date. Resolution: {resolution}.
+
+At every step output JSON only, with BOTH an action and your updated belief:
+{"action": {"type": "search", "query": "..."} OR {"type": "submit", "p": <0..1>},
+ "belief": {"p": <0..1>, "confidence": "low|medium|high",
+            "evidence_for": ["..."], "evidence_against": ["..."],
+            "open_questions": ["..."]}}
+
+Search returns dated news articles (up to today only). Submit when further
+search would not change your belief. You have at most {tmax} steps.
+\end{verbatim}\end{quote}
+
+%=========================================================================
+\section{Per-date Series}\label{app:series}
+All values as stored in \texttt{results/*/seqpar\_metrics.json}.
+
+\begin{table}[htbp]\centering\small
+\begin{tabular}{@{}llrrrrr@{}}
+\toprule
+harness & series & 01-14 & 01-28 & 02-08 & 02-15 & 02-20 \\
+\midrule
+\multirow{3}{*}{\hr{analytica}} & stabilisation & 1.88 & 0.71 & 2.72 & 0.74 & 1.41 \\
+ & coherence (\seq) & 0.594 & 0.589 & 0.617 & 0.633 & 0.811 \\
+ & Brier (\seq/\pl) & .382/.375 & .418/.325 & .405/.361 & .440/.441 & .347/.330 \\
+\midrule
+\multirow{3}{*}{\hr{bayesian}} & stabilisation & 1.31 & 0.32 & 0.43 & 0.93 & 0.80 \\
+ & coherence (\seq) & 0.662 & 0.651 & 0.626 & 0.802 & 0.986 \\
+ & Brier (\seq/\pl) & .382/.432 & .418/.424 & .374/.482 & .439/.496 & .360/.283 \\
+\midrule
+\multirow{3}{*}{\hr{futuresim}} & stabilisation & 1.05 & 0.79 & 1.14 & 0.63 & 0.48 \\
+ & coherence (\seq) & 0.766 & 0.732 & 0.741 & 0.766 & 0.788 \\
+ & Brier (\seq/\pl) & .494/.540 & .552/.490 & .554/.530 & .568/.531 & .549/.500 \\
+\midrule
+\multirow{3}{*}{\hr{react}} & stabilisation & 0.88 & 0.57 & 1.33 & 0.96 & 1.13 \\
+ & coherence (\seq) & 0.447 & 0.494 & 0.516 & 0.578 & 0.749 \\
+ & Brier (\seq/\pl) & .365/.363 & .368/.361 & .361/.353 & .358/.379 & .286/.366 \\
+\midrule\midrule
+\multirow{3}{*}{\hr{analytica-full}} & stabilisation & 0.54 & 0.37 & 0.27 & 0.63 & 1.04 \\
+ & coherence (\seq) & 0.95 & 0.93 & 0.96 & 0.97 & 1.04 \\
+ & Brier (\seq/\pl) & .371/.375 & .392/.388 & .408/.312 & .415/.366 & .444/.358 \\
+\midrule
+\multirow{3}{*}{\hr{blf-full}} & stabilisation & 1.27 & 1.07 & 1.32 & 1.07 & 1.14 \\
+ & coherence (\seq) & 0.59 & 0.60 & 0.62 & 0.63 & 0.68 \\
+ & Brier (\seq/\pl) & .346/.349 & .363/.317 & .362/.353 & .361/.344 & .364/.346 \\
+\bottomrule
+\end{tabular}
+\caption{Per-date series, both tiers. Stabilisation is $\mathrm{sd}(\seq)/\mathrm{sd}(\pl)$;
+coherence is $P_\text{USA}{+}P_\text{CAN}$; Brier is the plain quadratic score pooled over the
+pair (0.25 is the constant-$\tfrac12$ forecaster).}
+\label{tab:series}
+\end{table}
+
+%=========================================================================
+\section{Cost Ledger and Reproduction}\label{app:cost}
+\begin{table}[htbp]\centering\small
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+run & model calls & input tokens & output tokens & wall clock \\
+\midrule
+E1R sequential + parallel (Tier B) & 3{,}229 & 6{,}388{,}301 & 1{,}460{,}431 & 41 min \\
+\bottomrule
+\end{tabular}
+\caption{Tier-B cost, against a hard 4{,}000-call cap enforced in the model wrapper
+(\texttt{BudgetExceeded}). Harness model \texttt{gpt-5-mini}; 4 worker threads; zero turn errors
+across 200 forecasts. Usage is written to \texttt{results/exp1\_real/usage.json} by the runner.}
+\label{tab:cost}
+\end{table}
+
+\noindent\texttt{git clone https://github.com/DDI-droid/belieflens \&\& python bootstrap.py}
+downloads the corpus ($\sim$412\,MB), builds the index, and runs the verification battery. Set
+\texttt{OPENAI\_API\_KEY} in \texttt{.env} (gitignored; see \texttt{.env.example}) or the
+environment; the harnesses need \texttt{gpt-5-mini} and the extractor \texttt{gpt-5.2}.
+
+\noindent\texttt{scripts/} contains every stage: \texttt{run\_exp1.py} (\seq/\pl/E2),
+\texttt{run\_real\_e1.py} (\S\ref{sec:e1r} on the real harnesses in
+\texttt{belieflens/real\_harnesses.py}), \texttt{audit\_exp1.py}, \texttt{beliefdyn.py},
+\texttt{run\_probe.py}, \texttt{probe\_rule\_check.py}, \texttt{make\_charts.py}.
+\texttt{futuresim\_integration/} documents the pinned FutureSim-simulator integration and
+reproduces it from a clean clone. \texttt{build\_report.ps1} regenerates every figure, compiles
+this document, and renders page images. All collected data, configs and logs ship in
+\texttt{results/}.
+
 \end{document}

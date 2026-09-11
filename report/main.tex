@@ -1010,7 +1010,7 @@ Table~\ref{tab:series} gives every per-date series behind the figures of
 \S\ref{sec:e1res} and \S\ref{sec:e1r}, exactly as stored in each run directory's
 \texttt{seqpar\_metrics.json}.
 
-\begin{table}[htbp]\centering\small
+\begin{table}[tp]\centering\small
 \begin{tabular}{@{}llrrrrr@{}}
 \toprule
 harness & series & 01-14 & 01-28 & 02-08 & 02-15 & 02-20 \\
@@ -1048,9 +1048,7 @@ pair (0.25 is the constant-$\tfrac12$ forecaster).}
 
 %=========================================================================
 \section{Cost Ledger and Reproduction}\label{app:cost}
-Table~\ref{tab:cost} is the Tier-B cost ledger.
-
-\begin{table}[htbp]\centering\small
+\begin{center}\small
 \begin{tabular}{@{}lrrrr@{}}
 \toprule
 run & model calls & input tokens & output tokens & wall clock \\
@@ -1058,14 +1056,14 @@ run & model calls & input tokens & output tokens & wall clock \\
 E1R sequential + parallel (Tier B) & 3{,}229 & 6{,}388{,}301 & 1{,}460{,}431 & 41 min \\
 \bottomrule
 \end{tabular}
-\caption{Tier-B cost, against a hard 4{,}000-call cap enforced in the model wrapper
+\captionof{table}{Tier-B cost, against a hard 4{,}000-call cap enforced in the model wrapper
 (\texttt{BudgetExceeded}). Harness model \texttt{gpt-5-mini}; 4 worker threads; zero turn errors
 across 200 forecasts. Usage is written to \texttt{results/exp1\_real/usage.json} by the runner.}
 \label{tab:cost}
-\end{table}
+\end{center}
 
-\noindent\texttt{git clone https://github.com/DDI-droid/belieflens \&\& python bootstrap.py}
-downloads the corpus ($\sim$412\,MB), builds the index, and runs the verification battery. Set
+\noindent Running \texttt{python bootstrap.py} in a fresh clone of
+\url{https://github.com/DDI-droid/belieflens} downloads the corpus ($\sim$412\,MB), builds the index, and runs the verification battery. Set
 \texttt{OPENAI\_API\_KEY} in \texttt{.env} (gitignored; see \texttt{.env.example}) or the
 environment; the harnesses need \texttt{gpt-5-mini} and the extractor \texttt{gpt-5.2}.
 

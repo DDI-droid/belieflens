@@ -141,21 +141,22 @@ def flow_panel(ax, store, parstore, h, q, col, title):
 
 # ======================================================================= F1
 def fig_flow():
-    fig, axes = plt.subplots(4, 2, figsize=(7.0, 8.8), sharex=True, sharey=True)
+    fig, axes = plt.subplots(4, 2, figsize=(7.0, 8.9), sharex=True, sharey=True)
+    handles = None
     for i, h in enumerate(HARNESSES):
         for j, q in enumerate(QUESTIONS):
             ax = axes[i][j]
-            flow_panel(ax, seqrows, par, h, q, C[h], "%s — %s" % (h, QLAB[q]))
+            flow_panel(ax, seqrows, par, h, q, C[h], "%s - %s" % (h, QLAB[q]))
             if i == 3:
                 ax.set_xticks(X, DL)
             if j == 0:
                 ax.set_ylabel("P(event)")
-            if i == 0 and j == 0:
-                ax.legend(loc="lower left", fontsize=7.2)
-    fig.tight_layout()
+            if handles is None:
+                handles, labels = ax.get_legend_handles_labels()
+    fig.legend(handles, labels, loc="upper center", ncols=3, fontsize=8,
+               bbox_to_anchor=(0.5, 1.0))
+    fig.tight_layout(rect=(0, 0, 1, 0.975))
     save(fig, "fig_flow")
-
-
 # ======================================================================= F2
 def _gain_panel(ax, metrics, h, label, col):
     pts = metrics["per"][h]["gain_pts"]
@@ -207,8 +208,9 @@ def fig_anchor():
     save(fig, "fig_anchor")
 # ==================================================================== F4/F5
 def _stab_pit(metrics, names, colmap, labmap, fname, title_sfx):
-    fig, axes = plt.subplots(1, 2, figsize=(7.0, 2.8))
+    fig, axes = plt.subplots(1, 2, figsize=(7.0, 2.9))
     ax = axes[0]
+    handles = None
     for h in names:
         st = metrics["per"][h]["stab"]
         xs = [k for k, d in enumerate(DATES) if d in st]
@@ -219,9 +221,10 @@ def _stab_pit(metrics, names, colmap, labmap, fname, title_sfx):
     ax.axhline(1.0, color=MUT, lw=0.9, ls=(0, (4, 2)))
     ax.set_xticks(X, DL)
     ax.margins(x=0.06)
+    ax.set_ylim(bottom=0)
     ax.set_ylabel("sd(sequential) / sd(parallel)")
     ax.set_title("Is history a variance reducer?" + title_sfx, loc="left")
-    ax.legend(loc="upper right", fontsize=7.4, ncols=2 if len(names) > 2 else 1)
+    handles, labels = ax.get_legend_handles_labels()
     ax = axes[1]
     for i, h in enumerate(names):
         vals = metrics["per"][h]["pit"]
@@ -236,6 +239,8 @@ def _stab_pit(metrics, names, colmap, labmap, fname, title_sfx):
     ax.set_xlim(-3, 103)
     ax.set_xlabel("percentile of sequential forecast within parallel draws")
     ax.set_title("Placement (black = median; 50 = unbiased)", loc="left")
+    fig.legend(handles, labels, loc="lower center", ncols=min(len(names), 4),
+               fontsize=8, bbox_to_anchor=(0.5, -0.045))
     fig.tight_layout()
     save(fig, fname)
 def fig_stab_pit():
@@ -350,35 +355,35 @@ def fig_recovery():
 def fig_probe():
     pr = jload(R1 / "probe_results.json")
     rc = jload(R1 / "probe_rule_check.json")
-    fig, axes = plt.subplots(1, 2, figsize=(7.0, 3.5),
-                             gridspec_kw={"width_ratios": [1.45, 1.0]})
+    fig, axes = plt.subplots(1, 2, figsize=(7.0, 3.05),
+                             gridspec_kw={"width_ratios": [1.25, 1.0]})
     ax = axes[0]
     directional = [j for j in pr if j["condition"] != "placebo"]
     for yi, j in enumerate(directional):
         h = j["key"].split("/")[0]
         act = (j.get("p_probe") or 0) - j["p_last"]
         ax.plot([j["implied"], act], [yi, yi], color=GRID, lw=1.2, zorder=1)
-        ax.scatter([j["implied"]], [yi], marker="s", s=26, color=INK2, zorder=2)
-        ax.scatter([act], [yi], marker="o", s=30, color=C[h], zorder=3)
+        ax.scatter([j["implied"]], [yi], marker="s", s=24, color=INK2, zorder=2)
+        ax.scatter([act], [yi], marker="o", s=28, color=C[h], zorder=3)
     ax.axvline(0, color="#c3c2b7", lw=0.9)
     ax.set_yticks(range(len(directional)),
                   ["%s s%d %s" % (j["key"].split("/")[0], j["sample"], j["condition"])
-                   for j in directional], fontsize=7.2)
+                   for j in directional], fontsize=6.8)
     ax.invert_yaxis()
     ax.set_xlabel("forecast change on probe day")
-    ax.set_title("Implied by own rule (square) vs actual (dot)", loc="left", fontsize=8.6)
+    ax.set_title("Implied by own rule (square) vs actual (dot)", loc="left", fontsize=8.4)
     ax = axes[1]
     for i, h in enumerate(HARNESSES):
         for k, c_ in enumerate(["toward", "against", "placebo"]):
             gs = [abs(r["gap"]) for r in rc
                   if r["key"].startswith(h) and r["condition"] == c_]
             if gs:
-                ax.bar(i + (k - 1) * 0.27, mean(gs), width=0.25, color=C[h],
+                ax.bar(i + (k - 1) * 0.26, mean(gs), width=0.24, color=C[h],
                        alpha=[1.0, 0.65, 0.35][k])
-    ax.set_xticks(range(4), HARNESSES, fontsize=7)
+    ax.set_xticks(range(4), HARNESSES, fontsize=6.6)
     ax.set_ylabel("|actual - rule-implied|")
     ax.set_title("Rule-compliance gap\n(dark to light: toward, against, placebo)",
-                 loc="left", fontsize=8.6)
+                 loc="left", fontsize=8.4)
     fig.tight_layout()
     save(fig, "fig_probe")
 # ================================================================= exemplar
@@ -402,7 +407,8 @@ def fig_exemplar():
     ax.margins(x=0.05)
     ax.set_ylim(top=top * 1.6)
     ax.legend(loc="upper left", fontsize=7.2)
-    ax.set_title("Belief in its discovered coordinates", loc="left", fontsize=8.6)
+    ax.set_title("bayesian / USA (s0): belief in its discovered coordinates",
+                 loc="left", fontsize=8.4)
     ax.set_ylabel("value")
     ax = axes[1]
     ax.plot(range(len(dts)), [tj[d]["_target"] for d in dts], color="#eb6834",
@@ -416,28 +422,27 @@ def fig_exemplar():
     ax.text(0.04, 0.07, "early-theory program predicts the\nheld-out late days at MAE %.3f"
             % th.get("test_mae", float("nan")), transform=ax.transAxes, fontsize=7.4,
             color=INK2, va="bottom")
-    fig.suptitle("bayesian / USA, rollout s0", x=0.008, y=0.99, ha="left",
-                 fontsize=9, fontweight="bold", color=INK)
-    fig.tight_layout(rect=(0, 0, 1, 0.96))
+    fig.tight_layout()
     save(fig, "fig_exemplar")
 # ============================================================ E1R: real tier
 def fig_flow_real():
-    fig, axes = plt.subplots(2, 2, figsize=(7.0, 4.6), sharex=True, sharey=True)
+    fig, axes = plt.subplots(2, 2, figsize=(7.0, 4.8), sharex=True, sharey=True)
+    handles = None
     for i, h in enumerate(REAL):
         for j, q in enumerate(QUESTIONS):
             ax = axes[i][j]
             flow_panel(ax, seq2, par2, h, q, C[h],
-                       "%s — %s" % (RLAB[h], QLAB[q]))
+                       "%s - %s" % (RLAB[h], QLAB[q]))
             if i == 1:
                 ax.set_xticks(X, DL)
             if j == 0:
                 ax.set_ylabel("P(event)")
-            if i == 0 and j == 0:
-                ax.legend(loc="lower left", fontsize=7.2)
-    fig.tight_layout()
+            if handles is None:
+                handles, labels = ax.get_legend_handles_labels()
+    fig.legend(handles, labels, loc="upper center", ncols=3, fontsize=8,
+               bbox_to_anchor=(0.5, 1.0))
+    fig.tight_layout(rect=(0, 0, 1, 0.955))
     save(fig, "fig_flow_real")
-
-
 def fig_gain_real():
     fig, axes = plt.subplots(1, 2, figsize=(5.2, 2.4), sharex=True, sharey=True)
     for ax, h in zip(axes, REAL):
